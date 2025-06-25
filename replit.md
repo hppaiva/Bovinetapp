@@ -1,0 +1,95 @@
+# Replit.md
+
+## Overview
+
+Bovinet is a comprehensive cattle trading platform built as a full-stack web application. The platform connects cattle buyers, sellers, truckers, and service providers in Brazil's livestock market. It features a modern React frontend with shadcn/ui components, an Express.js backend with TypeScript, and a PostgreSQL database managed through Drizzle ORM.
+
+## System Architecture
+
+The application follows a monorepo structure with separate client and server directories:
+
+- **Frontend**: React 18 with TypeScript, using Vite for development and build tooling
+- **Backend**: Express.js server with TypeScript for API endpoints
+- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
+- **Styling**: Tailwind CSS with shadcn/ui component library
+- **State Management**: TanStack Query (React Query) for server state management
+
+## Key Components
+
+### Frontend Architecture
+- **Component Library**: shadcn/ui components with Radix UI primitives
+- **Routing**: Wouter for client-side routing
+- **Forms**: React Hook Form with Zod validation
+- **Styling**: Tailwind CSS with custom CSS variables for theming
+- **Mobile-First**: Responsive design with mobile navigation
+
+### Backend Architecture
+- **API Structure**: RESTful endpoints organized by feature
+- **Authentication**: Session-based authentication with bcrypt password hashing
+- **File Uploads**: Multer for handling video and image uploads
+- **Database**: Drizzle ORM with PostgreSQL for type-safe queries
+- **Middleware**: Express middleware for logging, authentication, and error handling
+
+### Database Schema
+The application uses a comprehensive schema for cattle trading:
+- **Users**: Core user information with verification status
+- **Listings**: Cattle listings with detailed specifications (sex, age, weight, aptitude)
+- **Truckers**: Transportation service providers with vehicle details
+- **Freight Requests**: Transportation requests between buyers and truckers
+- **GTA Requests**: Government transport authorization documents
+- **Identity Verification**: KYC documents and verification status
+
+## Data Flow
+
+1. **User Registration**: Multi-step process with document verification
+2. **Cattle Listings**: Sellers create listings with photos/videos and location data
+3. **Marketplace**: Buyers browse listings with filtering and search capabilities
+4. **Freight Services**: Transportation requests and trucker matching
+5. **GTA Services**: Government document processing for livestock transport
+
+## External Dependencies
+
+### Frontend Dependencies
+- React ecosystem (React, React DOM, React Router via Wouter)
+- UI Components (Radix UI primitives, shadcn/ui)
+- Form handling (React Hook Form, Zod validation)
+- State management (TanStack Query)
+- Styling (Tailwind CSS, class-variance-authority)
+- Date handling (date-fns)
+
+### Backend Dependencies
+- Express.js with TypeScript support
+- Database (Drizzle ORM, @neondatabase/serverless)
+- Authentication (bcrypt for password hashing)
+- File uploads (multer)
+- Session management (connect-pg-simple)
+
+### Development Tools
+- TypeScript for type safety
+- Vite for fast development and building
+- ESBuild for production server bundling
+- PostCSS with Tailwind CSS
+- Various Replit-specific plugins for development environment
+
+## Deployment Strategy
+
+The application is configured for deployment on Replit with the following setup:
+
+- **Development**: Runs on port 5000 with hot reloading via Vite
+- **Production**: Client built to `dist/public`, server bundled to `dist/index.js`
+- **Database**: Uses Neon serverless PostgreSQL
+- **Static Assets**: Served from the built client directory
+- **Environment**: Configured for autoscale deployment target
+
+### Build Process
+1. Client assets built with Vite to `dist/public`
+2. Server code bundled with ESBuild to `dist/index.js`
+3. Database migrations handled via Drizzle Kit
+4. Production server serves both API and static files
+
+## Changelog
+- June 25, 2025. Initial setup
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
