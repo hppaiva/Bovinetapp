@@ -5,6 +5,7 @@ import {
   freightRequests,
   gtaRequests,
   identityVerifications,
+  freightAlerts,
   type User,
   type InsertUser,
   type Listing,
@@ -17,6 +18,8 @@ import {
   type InsertGtaRequest,
   type IdentityVerification,
   type InsertIdentityVerification,
+  type FreightAlert,
+  type InsertFreightAlert,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -68,6 +71,13 @@ export interface IStorage {
   getIdentityVerification(userId: number): Promise<IdentityVerification | undefined>;
   createIdentityVerification(verification: InsertIdentityVerification & { userId: number }): Promise<IdentityVerification>;
   updateIdentityVerification(id: number, verification: Partial<InsertIdentityVerification>): Promise<IdentityVerification>;
+
+  // Freight alert methods
+  getFreightAlerts(truckerId?: number): Promise<FreightAlert[]>;
+  createFreightAlert(alert: InsertFreightAlert): Promise<FreightAlert>;
+  updateFreightAlert(id: number, alert: Partial<InsertFreightAlert>): Promise<FreightAlert>;
+  deleteFreightAlert(id: number): Promise<void>;
+  findNearbyTruckers(latitude: number, longitude: number, maxDistanceKm: number): Promise<Trucker[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -254,6 +264,101 @@ export class DatabaseStorage implements IStorage {
   async updateIdentityVerification(id: number, updateData: Partial<InsertIdentityVerification>): Promise<IdentityVerification> {
     const [verification] = await db.update(identityVerifications).set(updateData).where(eq(identityVerifications.id, id)).returning();
     return verification;
+  }
+
+  // Freight alert methods
+  async getFreightAlerts(truckerId?: number): Promise<FreightAlert[]> {
+    const query = db
+      .select({
+        alert: freightAlerts,
+        freightRequest: freightRequests,
+        trucker: truckers,
+        user: users,
+      })
+      .from(freightAlerts)
+      .leftJoin(freightRequests, eq(freightAlerts.freightRequestId, freightRequests.id))
+      .leftJoin(truckers, eq(freightAlerts.truckerId, truckers.id))
+      .leftJoin(users, eq(freightRequests.userId, users.id))
+      .orderBy(desc(freightAlerts.createdAt));
+
+    if (truckerId) {
+      query.where(eq(freightAlerts.truckerId, truckerId));
+    }
+
+    const results = await query;
+    return results.map(row => ({
+      ...row.alert,
+      freightRequest: row.freightRequest,
+      trucker: row.trucker,
+      user: row.user,
+    })) as any;
+  }
+
+  async createFreightAlert(alertData: InsertFreightAlert): Promise<FreightAlert> {
+    const [created] = await db
+      .insert(freightAlerts)
+      .values(alertData)
+      .returning();
+    
+    if (!created) {
+      throw new Error("Failed to create freight alert");
+    }
+    
+    return created;
+  }
+
+  async updateFreightAlert(id: number, updateData: Partial<InsertFreightAlert>): Promise<FreightAlert> {
+    const [updated] = await db
+      .update(freightAlerts)
+      .set({ ...updateData, respondedAt: new Date() })
+      .where(eq(freightAlerts.id, id))
+      .returning();
+    
+    if (!updated) {
+      throw new Error("Freight alert not found");
+    }
+    
+    return updated;
+  }
+
+  async deleteFreightAlert(id: number): Promise<void> {
+    await db.delete(freightAlerts).where(eq(freightAlerts.id, id));
+  }
+
+  async findNearbyTruckers(latitude: number, longitude: number, maxDistanceKm: number): Promise<Trucker[]> {
+    const availableTruckers = await db
+      .select()
+      .from(truckers)
+      .where(eq(truckers.isAvailable, true));
+
+    return availableTruckers.filter(trucker => {
+      if (!trucker.currentLatitude || !trucker.currentLongitude) return false;
+      
+      const distance = this.calculateDistance(
+        latitude,
+        longitude,
+        Number(trucker.currentLatitude),
+        Number(trucker.currentLongitude)
+      );
+      
+      return distance <= maxDistanceKm;
+    });
+  }
+
+  calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371;
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLon = this.toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 }
 

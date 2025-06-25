@@ -111,6 +111,17 @@ export const identityVerifications = pgTable("identity_verifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const freightAlerts = pgTable("freight_alerts", {
+  id: serial("id").primaryKey(),
+  freightRequestId: integer("freight_request_id").references(() => freightRequests.id).notNull(),
+  truckerId: integer("trucker_id").references(() => truckers.id).notNull(),
+  status: text("status").default("pending"), // pending, accepted, rejected, expired
+  distanceKm: decimal("distance_km", { precision: 10, scale: 2 }),
+  estimatedPrice: decimal("estimated_price", { precision: 10, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  respondedAt: timestamp("responded_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   listings: many(listings),
@@ -166,6 +177,17 @@ export const identityVerificationsRelations = relations(identityVerifications, (
   }),
 }));
 
+export const freightAlertsRelations = relations(freightAlerts, ({ one }) => ({
+  freightRequest: one(freightRequests, {
+    fields: [freightAlerts.freightRequestId],
+    references: [freightRequests.id],
+  }),
+  trucker: one(truckers, {
+    fields: [freightAlerts.truckerId],
+    references: [truckers.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -202,6 +224,12 @@ export const insertIdentityVerificationSchema = createInsertSchema(identityVerif
   userId: true,
 });
 
+export const insertFreightAlertSchema = createInsertSchema(freightAlerts).omit({
+  id: true,
+  createdAt: true,
+  respondedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -215,3 +243,5 @@ export type GtaRequest = typeof gtaRequests.$inferSelect;
 export type InsertGtaRequest = z.infer<typeof insertGtaRequestSchema>;
 export type IdentityVerification = typeof identityVerifications.$inferSelect;
 export type InsertIdentityVerification = z.infer<typeof insertIdentityVerificationSchema>;
+export type FreightAlert = typeof freightAlerts.$inferSelect;
+export type InsertFreightAlert = z.infer<typeof insertFreightAlertSchema>;

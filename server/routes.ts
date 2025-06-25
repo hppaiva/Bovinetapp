@@ -8,7 +8,9 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { storage } from "./storage";
 import { pool } from "./db";
-import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema } from "@shared/schema";
+import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema, insertFreightAlertSchema } from "@shared/schema";
+import { WebSocketServer } from "ws";
+
 
 const PgSession = connectPgSimple(session);
 
@@ -379,5 +381,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
   const httpServer = createServer(app);
+
+  // WebSocket server for real-time freight alerts
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  wss.on('connection', (ws: any, req) => {
+    console.log('WebSocket connection established');
+    
+    ws.on('message', (message: any) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'register_trucker') {
+          ws.truckerId = data.truckerId;
+          console.log(`Trucker ${data.truckerId} registered for alerts`);
+        }
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      console.log('WebSocket connection closed');
+    });
+  });
+
+  // Function to broadcast freight alerts to nearby truckers
+  async function broadcastFreightAlert(freightRequest: any) {
+    if (!freightRequest.originLatitude || !freightRequest.originLongitude) return;
+
+    try {
+      // Find nearby truckers within 100km
+      const nearbyTruckers = await storage.findNearbyTruckers(
+        Number(freightRequest.originLatitude),
+        Number(freightRequest.originLongitude),
+        100 // 100km radius
+      );
+
+      // Create alerts for each nearby trucker
+      for (const trucker of nearbyTruckers) {
+        const distance = storage.calculateDistance(
+          Number(freightRequest.originLatitude),
+          Number(freightRequest.originLongitude),
+          Number(trucker.currentLatitude),
+          Number(trucker.currentLongitude)
+        );
+
+        const estimatedPrice = distance * Number(trucker.pricePerKm);
+
+        // Create freight alert in database
+        const alert = await storage.createFreightAlert({
+          freightRequestId: freightRequest.id,
+          truckerId: trucker.id,
+          status: 'pending',
+          distanceKm: distance.toString(),
+          estimatedPrice: estimatedPrice.toString(),
+        });
+
+        // Send real-time notification via WebSocket
+        wss.clients.forEach((client: any) => {
+          if (client.readyState === 1 && client.truckerId === trucker.id) {
+            client.send(JSON.stringify({
+              type: 'freight_alert',
+              alert: {
+                ...alert,
+                freightRequest,
+                distance: distance.toFixed(1),
+                estimatedPrice: estimatedPrice.toFixed(2),
+              }
+            }));
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error broadcasting freight alert:', error);
+    }
+  }
+
+  // Freight alert routes
+  app.get("/api/freight-alerts/:truckerId", requireAuth, async (req, res) => {
+    try {
+      const truckerId = parseInt(req.params.truckerId);
+      const alerts = await storage.getFreightAlerts(truckerId);
+      res.json({ alerts });
+    } catch (error) {
+      console.error("Get freight alerts error:", error);
+      res.status(500).json({ message: "Failed to get freight alerts" });
+    }
+  });
+
+  app.put("/api/freight-alerts/:id", requireAuth, async (req, res) => {
+    try {
+      const alertId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      const alert = await storage.updateFreightAlert(alertId, { status });
+      res.json({ alert });
+    } catch (error) {
+      console.error("Update freight alert error:", error);
+      res.status(500).json({ message: "Failed to update freight alert" });
+    }
+  });
+
+  // Modified freight request creation to trigger alerts
+  app.post("/api/freight-requests", requireAuth, async (req, res) => {
+    try {
+      const requestData = insertFreightRequestSchema.parse(req.body);
+      
+      const freightRequest = await storage.createFreightRequest({
+        ...requestData,
+        userId: req.session.userId!,
+      });
+
+      // Broadcast alert to nearby truckers
+      await broadcastFreightAlert(freightRequest);
+
+      res.json({ freightRequest });
+    } catch (error) {
+      console.error("Create freight request error:", error);
+      res.status(500).json({ message: "Failed to create freight request" });
+    }
+  });
+
   return httpServer;
 }

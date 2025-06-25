@@ -18,6 +18,7 @@ import { generateWhatsAppLink } from "@/lib/whatsapp";
 import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
 import LocationPicker from "@/components/location-picker";
+import FreightAlerts from "@/components/freight-alerts";
 import { Search, Truck, List, MapPin, MessageCircle, Clock, CheckCircle } from "lucide-react";
 
 const freightRequestSchema = z.object({
@@ -617,41 +618,48 @@ export default function Freight() {
 
             {/* Trucker Status Panel (if already registered) */}
             {userTrucker?.trucker && (
-              <Card className="mt-8 bg-container-bg border-gray-600">
-                <CardHeader>
-                  <CardTitle className="text-white">Status do Caminhoneiro</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="font-medium text-white">{user?.user?.name}</p>
-                      <p className="text-secondary">
-                        {userTrucker.trucker.truckModel} - {userTrucker.trucker.adultCapacity} animais
-                      </p>
+              <>
+                <Card className="mt-8 bg-container-bg border-gray-600">
+                  <CardHeader>
+                    <CardTitle className="text-white">Status do Caminhoneiro</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="font-medium text-white">{user?.user?.name}</p>
+                        <p className="text-secondary">
+                          {userTrucker.trucker.truckModel} - {userTrucker.trucker.adultCapacity} animais
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-secondary">Status</p>
+                        <p className={`font-semibold ${userTrucker.trucker.isAvailable ? 'text-accent-green' : 'text-accent-red'}`}>
+                          {userTrucker.trucker.isAvailable ? "Disponível" : "Indisponível"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-secondary">Status</p>
-                      <p className={`font-semibold ${userTrucker.trucker.isAvailable ? 'text-accent-green' : 'text-accent-red'}`}>
-                        {userTrucker.trucker.isAvailable ? "Disponível" : "Indisponível"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => updateTruckerAvailabilityMutation.mutate({
-                      id: userTrucker.trucker.id,
-                      isAvailable: !userTrucker.trucker.isAvailable
-                    })}
-                    disabled={updateTruckerAvailabilityMutation.isPending}
-                    className="w-full bg-accent-green hover:bg-green-600 text-white"
-                  >
-                    {updateTruckerAvailabilityMutation.isPending 
-                      ? "Atualizando..." 
-                      : userTrucker.trucker.isAvailable 
-                        ? "Marcar como Indisponível" 
-                        : "Marcar como Disponível"}
-                  </Button>
-                </CardContent>
-              </Card>
+                    <Button
+                      onClick={() => updateTruckerAvailabilityMutation.mutate({
+                        id: userTrucker.trucker.id,
+                        isAvailable: !userTrucker.trucker.isAvailable
+                      })}
+                      disabled={updateTruckerAvailabilityMutation.isPending}
+                      className="w-full bg-accent-green hover:bg-green-600 text-white"
+                    >
+                      {updateTruckerAvailabilityMutation.isPending 
+                        ? "Atualizando..." 
+                        : userTrucker.trucker.isAvailable 
+                          ? "Marcar como Indisponível" 
+                          : "Marcar como Disponível"}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Freight Alerts for Truckers */}
+                <div className="mt-8">
+                  <FreightAlerts truckerId={userTrucker.trucker.id} />
+                </div>
+              </>
             )}
           </TabsContent>
 

@@ -105,6 +105,11 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Corrigido função de logout para redirecionar corretamente para login
 - June 25, 2025. Corrigido erros da API /api/listings/user removendo parâmetro desnecessário
 - June 25, 2025. Melhorado redirecionamento do logout usando window.location.href para garantir navegação completa
+- June 25, 2025. Implementado sistema de alertas de frete inteligente com WebSocket
+- June 25, 2025. Criado matching automático entre solicitações e caminhoneiros por área (100km)
+- June 25, 2025. Adicionado notificações em tempo real para caminhoneiros
+- June 25, 2025. Integrado interface de alertas com aceitar/recusar e visualização de rota no Google Maps
+- June 25, 2025. Implementado cálculo automático de distância e preço estimado
 
 ## User Preferences
 
