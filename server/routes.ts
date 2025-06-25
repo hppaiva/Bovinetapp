@@ -280,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...truckerData,
         userId: req.session.userId!,
         truckPhotoUrl: files.truckPhoto ? files.truckPhoto[0].path : undefined,
-        documentUrl: files.document ? files.document[0].path : undefined,
+
       });
       
       // Update user to mark as trucker

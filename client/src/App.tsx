@@ -10,6 +10,7 @@ import Freight from "@/pages/freight";
 import Services from "@/pages/services";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
+import OfflineIndicator from "@/components/offline-indicator";
 import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "./lib/queryClient";
 
@@ -47,6 +48,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <OfflineIndicator />
         <Toaster />
         <Router />
       </TooltipProvider>

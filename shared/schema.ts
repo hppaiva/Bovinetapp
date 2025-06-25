@@ -41,20 +41,24 @@ export const truckers = pgTable("truckers", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   truckModel: text("truck_model").notNull(),
-
   adultCapacity: integer("adult_capacity").notNull(),
   calfCapacity: integer("calf_capacity").notNull(),
   pricePerKm: decimal("price_per_km", { precision: 10, scale: 2 }).notNull(),
   experience: text("experience").notNull(),
   workingArea: text("working_area"),
   truckPhotoUrl: text("truck_photo_url"),
-
   isAvailable: boolean("is_available").default(false),
   currentLatitude: decimal("current_latitude", { precision: 10, scale: 8 }),
   currentLongitude: decimal("current_longitude", { precision: 11, scale: 8 }),
   lastLocationUpdate: timestamp("last_location_update"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Índices para localização e disponibilidade
+  userIdIdx: index("truckers_user_id_idx").on(table.userId),
+  availabilityIdx: index("truckers_availability_idx").on(table.isAvailable),
+  locationIdx: index("truckers_location_idx").on(table.currentLatitude, table.currentLongitude),
+  priceIdx: index("truckers_price_idx").on(table.pricePerKm),
+}));
 
 export const freightRequests = pgTable("freight_requests", {
   id: serial("id").primaryKey(),

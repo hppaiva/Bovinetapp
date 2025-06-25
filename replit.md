@@ -97,6 +97,11 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Alterado sexo e aptidão para checkboxes consistentes com aba comprar
 - June 25, 2025. Implementado slider arrastável para distância (1-500km)
 - June 25, 2025. Corrigido texto duplicado "Vídeo dos animais"
+- June 25, 2025. Removido campos CNH, placa e documento do cadastro de caminhoneiro
+- June 25, 2025. Otimizado banco de dados com índices para performance PWA
+- June 25, 2025. Implementado Service Worker e cache offline para PWA
+- June 25, 2025. Adicionado paginação nas consultas do banco para melhor performance
+- June 25, 2025. Configurado manifest.json para instalação como PWA
 
 ## User Preferences
 
