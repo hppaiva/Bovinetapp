@@ -60,7 +60,7 @@ export default function Freight() {
   });
 
   const { data: userFreightRequests } = useQuery({
-    queryKey: ["/api/freight-requests", user?.user?.id],
+    queryKey: ["/api/freight-requests"],
     enabled: !!user?.user?.id,
   });
 

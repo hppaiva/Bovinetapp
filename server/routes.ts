@@ -458,6 +458,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  // Freight request routes
+  app.get("/api/freight-requests", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const requests = await storage.getFreightRequests(userId);
+      res.json({ requests });
+    } catch (error) {
+      console.error("Get freight requests error:", error);
+      res.status(500).json({ message: "Failed to get freight requests" });
+    }
+  });
+
+  app.get("/api/freight-requests/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const request = await storage.getFreightRequest(id);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Freight request not found" });
+      }
+      
+      res.json({ request });
+    } catch (error) {
+      console.error("Get freight request error:", error);
+      res.status(500).json({ message: "Failed to get freight request" });
+    }
+  });
+
   // Freight alert routes
   app.get("/api/freight-alerts/:truckerId", requireAuth, async (req, res) => {
     try {
