@@ -40,7 +40,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   ]), async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(userData.email);
@@ -57,15 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
       });
 
-      // Create identity verification if files are provided
-      if (files.documentFront && files.documentBack && files.selfie) {
-        await storage.createIdentityVerification({
-          userId: user.id,
-          documentFrontUrl: files.documentFront[0].path,
-          documentBackUrl: files.documentBack[0].path,
-          selfieUrl: files.selfie[0].path,
-        });
-      }
+
 
       // Set session
       req.session.userId = user.id;

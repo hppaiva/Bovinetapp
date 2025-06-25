@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Eye, EyeOff, Upload, Dog } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -32,11 +32,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<{
-    documentFront?: File;
-    documentBack?: File;
-    selfie?: File;
-  }>({});
+
   
   const queryClient = useQueryClient();
 
@@ -125,14 +121,7 @@ export default function LoginPage() {
     },
   });
 
-  const handleFileChange = (type: 'documentFront' | 'documentBack' | 'selfie') => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFiles(prev => ({ ...prev, [type]: file }));
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-primary-bg flex items-center justify-center p-6">
@@ -342,62 +331,7 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  {/* Identity Verification */}
-                  <div className="mt-6">
-                    <h3 className="font-semibold mb-3 text-white">Verificação de Identidade</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-white text-sm mb-2 block">Documento (Frente)</Label>
-                        <div className="relative">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange('documentFront')}
-                            className="bg-primary-bg border-gray-600 text-white file:text-white file:bg-accent-green file:border-0 file:rounded file:px-2 file:py-1"
-                          />
-                          {selectedFiles.documentFront && (
-                            <p className="text-accent-green text-sm mt-1">
-                              ✓ {selectedFiles.documentFront.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
 
-                      <div>
-                        <Label className="text-white text-sm mb-2 block">Documento (Verso)</Label>
-                        <div className="relative">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange('documentBack')}
-                            className="bg-primary-bg border-gray-600 text-white file:text-white file:bg-accent-green file:border-0 file:rounded file:px-2 file:py-1"
-                          />
-                          {selectedFiles.documentBack && (
-                            <p className="text-accent-green text-sm mt-1">
-                              ✓ {selectedFiles.documentBack.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label className="text-white text-sm mb-2 block">Selfie com documento</Label>
-                        <div className="relative">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange('selfie')}
-                            className="bg-primary-bg border-gray-600 text-white file:text-white file:bg-accent-green file:border-0 file:rounded file:px-2 file:py-1"
-                          />
-                          {selectedFiles.selfie && (
-                            <p className="text-accent-green text-sm mt-1">
-                              ✓ {selectedFiles.selfie.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                   <Button
                     type="submit"
