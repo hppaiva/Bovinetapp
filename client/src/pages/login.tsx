@@ -65,6 +65,10 @@ export default function LoginPage() {
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao Bovinet",
       });
+      // Força refresh da página para garantir que a autenticação seja reconhecida
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     },
     onError: () => {
       toast({
@@ -99,6 +103,10 @@ export default function LoginPage() {
         title: "Cadastro realizado com sucesso!",
         description: "Sua conta foi criada e você já está logado",
       });
+      // Força refresh da página para garantir que a autenticação seja reconhecida
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     },
     onError: (error: Error) => {
       console.error("Register error:", error);

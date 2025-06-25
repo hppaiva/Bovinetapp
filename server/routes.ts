@@ -76,8 +76,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-      // Set session
+      // Set session and save it
       req.session.userId = user.id;
+      await new Promise((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
       
       res.json({ user: { ...user, password: undefined } });
     } catch (error: any) {
@@ -103,19 +109,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "E-mail ou senha incorretos" });
       }
 
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "E-mail ou senha incorretos" });
       }
 
+      // Garantir que a sessão seja salva
       req.session.userId = user.id;
+      await new Promise((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
+
       res.json({ user: { ...user, password: undefined } });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed" });
+      res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
 
