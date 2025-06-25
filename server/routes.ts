@@ -174,9 +174,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/listings/user/:userId", requireAuth, async (req, res) => {
+  app.get("/api/listings/user", requireAuth, async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = req.session.userId!;
       const listings = await storage.getUserListings(userId);
       res.json({ listings });
     } catch (error) {
