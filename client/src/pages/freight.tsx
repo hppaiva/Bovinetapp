@@ -278,7 +278,7 @@ export default function Freight() {
                       <MapPin className="w-4 h-4 mr-1" />
                       Localização de Origem
                     </Label>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Input
                         {...freightForm.register("originAddress")}
                         placeholder="Digite seu endereço ou cidade"
@@ -287,9 +287,10 @@ export default function Freight() {
                       <Button
                         type="button"
                         onClick={handleUseCurrentLocation}
-                        className="bg-blue-600 hover:bg-blue-700 px-4"
+                        className="bg-accent-green hover:bg-green-600 text-white whitespace-nowrap"
                       >
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Usar minha localização
                       </Button>
                     </div>
                     {freightForm.formState.errors.originAddress && (
