@@ -41,15 +41,14 @@ export const truckers = pgTable("truckers", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id).notNull(),
   truckModel: text("truck_model").notNull(),
-  licensePlate: text("license_plate").notNull(),
-  cnh: text("cnh").notNull(),
+
   adultCapacity: integer("adult_capacity").notNull(),
   calfCapacity: integer("calf_capacity").notNull(),
   pricePerKm: decimal("price_per_km", { precision: 10, scale: 2 }).notNull(),
   experience: text("experience").notNull(),
   workingArea: text("working_area"),
   truckPhotoUrl: text("truck_photo_url"),
-  documentUrl: text("document_url"),
+
   isAvailable: boolean("is_available").default(false),
   currentLatitude: decimal("current_latitude", { precision: 10, scale: 8 }),
   currentLongitude: decimal("current_longitude", { precision: 11, scale: 8 }),

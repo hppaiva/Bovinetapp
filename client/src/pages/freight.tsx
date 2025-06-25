@@ -31,8 +31,6 @@ const freightRequestSchema = z.object({
 
 const truckerSchema = z.object({
   truckModel: z.enum(["Truck", "Bitruck", "Carreta", "Boiadeiro pequeno"], { required_error: "Modelo é obrigatório" }),
-  licensePlate: z.string().min(1, "Placa é obrigatória"),
-  cnh: z.string().min(1, "CNH é obrigatória"),
   adultCapacity: z.number().min(1, "Capacidade deve ser maior que 0"),
   calfCapacity: z.number().min(1, "Capacidade deve ser maior que 0"),
   pricePerKm: z.number().min(0.01, "Preço deve ser maior que 0"),
@@ -48,7 +46,7 @@ export default function Freight() {
   const [originCoordinates, setOriginCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [destinationCoordinates, setDestinationCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedTruckPhoto, setSelectedTruckPhoto] = useState<File | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<File | null>(null);
+
 
   const queryClient = useQueryClient();
 
@@ -134,9 +132,7 @@ export default function Freight() {
         formData.append("truckPhoto", selectedTruckPhoto);
       }
 
-      if (selectedDocument) {
-        formData.append("document", selectedDocument);
-      }
+
 
       const response = await fetch("/api/truckers", {
         method: "POST",
@@ -160,7 +156,7 @@ export default function Freight() {
       });
       truckerForm.reset();
       setSelectedTruckPhoto(null);
-      setSelectedDocument(null);
+
     },
     onError: (error: Error) => {
       toast({
@@ -462,20 +458,6 @@ export default function Freight() {
                 <form onSubmit={truckerForm.handleSubmit((data) => createTruckerMutation.mutate(data))} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label className="text-white">CNH</Label>
-                      <Input
-                        {...truckerForm.register("cnh")}
-                        placeholder="Número da CNH"
-                        className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
-                      />
-                      {truckerForm.formState.errors.cnh && (
-                        <p className="text-accent-red text-sm mt-1">
-                          {truckerForm.formState.errors.cnh.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
                       <Label className="text-white">Modelo do caminhão</Label>
                       <Select onValueChange={(value) => truckerForm.setValue("truckModel", value as any)}>
                         <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
@@ -491,20 +473,6 @@ export default function Freight() {
                       {truckerForm.formState.errors.truckModel && (
                         <p className="text-accent-red text-sm mt-1">
                           {truckerForm.formState.errors.truckModel.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label className="text-white">Placa do veículo</Label>
-                      <Input
-                        {...truckerForm.register("licensePlate")}
-                        placeholder="ABC-1234"
-                        className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
-                      />
-                      {truckerForm.formState.errors.licensePlate && (
-                        <p className="text-accent-red text-sm mt-1">
-                          {truckerForm.formState.errors.licensePlate.message}
                         </p>
                       )}
                     </div>
@@ -584,35 +552,19 @@ export default function Freight() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-white">Foto do caminhão</Label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setSelectedTruckPhoto(e.target.files?.[0] || null)}
-                        className="bg-primary-bg border-gray-600 text-white file:text-white file:bg-accent-green file:border-0 file:rounded file:px-2 file:py-1"
-                      />
-                      {selectedTruckPhoto && (
-                        <p className="text-accent-green text-sm mt-1">
-                          ✓ {selectedTruckPhoto.name}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <Label className="text-white">Documento do veículo</Label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setSelectedDocument(e.target.files?.[0] || null)}
-                        className="bg-primary-bg border-gray-600 text-white file:text-white file:bg-accent-green file:border-0 file:rounded file:px-2 file:py-1"
-                      />
-                      {selectedDocument && (
-                        <p className="text-accent-green text-sm mt-1">
-                          ✓ {selectedDocument.name}
-                        </p>
-                      )}
-                    </div>
+                  <div>
+                    <Label className="text-white">Foto do caminhão</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setSelectedTruckPhoto(e.target.files?.[0] || null)}
+                      className="bg-primary-bg border-gray-600 text-white file:text-white file:bg-accent-green file:border-0 file:rounded file:px-2 file:py-1"
+                    />
+                    {selectedTruckPhoto && (
+                      <p className="text-accent-green text-sm mt-1">
+                        ✓ {selectedTruckPhoto.name}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex space-x-4">
