@@ -91,6 +91,8 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Initial setup
 - June 25, 2025. Substituído logo inicial pela logo original do Bovinet em todos os componentes
 - June 25, 2025. Removido campos de documentos do cadastro para simplificar o processo
+- June 25, 2025. Implementado filtro de raio de distância similar ao Facebook Marketplace
+- June 25, 2025. Removido filtro de faixa de preço para simplificar interface
 
 ## User Preferences
 

@@ -298,16 +298,24 @@ export default function Marketplace() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Distância</Label>
+                    <Label className="text-white">Raio de distância</Label>
                     <Select value={filters.distance} onValueChange={(value) => handleFilterChange("distance", value)}>
                       <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                        <SelectValue placeholder="Qualquer distância" />
+                        <SelectValue placeholder="Todas as distâncias" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Qualquer distância</SelectItem>
-                        <SelectItem value="50">Até 50 km</SelectItem>
-                        <SelectItem value="100">Até 100 km</SelectItem>
-                        <SelectItem value="200">Até 200 km</SelectItem>
+                        <SelectItem value="all">Todas as distâncias</SelectItem>
+                        <SelectItem value="1">1 km</SelectItem>
+                        <SelectItem value="2">2 km</SelectItem>
+                        <SelectItem value="5">5 km</SelectItem>
+                        <SelectItem value="10">10 km</SelectItem>
+                        <SelectItem value="20">20 km</SelectItem>
+                        <SelectItem value="40">40 km</SelectItem>
+                        <SelectItem value="60">60 km</SelectItem>
+                        <SelectItem value="80">80 km</SelectItem>
+                        <SelectItem value="100">100 km</SelectItem>
+                        <SelectItem value="200">200 km</SelectItem>
+                        <SelectItem value="500">500 km</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
