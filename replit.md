@@ -121,6 +121,8 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Criado página de teste completa para validação de funcionalidades
 - June 25, 2025. Corrigido configuração duplicada de sessões causando erro de autenticação
 - June 25, 2025. Sistema completamente funcional - login, criação de fretes e alertas operacionais
+- June 25, 2025. Corrigido e testado sistema de publicação de anúncios no marketplace
+- June 25, 2025. Implementado validação robusta e logs detalhados para criação de listings
 
 ## User Preferences
 

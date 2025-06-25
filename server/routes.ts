@@ -219,36 +219,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/listings", requireAuth, upload.single("video"), async (req, res) => {
     try {
+      console.log("=== LISTING CREATION SERVER DEBUG ===");
+      console.log("Session userId:", req.session.userId);
       console.log("Received listing data:", req.body);
+      console.log("Received file:", req.file);
+      
+      // Validate required fields
+      if (!req.body.quantity || !req.body.weight || !req.body.pricePerHead || !req.body.city) {
+        return res.status(400).json({ 
+          message: "Campos obrigatórios: quantidade, peso, preço e cidade" 
+        });
+      }
+
+      if (!req.body.sex || !req.body.age || !req.body.aptitude) {
+        return res.status(400).json({ 
+          message: "Campos obrigatórios: sexo, idade e aptidão" 
+        });
+      }
       
       // Parse numeric fields and ensure proper string conversion for decimals
       const parsedData = {
         ...req.body,
         quantity: parseInt(req.body.quantity),
-        weight: req.body.weight.toString(),
-        pricePerHead: req.body.pricePerHead.toString(),
-        latitude: req.body.latitude ? req.body.latitude.toString() : undefined,
-        longitude: req.body.longitude ? req.body.longitude.toString() : undefined,
-        title: `${req.body.quantity} Animais - ${req.body.city}`,
-        acceptOffers: false,
+        weight: parseFloat(req.body.weight),
+        pricePerHead: parseFloat(req.body.pricePerHead),
+        latitude: req.body.latitude ? parseFloat(req.body.latitude) : undefined,
+        longitude: req.body.longitude ? parseFloat(req.body.longitude) : undefined,
+        description: req.body.description || undefined,
       };
       
+      console.log("Parsed data:", parsedData);
+      
       const listingData = insertListingSchema.parse(parsedData);
+      console.log("Validated listing data:", listingData);
+      
       const videoFile = req.file;
       
       const listing = await storage.createListing({
         ...listingData,
         userId: req.session.userId!,
-        videoUrl: videoFile ? `/${videoFile.path}` : undefined,
+        videoUrl: videoFile ? `/uploads/${videoFile.filename}` : undefined,
       });
       
-      res.json({ listing });
-    } catch (error) {
+      console.log("Created listing:", listing);
+      res.json({ success: true, listing, message: "Anúncio criado com sucesso!" });
+    } catch (error: any) {
       console.error("Create listing error:", error);
+      
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Dados inválidos no anúncio",
+          details: error.errors 
+        });
+      }
+      
       if (error instanceof Error) {
         res.status(400).json({ message: error.message });
       } else {
-        res.status(400).json({ message: "Invalid listing data" });
+        res.status(500).json({ message: "Erro interno do servidor" });
       }
     }
   });

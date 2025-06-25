@@ -52,9 +52,15 @@ export default function Marketplace() {
 
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
+  const { data: user, error: userError, isLoading: userLoading } = useQuery({
     queryKey: ["/api/auth/me"],
+    retry: 1,
   });
+  
+  console.log("=== USER AUTH STATUS ===");
+  console.log("User data:", user);
+  console.log("User error:", userError);
+  console.log("User loading:", userLoading);
 
   const { data: listings, isLoading: loadingListings } = useQuery({
     queryKey: ["/api/listings", filters],
@@ -95,9 +101,21 @@ export default function Marketplace() {
 
   const createListingMutation = useMutation({
     mutationFn: async (data: ListingForm) => {
+      console.log("=== LISTING CREATION DEBUG ===");
+      console.log("Form data:", data);
+      console.log("Selected video:", selectedVideo);
+      console.log("Coordinates:", coordinates);
+      console.log("User:", user);
+
+      if (!user?.user?.id) {
+        throw new Error("Você precisa estar logado para criar um anúncio");
+      }
+
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value.toString());
+        if (value !== null && value !== undefined && value !== "") {
+          formData.append(key, value.toString());
+        }
       });
 
       if (selectedVideo) {
@@ -109,34 +127,79 @@ export default function Marketplace() {
         formData.append("longitude", coordinates.lng.toString());
       }
 
+      console.log("FormData entries:");
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
       const response = await fetch("/api/listings", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        let errorMessage;
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || "Erro ao criar anúncio";
+        } catch {
+          errorMessage = errorText || "Erro ao criar anúncio";
+        }
+        throw new Error(errorMessage);
       }
 
-      return response.json();
+      const result = await response.json();
+      console.log("Success response:", result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Listing created successfully:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
       toast({
         title: "Anúncio criado com sucesso!",
         description: "Seu anúncio está agora disponível no marketplace",
       });
-      form.reset();
+      form.reset({
+        quantity: 1,
+        weight: 0,
+        pricePerHead: 0,
+        description: "",
+        city: "",
+        sex: "" as "macho" | "femea",
+        aptitude: "" as "corte" | "leite", 
+        age: "" as "ate12" | "12a24" | "24a36" | "36a48" | "mais48",
+      });
       setSelectedVideo(null);
       setCoordinates(null);
     },
     onError: (error: Error) => {
+      console.error("=== LISTING ERROR ===");
+      console.error("Error:", error);
+      console.error("Error message:", error.message);
+      
+      let errorMessage = "Erro desconhecido ao criar anúncio";
+      
+      if (error.message.includes("401")) {
+        errorMessage = "Sessão expirada. Faça login novamente.";
+        setTimeout(() => window.location.reload(), 2000);
+      } else if (error.message.includes("400")) {
+        errorMessage = "Dados inválidos no formulário. Verifique os campos obrigatórios.";
+      } else if (error.message.includes("500")) {
+        errorMessage = "Erro interno do servidor. Tente novamente.";
+      } else {
+        errorMessage = error.message || "Erro ao criar anúncio";
+      }
+      
       toast({
         title: "Erro ao criar anúncio",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     },
