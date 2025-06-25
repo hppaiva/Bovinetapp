@@ -34,6 +34,7 @@ export const listings = pgTable("listings", {
   longitude: text("longitude"),
   isActive: boolean("is_active").default(true),
   acceptOffers: boolean("accept_offers").default(false),
+  lotNumber: integer("lot_number"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -255,8 +255,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const videoFile = req.file;
       
+      // Get user's listing count to generate lot number
+      const userListings = await storage.getUserListings(req.session.userId!);
+      const lotNumber = userListings.length + 1;
+      const lotTitle = `Lote ${lotNumber.toString().padStart(2, '0')} - ${parsedData.city}`;
+      
+      console.log("Generated lot info:", { lotNumber, lotTitle, userListingsCount: userListings.length });
+
       const listing = await storage.createListing({
         ...listingData,
+        title: lotTitle,
         userId: req.session.userId!,
         videoUrl: videoFile ? `/uploads/${videoFile.filename}` : undefined,
       });

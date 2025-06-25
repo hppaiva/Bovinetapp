@@ -17,12 +17,45 @@ export default function LocationPicker({ onLocationSelect, coordinates }: Locati
   const handleGetCurrentLocation = async () => {
     setIsLoading(true);
     try {
-      const position = await getCurrentLocation();
+      console.log("=== LOCATION PICKER DEBUG ===");
+      console.log("Starting location request...");
+      
+      if (!navigator.geolocation) {
+        throw new Error("Geolocalização não suportada neste navegador");
+      }
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            console.log("Location success:", pos);
+            resolve(pos);
+          },
+          (error) => {
+            console.error("Location error:", error);
+            let errorMessage = "Erro ao obter localização";
+            if (error.code === 1) {
+              errorMessage = "Permissão de localização negada. Permita o acesso à localização.";
+            } else if (error.code === 2) {
+              errorMessage = "Localização indisponível. Verifique o GPS.";
+            } else if (error.code === 3) {
+              errorMessage = "Tempo limite para obter localização. Tente novamente.";
+            }
+            reject(new Error(errorMessage));
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 300000
+          }
+        );
+      });
+
       const coords = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
       
+      console.log("Got coordinates:", coords);
       onLocationSelect(coords);
       
       toast({
@@ -30,6 +63,7 @@ export default function LocationPicker({ onLocationSelect, coordinates }: Locati
         description: "Sua localização atual foi adicionada com sucesso",
       });
     } catch (error: any) {
+      console.error("Location picker error:", error);
       toast({
         title: "Erro de localização",
         description: error.message || "Não foi possível obter sua localização",

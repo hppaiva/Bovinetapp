@@ -19,32 +19,48 @@ export default function VideoUpload({ onVideoSelect, selectedVideo }: VideoUploa
 
     const file = files[0];
     
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
+    console.log("=== VIDEO UPLOAD DEBUG ===");
+    console.log("Selected file:", {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified
+    });
+    
+    // Validate file type - be more permissive
+    const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov', 'video/quicktime', 'video/x-msvideo'];
+    if (!file.type.startsWith('video/') && !validTypes.some(type => file.type === type)) {
+      console.warn("Unsupported file type:", file.type);
       toast({
         title: "Arquivo inválido",
-        description: "Por favor, selecione um arquivo de vídeo",
+        description: "Por favor, selecione um arquivo de vídeo (MP4, WebM, MOV, AVI)",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file size (50MB limit)
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    // Validate file size (100MB limit for better compatibility)
+    const maxSize = 100 * 1024 * 1024; // 100MB
     if (file.size > maxSize) {
       toast({
         title: "Arquivo muito grande",
-        description: "O vídeo deve ter no máximo 50MB",
+        description: "O vídeo deve ter no máximo 100MB",
         variant: "destructive",
       });
       return;
     }
 
+    console.log("File validation passed, setting video");
     onVideoSelect(file);
     
     // Create preview URL
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
+    
+    toast({
+      title: "Vídeo selecionado!",
+      description: `Arquivo: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`,
+    });
   };
 
   const handleDrag = (e: React.DragEvent) => {
