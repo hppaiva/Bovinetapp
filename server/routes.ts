@@ -197,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pricePerHead: req.body.pricePerHead.toString(),
         latitude: req.body.latitude ? req.body.latitude.toString() : undefined,
         longitude: req.body.longitude ? req.body.longitude.toString() : undefined,
-        title: `${req.body.quantity} ${req.body.sex === 'macho' ? 'Machos' : 'Fêmeas'} ${req.body.aptitude === 'corte' ? 'para Corte' : 'para Leite'}`,
+        title: `${req.body.quantity} Animais - ${req.body.city}`,
         acceptOffers: false,
       };
       

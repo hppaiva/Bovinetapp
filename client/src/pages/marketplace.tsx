@@ -361,7 +361,10 @@ export default function Marketplace() {
                       </div>
                       <div className="md:w-2/3 p-6">
                         <div className="flex justify-between items-start mb-3">
-                          <h3 className="text-xl font-bold">{listing.title}</h3>
+                          <div>
+                            <h3 className="text-xl font-bold">{listing.quantity} animais</h3>
+                            <p className="text-gray-600">{listing.city}</p>
+                          </div>
                           <Badge className="bg-green-100 text-green-800">Disponível</Badge>
                         </div>
                         
@@ -675,7 +678,7 @@ export default function Marketplace() {
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-white">{listing.title}</h3>
+                          <h3 className="text-lg font-semibold text-white">{listing.quantity} animais - {listing.city}</h3>
                           <p className="text-secondary">
                             Publicado em {new Date(listing.createdAt).toLocaleDateString('pt-BR')}
                           </p>
