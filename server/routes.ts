@@ -5,8 +5,12 @@ import multer from "multer";
 import path from "path";
 import express from "express";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import { storage } from "./storage";
+import { pool } from "./db";
 import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema } from "@shared/schema";
+
+const PgSession = connectPgSimple(session);
 
 // Extend Request interface to include session
 declare module 'express-session' {
@@ -32,12 +36,24 @@ const requireAuth = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session
+  app.use(session({
+    store: new PgSession({
+      pool: pool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+  }));
   // Auth routes
-  app.post("/api/auth/register", upload.fields([
-    { name: "documentFront", maxCount: 1 },
-    { name: "documentBack", maxCount: 1 },
-    { name: "selfie", maxCount: 1 }
-  ]), async (req, res) => {
+  app.post("/api/auth/register", async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       

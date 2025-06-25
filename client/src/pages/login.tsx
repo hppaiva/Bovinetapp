@@ -77,33 +77,13 @@ export default function LoginPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      
-      if (selectedFiles.documentFront) {
-        formData.append("documentFront", selectedFiles.documentFront);
-      }
-      if (selectedFiles.documentBack) {
-        formData.append("documentBack", selectedFiles.documentBack);
-      }
-      if (selectedFiles.selfie) {
-        formData.append("selfie", selectedFiles.selfie);
-      }
-
-      const response = await fetch("/api/auth/register", {
+      return apiRequest("/api/auth/register", {
         method: "POST",
-        body: formData,
-        credentials: "include",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
-
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
