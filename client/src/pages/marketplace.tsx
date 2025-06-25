@@ -33,7 +33,6 @@ const listingSchema = z.object({
   aptitude: z.enum(["corte", "leite"], { required_error: "Aptidão é obrigatória" }),
   description: z.string().optional(),
   city: z.string().min(1, "Cidade é obrigatória"),
-  acceptOffers: z.boolean().default(false),
 });
 
 type ListingForm = z.infer<typeof listingSchema>;
@@ -88,9 +87,9 @@ export default function Marketplace() {
       pricePerHead: 0,
       description: "",
       city: "",
-      sex: "",
-      aptitude: "",
-      age: "",
+      sex: "" as "macho" | "femea",
+      aptitude: "" as "corte" | "leite", 
+      age: "" as "ate12" | "12a24" | "24a36" | "36a48" | "mais48",
     },
   });
 
@@ -457,7 +456,13 @@ export default function Marketplace() {
                           <Checkbox
                             id="corte-sell"
                             checked={form.watch("aptitude") === "corte"}
-                            onCheckedChange={(checked) => form.setValue("aptitude", checked ? "corte" : "")}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                form.setValue("aptitude", "corte");
+                              } else if (form.watch("aptitude") === "corte") {
+                                form.setValue("aptitude", "" as any);
+                              }
+                            }}
                           />
                           <Label htmlFor="corte-sell" className="text-white">Corte</Label>
                         </div>
@@ -465,7 +470,13 @@ export default function Marketplace() {
                           <Checkbox
                             id="leite-sell"
                             checked={form.watch("aptitude") === "leite"}
-                            onCheckedChange={(checked) => form.setValue("aptitude", checked ? "leite" : "")}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                form.setValue("aptitude", "leite");
+                              } else if (form.watch("aptitude") === "leite") {
+                                form.setValue("aptitude", "" as any);
+                              }
+                            }}
                           />
                           <Label htmlFor="leite-sell" className="text-white">Leite</Label>
                         </div>
@@ -484,7 +495,13 @@ export default function Marketplace() {
                           <Checkbox
                             id="macho-sell"
                             checked={form.watch("sex") === "macho"}
-                            onCheckedChange={(checked) => form.setValue("sex", checked ? "macho" : "")}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                form.setValue("sex", "macho");
+                              } else if (form.watch("sex") === "macho") {
+                                form.setValue("sex", "" as any);
+                              }
+                            }}
                           />
                           <Label htmlFor="macho-sell" className="text-white">Macho</Label>
                         </div>
@@ -492,7 +509,13 @@ export default function Marketplace() {
                           <Checkbox
                             id="femea-sell"
                             checked={form.watch("sex") === "femea"}
-                            onCheckedChange={(checked) => form.setValue("sex", checked ? "femea" : "")}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                form.setValue("sex", "femea");
+                              } else if (form.watch("sex") === "femea") {
+                                form.setValue("sex", "" as any);
+                              }
+                            }}
                           />
                           <Label htmlFor="femea-sell" className="text-white">Fêmea</Label>
                         </div>
