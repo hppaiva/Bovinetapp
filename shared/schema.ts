@@ -210,6 +210,8 @@ export const insertFreightRequestSchema = createInsertSchema(freightRequests).om
   id: true,
   createdAt: true,
   userId: true,
+  status: true,
+  matchedTruckerId: true,
 });
 
 export const insertGtaRequestSchema = createInsertSchema(gtaRequests).omit({

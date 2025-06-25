@@ -92,14 +92,19 @@ export default function Freight() {
   const createFreightRequestMutation = useMutation({
     mutationFn: async (data: FreightRequestForm) => {
       const requestData = {
-        ...data,
-        preferredDate: data.preferredDate ? new Date(data.preferredDate).toISOString() : undefined,
-        originLatitude: originCoordinates?.lat,
-        originLongitude: originCoordinates?.lng,
-        destinationLatitude: destinationCoordinates?.lat,
-        destinationLongitude: destinationCoordinates?.lng,
+        originAddress: data.originAddress,
+        destinationAddress: data.destinationAddress,
+        animalQuantity: Number(data.animalQuantity),
+        animalAge: data.animalAge,
+        observations: data.observations || undefined,
+        preferredDate: data.preferredDate ? data.preferredDate : undefined,
+        originLatitude: originCoordinates?.lat?.toString() || undefined,
+        originLongitude: originCoordinates?.lng?.toString() || undefined,
+        destinationLatitude: destinationCoordinates?.lat?.toString() || undefined,
+        destinationLongitude: destinationCoordinates?.lng?.toString() || undefined,
       };
 
+      console.log("Sending freight request:", requestData);
       const response = await apiRequest("POST", "/api/freight-requests", requestData);
       return response.json();
     },
@@ -114,6 +119,7 @@ export default function Freight() {
       setDestinationCoordinates(null);
     },
     onError: (error: Error) => {
+      console.error("Freight request error:", error);
       toast({
         title: "Erro ao criar solicitação",
         description: error.message,

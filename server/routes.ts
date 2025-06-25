@@ -528,20 +528,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Modified freight request creation to trigger alerts
   app.post("/api/freight-requests", requireAuth, async (req, res) => {
     try {
+      console.log("Received freight request data:", req.body);
+      
+      // Parse and validate the request data
       const requestData = insertFreightRequestSchema.parse(req.body);
+      console.log("Validated request data:", requestData);
       
       const freightRequest = await storage.createFreightRequest({
         ...requestData,
         userId: req.session.userId!,
       });
 
+      console.log("Created freight request:", freightRequest);
+
       // Broadcast alert to nearby truckers
       await broadcastFreightAlert(freightRequest);
 
       res.json({ freightRequest });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create freight request error:", error);
-      res.status(500).json({ message: "Failed to create freight request" });
+      
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Dados inválidos na solicitação de frete",
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ message: "Erro ao criar solicitação de frete" });
     }
   });
 

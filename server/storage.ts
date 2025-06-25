@@ -214,12 +214,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createFreightRequest(requestData: InsertFreightRequest & { userId: number }): Promise<FreightRequest> {
-    const [request] = await db.insert(freightRequests).values(requestData).returning();
+    // Convert string date to Date object if provided
+    const processedData = {
+      ...requestData,
+      preferredDate: requestData.preferredDate ? new Date(requestData.preferredDate) : null,
+    };
+    
+    const [request] = await db.insert(freightRequests).values(processedData).returning();
     return request;
   }
 
   async updateFreightRequest(id: number, updateData: Partial<InsertFreightRequest>): Promise<FreightRequest> {
-    const [request] = await db.update(freightRequests).set(updateData).where(eq(freightRequests.id, id)).returning();
+    // Convert string date to Date object if provided
+    const processedData = {
+      ...updateData,
+      preferredDate: updateData.preferredDate ? new Date(updateData.preferredDate) : undefined,
+    };
+    
+    const [request] = await db.update(freightRequests).set(processedData).where(eq(freightRequests.id, id)).returning();
     return request;
   }
 
