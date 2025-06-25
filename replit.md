@@ -110,6 +110,10 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Adicionado notificações em tempo real para caminhoneiros
 - June 25, 2025. Integrado interface de alertas com aceitar/recusar e visualização de rota no Google Maps
 - June 25, 2025. Implementado cálculo automático de distância e preço estimado
+- June 25, 2025. Corrigido sistema de autenticação com AuthGuard robusto
+- June 25, 2025. Implementado botões de geolocalização funcionais na busca de frete
+- June 25, 2025. Adicionado reverse geocoding para obter endereços automaticamente
+- June 25, 2025. Corrigido validação de dados na criação de solicitações de frete
 
 ## User Preferences
 

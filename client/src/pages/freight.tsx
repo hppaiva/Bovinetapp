@@ -75,6 +75,8 @@ export default function Freight() {
       originAddress: "",
       destinationAddress: "",
       animalQuantity: 1,
+      animalAge: "ate12",
+      preferredDate: "",
       observations: "",
     },
   });
@@ -112,9 +114,16 @@ export default function Freight() {
       queryClient.invalidateQueries({ queryKey: ["/api/freight-requests"] });
       toast({
         title: "Solicitação de frete criada!",
-        description: "Caminhoneiros disponíveis serão notificados",
+        description: "Caminhoneiros próximos serão notificados automaticamente",
       });
-      freightForm.reset();
+      freightForm.reset({
+        animalAge: "ate12",
+        preferredDate: "",
+        originAddress: "",
+        destinationAddress: "",
+        animalQuantity: 1,
+        observations: "",
+      });
       setOriginCoordinates(null);
       setDestinationCoordinates(null);
     },
@@ -311,7 +320,58 @@ export default function Freight() {
                       />
                       <Button
                         type="button"
-                        onClick={handleUseCurrentLocation}
+                        onClick={async () => {
+                          try {
+                            if (!navigator.geolocation) {
+                              toast({
+                                title: "Erro",
+                                description: "Geolocalização não suportada pelo navegador",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+
+                            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 60000,
+                              });
+                            });
+
+                            setOriginCoordinates({
+                              lat: position.coords.latitude,
+                              lng: position.coords.longitude,
+                            });
+
+                            try {
+                              const response = await fetch(
+                                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&localityLanguage=pt`
+                              );
+                              const data = await response.json();
+                              const address = `${data.locality || data.city || ''}, ${data.principalSubdivision || ''}`;
+                              freightForm.setValue("originAddress", address || "Localização atual");
+                            } catch {
+                              freightForm.setValue("originAddress", "Localização atual");
+                            }
+
+                            toast({
+                              title: "Localização obtida",
+                              description: "Origem definida com sua localização atual",
+                            });
+                          } catch (error: any) {
+                            let message = "Não foi possível obter sua localização";
+                            if (error.code === 1) message = "Permissão negada. Ative a localização no navegador.";
+                            if (error.code === 2) message = "Localização indisponível.";
+                            if (error.code === 3) message = "Tempo limite excedido.";
+                            
+                            toast({
+                              title: "Erro de localização",
+                              description: message,
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                         className="bg-accent-green hover:bg-green-600 text-white whitespace-nowrap"
                       >
                         <MapPin className="w-4 h-4 mr-2" />
@@ -338,7 +398,58 @@ export default function Freight() {
                       />
                       <Button
                         type="button"
-                        onClick={handleUseDestinationLocation}
+                        onClick={async () => {
+                          try {
+                            if (!navigator.geolocation) {
+                              toast({
+                                title: "Erro",
+                                description: "Geolocalização não suportada pelo navegador",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+
+                            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 60000,
+                              });
+                            });
+
+                            setDestinationCoordinates({
+                              lat: position.coords.latitude,
+                              lng: position.coords.longitude,
+                            });
+
+                            try {
+                              const response = await fetch(
+                                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&localityLanguage=pt`
+                              );
+                              const data = await response.json();
+                              const address = `${data.locality || data.city || ''}, ${data.principalSubdivision || ''}`;
+                              freightForm.setValue("destinationAddress", address || "Localização atual");
+                            } catch {
+                              freightForm.setValue("destinationAddress", "Localização atual");
+                            }
+
+                            toast({
+                              title: "Localização obtida",
+                              description: "Destino definido com sua localização atual",
+                            });
+                          } catch (error: any) {
+                            let message = "Não foi possível obter sua localização";
+                            if (error.code === 1) message = "Permissão negada. Ative a localização no navegador.";
+                            if (error.code === 2) message = "Localização indisponível.";
+                            if (error.code === 3) message = "Tempo limite excedido.";
+                            
+                            toast({
+                              title: "Erro de localização",
+                              description: message,
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                         className="bg-accent-green hover:bg-green-600 text-white whitespace-nowrap"
                       >
                         <MapPin className="w-4 h-4 mr-2" />
@@ -355,15 +466,18 @@ export default function Freight() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label className="text-white">Idade dos Animais</Label>
-                      <Select onValueChange={(value) => freightForm.setValue("animalAge", value as any)}>
+                      <Select 
+                        onValueChange={(value) => freightForm.setValue("animalAge", value as any)}
+                        defaultValue="ate12"
+                      >
                         <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder="Selecione a idade dos animais" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="ate12">Até 12 meses</SelectItem>
                           <SelectItem value="12a24">12 a 24 meses</SelectItem>
                           <SelectItem value="24a36">24 a 36 meses</SelectItem>
-                          <SelectItem value="36a48">36 a 48 meses</SelectItem>
+                          <SelectItem value="acima36">Acima de 36 meses</SelectItem>
                         </SelectContent>
                       </Select>
                       {freightForm.formState.errors.animalAge && (
