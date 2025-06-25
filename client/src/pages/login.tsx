@@ -77,13 +77,21 @@ export default function LoginPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      return apiRequest("/api/auth/register", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(data),
+        credentials: "include",
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
@@ -93,9 +101,10 @@ export default function LoginPage() {
       });
     },
     onError: (error: Error) => {
+      console.error("Register error:", error);
       toast({
         title: "Erro no cadastro",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },

@@ -78,9 +78,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.userId = user.id;
       
       res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
-      res.status(400).json({ message: "Invalid registration data" });
+      
+      // Handle specific database errors
+      if (error.code === '23505') {
+        if (error.constraint === 'users_email_unique') {
+          return res.status(400).json({ message: "Este e-mail já está em uso" });
+        }
+        if (error.constraint === 'users_cpf_unique') {
+          return res.status(400).json({ message: "Este CPF já está cadastrado" });
+        }
+      }
+      
+      res.status(400).json({ message: "Dados de cadastro inválidos" });
     }
   });
 
