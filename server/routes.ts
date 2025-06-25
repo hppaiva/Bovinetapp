@@ -207,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const listing = await storage.createListing({
         ...listingData,
         userId: req.session.userId!,
-        videoUrl: videoFile ? videoFile.path : undefined,
+        videoUrl: videoFile ? `/${videoFile.path}` : undefined,
       });
       
       res.json({ listing });

@@ -338,11 +338,17 @@ export default function Marketplace() {
                     <div className="md:flex">
                       <div className="md:w-1/3">
                         {listing.videoUrl ? (
-                          <div className="h-48 md:h-full bg-gray-200 flex items-center justify-center relative">
-                            <Play className="h-12 w-12 text-gray-400" />
-                            <p className="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 text-white px-2 py-1 rounded">
-                              Vídeo disponível
-                            </p>
+                          <div className="h-48 md:h-full bg-gray-200 relative">
+                            <video 
+                              className="w-full h-full object-cover"
+                              controls
+                              preload="metadata"
+                            >
+                              <source src={listing.videoUrl} type="video/mp4" />
+                              <source src={listing.videoUrl} type="video/webm" />
+                              <source src={listing.videoUrl} type="video/mov" />
+                              Seu navegador não suporta reprodução de vídeo.
+                            </video>
                           </div>
                         ) : (
                           <div className="h-48 md:h-full bg-gray-200 flex items-center justify-center">
