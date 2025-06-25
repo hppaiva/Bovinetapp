@@ -25,7 +25,6 @@ import LocationPicker from "@/components/location-picker";
 import { Search, Plus, List, MapPin, MessageCircle, Play, Eye } from "lucide-react";
 
 const listingSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório"),
   quantity: z.number().min(1, "Quantidade deve ser maior que 0"),
   sex: z.enum(["macho", "femea"], { required_error: "Sexo é obrigatório" }),
   age: z.enum(["ate12", "12a24", "24a36", "36a48", "mais48"], { required_error: "Idade é obrigatória" }),

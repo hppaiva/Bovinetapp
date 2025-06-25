@@ -187,7 +187,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/listings", requireAuth, upload.single("video"), async (req, res) => {
     try {
-      const listingData = insertListingSchema.parse(req.body);
+      console.log("Received listing data:", req.body);
+      
+      // Parse numeric fields
+      const parsedData = {
+        ...req.body,
+        quantity: parseInt(req.body.quantity),
+        weight: parseFloat(req.body.weight),
+        pricePerHead: parseFloat(req.body.pricePerHead),
+        latitude: req.body.latitude ? parseFloat(req.body.latitude) : undefined,
+        longitude: req.body.longitude ? parseFloat(req.body.longitude) : undefined,
+        title: `${req.body.quantity} ${req.body.sex === 'macho' ? 'Machos' : 'Fêmeas'} ${req.body.aptitude === 'corte' ? 'para Corte' : 'para Leite'}`,
+        acceptOffers: false,
+      };
+      
+      const listingData = insertListingSchema.parse(parsedData);
       const videoFile = req.file;
       
       const listing = await storage.createListing({
@@ -199,7 +213,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ listing });
     } catch (error) {
       console.error("Create listing error:", error);
-      res.status(400).json({ message: "Invalid listing data" });
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(400).json({ message: "Invalid listing data" });
+      }
     }
   });
 
