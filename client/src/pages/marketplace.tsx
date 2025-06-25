@@ -65,8 +65,8 @@ export default function Marketplace() {
       const params = new URLSearchParams();
       if (filters.sex.length > 0) params.append("sex", filters.sex.join(","));
       if (filters.aptitude.length > 0) params.append("aptitude", filters.aptitude.join(","));
-      if (filters.age) params.append("age", filters.age);
-      if (filters.distance) params.append("maxDistance", filters.distance);
+      if (filters.age && filters.age !== "all") params.append("age", filters.age);
+      if (filters.distance && filters.distance !== "all") params.append("maxDistance", filters.distance);
       if (filters.search) params.append("search", filters.search);
 
       const response = await fetch(`/api/listings?${params.toString()}`, {
@@ -151,6 +151,15 @@ export default function Marketplace() {
     if (tab && ["buy", "sell", "my-listings"].includes(tab)) {
       setActiveTab(tab);
     }
+  }, []);
+
+  // Set default values for filters to avoid empty string errors
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      age: prev.age || "all",
+      distance: prev.distance || "all"
+    }));
   }, []);
 
   const handleFilterChange = (type: string, value: string | string[]) => {
@@ -280,7 +289,7 @@ export default function Marketplace() {
                         <SelectValue placeholder="Todas as idades" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas as idades</SelectItem>
+                        <SelectItem value="all">Todas as idades</SelectItem>
                         <SelectItem value="ate12">Até 12 meses</SelectItem>
                         <SelectItem value="12a24">12 a 24 meses</SelectItem>
                         <SelectItem value="24a36">24 a 36 meses</SelectItem>
@@ -297,7 +306,7 @@ export default function Marketplace() {
                         <SelectValue placeholder="Qualquer distância" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Qualquer distância</SelectItem>
+                        <SelectItem value="all">Qualquer distância</SelectItem>
                         <SelectItem value="50">Até 50 km</SelectItem>
                         <SelectItem value="100">Até 100 km</SelectItem>
                         <SelectItem value="200">Até 200 km</SelectItem>
