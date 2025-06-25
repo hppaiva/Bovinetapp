@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Autenticação Bovinet</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 10px 0; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .result { background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 4px; white-space: pre-wrap; }
+        .error { background: #ffeaea; color: #d00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de Autenticação - Bovinet</h1>
+        
+        <div class="form">
+            <h2>1. Registrar Usuário</h2>
+            <button onclick="registerUser()">Registrar Usuário de Teste</button>
+            <div id="registerResult" class="result"></div>
+        </div>
+
+        <div class="form">
+            <h2>2. Fazer Login</h2>
+            <button onclick="loginUser()">Fazer Login</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+
+        <div class="form">
+            <h2>3. Criar Solicitação de Frete</h2>
+            <button onclick="createFreightRequest()">Criar Solicitação</button>
+            <div id="freightResult" class="result"></div>
+        </div>
+
+        <div class="form">
+            <h2>4. Verificar Status</h2>
+            <button onclick="checkAuth()">Verificar Autenticação</button>
+            <button onclick="getFreightRequests()">Buscar Solicitações</button>
+            <div id="statusResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.json();
+                return { status: response.status, data };
+            } catch (error) {
+                return { status: 'error', data: { message: error.message } };
+            }
+        }
+
+        async function registerUser() {
+            const result = await makeRequest('/api/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: 'João Silva',
+                    email: 'joao@fazenda.com',
+                    phone: '11999888777',
+                    cpf: '12345678901',
+                    city: 'Ribeirão Preto',
+                    state: 'SP',
+                    password: '123456'
+                })
+            });
+            
+            document.getElementById('registerResult').innerText = 
+                `Status: ${result.status}\n` + JSON.stringify(result.data, null, 2);
+        }
+
+        async function loginUser() {
+            const result = await makeRequest('/api/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: 'joao@fazenda.com',
+                    password: '123456'
+                })
+            });
+            
+            document.getElementById('loginResult').innerText = 
+                `Status: ${result.status}\n` + JSON.stringify(result.data, null, 2);
+        }
+
+        async function createFreightRequest() {
+            const result = await makeRequest('/api/freight-requests', {
+                method: 'POST',
+                body: JSON.stringify({
+                    originAddress: 'Ribeirão Preto, SP',
+                    destinationAddress: 'São Paulo, SP',
+                    animalQuantity: 15,
+                    animalAge: 'ate12',
+                    observations: 'Transporte de bezerros para feira'
+                })
+            });
+            
+            document.getElementById('freightResult').innerText = 
+                `Status: ${result.status}\n` + JSON.stringify(result.data, null, 2);
+        }
+
+        async function checkAuth() {
+            const result = await makeRequest('/api/auth/me');
+            
+            document.getElementById('statusResult').innerText = 
+                `Auth Status: ${result.status}\n` + JSON.stringify(result.data, null, 2);
+        }
+
+        async function getFreightRequests() {
+            const result = await makeRequest('/api/freight-requests');
+            
+            document.getElementById('statusResult').innerText = 
+                `Freight Status: ${result.status}\n` + JSON.stringify(result.data, null, 2);
+        }
+    </script>
+</body>
+</html>

@@ -31,9 +31,15 @@ const upload = multer({
 
 // Middleware to check if user is authenticated
 const requireAuth = (req: any, res: any, next: any) => {
+  console.log("Auth check - Session:", req.session);
+  console.log("Auth check - UserId:", req.session?.userId);
+  
   if (!req.session?.userId) {
+    console.log("No userId in session, authentication failed");
     return res.status(401).json({ message: "Authentication required" });
   }
+  
+  console.log("Authentication successful for user:", req.session.userId);
   next();
 };
 
@@ -45,13 +51,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       tableName: "session",
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET || "your-secret-key",
+    secret: process.env.SESSION_SECRET || "your-secret-key-development",
     resave: false,
     saveUninitialized: false,
+    name: "bovinet.sid", // Nome customizado para evitar conflitos
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: 'lax',
     },
   }));
   // Auth routes
@@ -78,13 +86,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Set session and save it
       req.session.userId = user.id;
+      
+      console.log("Registration successful - Setting session userId:", user.id);
+      console.log("Session before save:", req.session);
+      
       await new Promise((resolve, reject) => {
         req.session.save((err: any) => {
-          if (err) reject(err);
-          else resolve(true);
+          if (err) {
+            console.error("Session save error:", err);
+            reject(err);
+          } else {
+            console.log("Session saved successfully");
+            resolve(true);
+          }
         });
       });
-      
+
+      console.log("Session after save:", req.session);
       res.json({ user: { ...user, password: undefined } });
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -119,13 +137,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Garantir que a sessão seja salva
       req.session.userId = user.id;
+      
+      console.log("Login successful - Setting session userId:", user.id);
+      console.log("Session before save:", req.session);
+      
       await new Promise((resolve, reject) => {
         req.session.save((err: any) => {
-          if (err) reject(err);
-          else resolve(true);
+          if (err) {
+            console.error("Session save error:", err);
+            reject(err);
+          } else {
+            console.log("Session saved successfully");
+            resolve(true);
+          }
         });
       });
 
+      console.log("Session after save:", req.session);
       res.json({ user: { ...user, password: undefined } });
     } catch (error) {
       console.error("Login error:", error);
@@ -528,6 +556,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Modified freight request creation to trigger alerts
   app.post("/api/freight-requests", requireAuth, async (req, res) => {
     try {
+      console.log("=== FREIGHT REQUEST DEBUG ===");
+      console.log("Session:", req.session);
+      console.log("UserId from session:", req.session.userId);
       console.log("Received freight request data:", req.body);
       
       // Parse and validate the request data
@@ -542,9 +573,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Created freight request:", freightRequest);
 
       // Broadcast alert to nearby truckers
-      await broadcastFreightAlert(freightRequest);
+      try {
+        await broadcastFreightAlert(freightRequest);
+        console.log("Alert broadcast successful");
+      } catch (alertError) {
+        console.error("Alert broadcast failed:", alertError);
+        // Don't fail the request if alert fails
+      }
 
-      res.json({ freightRequest });
+      res.json({ 
+        success: true,
+        freightRequest,
+        message: "Solicitação de frete criada com sucesso!" 
+      });
     } catch (error: any) {
       console.error("Create freight request error:", error);
       
