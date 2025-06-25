@@ -454,22 +454,22 @@ export default function Marketplace() {
                     <div>
                       <Label className="text-white">Aptidão</Label>
                       <div className="flex space-x-4 mt-2">
-                        <Button
-                          type="button"
-                          variant={form.watch("aptitude") === "corte" ? "default" : "outline"}
-                          onClick={() => form.setValue("aptitude", "corte")}
-                          className={form.watch("aptitude") === "corte" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
-                        >
-                          Corte
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={form.watch("aptitude") === "leite" ? "default" : "outline"}
-                          onClick={() => form.setValue("aptitude", "leite")}
-                          className={form.watch("aptitude") === "leite" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
-                        >
-                          Leite
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="corte-sell"
+                            checked={form.watch("aptitude") === "corte"}
+                            onCheckedChange={(checked) => form.setValue("aptitude", checked ? "corte" : "")}
+                          />
+                          <Label htmlFor="corte-sell" className="text-white">Corte</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="leite-sell"
+                            checked={form.watch("aptitude") === "leite"}
+                            onCheckedChange={(checked) => form.setValue("aptitude", checked ? "leite" : "")}
+                          />
+                          <Label htmlFor="leite-sell" className="text-white">Leite</Label>
+                        </div>
                       </div>
                       {form.formState.errors.aptitude && (
                         <p className="text-accent-red text-sm mt-1">
@@ -481,22 +481,22 @@ export default function Marketplace() {
                     <div>
                       <Label className="text-white">Sexo</Label>
                       <div className="flex space-x-4 mt-2">
-                        <Button
-                          type="button"
-                          variant={form.watch("sex") === "macho" ? "default" : "outline"}
-                          onClick={() => form.setValue("sex", "macho")}
-                          className={form.watch("sex") === "macho" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
-                        >
-                          Macho
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={form.watch("sex") === "femea" ? "default" : "outline"}
-                          onClick={() => form.setValue("sex", "femea")}
-                          className={form.watch("sex") === "femea" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
-                        >
-                          Fêmea
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="macho-sell"
+                            checked={form.watch("sex") === "macho"}
+                            onCheckedChange={(checked) => form.setValue("sex", checked ? "macho" : "")}
+                          />
+                          <Label htmlFor="macho-sell" className="text-white">Macho</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="femea-sell"
+                            checked={form.watch("sex") === "femea"}
+                            onCheckedChange={(checked) => form.setValue("sex", checked ? "femea" : "")}
+                          />
+                          <Label htmlFor="femea-sell" className="text-white">Fêmea</Label>
+                        </div>
                       </div>
                       {form.formState.errors.sex && (
                         <p className="text-accent-red text-sm mt-1">
