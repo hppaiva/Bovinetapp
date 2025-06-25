@@ -93,6 +93,10 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Removido campos de documentos do cadastro para simplificar o processo
 - June 25, 2025. Implementado filtro de raio de distância similar ao Facebook Marketplace
 - June 25, 2025. Removido filtro de faixa de preço para simplificar interface
+- June 25, 2025. Removido campo título e aceitar ofertas do formulário de venda
+- June 25, 2025. Alterado sexo e aptidão para checkboxes consistentes com aba comprar
+- June 25, 2025. Implementado slider arrastável para distância (1-500km)
+- June 25, 2025. Corrigido texto duplicado "Vídeo dos animais"
 
 ## User Preferences
 

@@ -592,7 +592,6 @@ export default function Marketplace() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Vídeo dos animais</Label>
                     <VideoUpload
                       onVideoSelect={setSelectedVideo}
                       selectedVideo={selectedVideo}
