@@ -93,24 +93,38 @@ export default function Freight() {
 
   const createFreightRequestMutation = useMutation({
     mutationFn: async (data: FreightRequestForm) => {
+      console.log("=== CLIENT SIDE DEBUG ===");
+      console.log("Form data received:", data);
+      console.log("Origin coordinates:", originCoordinates);
+      console.log("Destination coordinates:", destinationCoordinates);
+      
       const requestData = {
         originAddress: data.originAddress,
         destinationAddress: data.destinationAddress,
         animalQuantity: Number(data.animalQuantity),
         animalAge: data.animalAge,
         observations: data.observations || undefined,
-        preferredDate: data.preferredDate ? data.preferredDate : undefined,
+        preferredDate: data.preferredDate || undefined,
         originLatitude: originCoordinates?.lat?.toString() || undefined,
         originLongitude: originCoordinates?.lng?.toString() || undefined,
         destinationLatitude: destinationCoordinates?.lat?.toString() || undefined,
         destinationLongitude: destinationCoordinates?.lng?.toString() || undefined,
       };
 
-      console.log("Sending freight request:", requestData);
-      const response = await apiRequest("POST", "/api/freight-requests", requestData);
-      return response.json();
+      console.log("Final request data:", requestData);
+      
+      try {
+        const response = await apiRequest("POST", "/api/freight-requests", requestData);
+        const result = await response.json();
+        console.log("Server response:", result);
+        return result;
+      } catch (error) {
+        console.error("Request failed:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Success callback triggered with:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/freight-requests"] });
       toast({
         title: "Solicitação de frete criada!",
@@ -128,10 +142,28 @@ export default function Freight() {
       setDestinationCoordinates(null);
     },
     onError: (error: Error) => {
-      console.error("Freight request error:", error);
+      console.error("=== ERROR CALLBACK ===");
+      console.error("Full error:", error);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      
+      let errorMessage = "Erro desconhecido ao criar solicitação";
+      
+      if (error.message.includes("401")) {
+        errorMessage = "Sessão expirada. Faça login novamente.";
+        // Força refresh para voltar ao login
+        setTimeout(() => window.location.reload(), 2000);
+      } else if (error.message.includes("400")) {
+        errorMessage = "Dados inválidos no formulário. Verifique os campos.";
+      } else if (error.message.includes("500")) {
+        errorMessage = "Erro interno do servidor. Tente novamente.";
+      } else {
+        errorMessage = error.message || "Erro ao criar solicitação de frete";
+      }
+      
       toast({
         title: "Erro ao criar solicitação",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     },
