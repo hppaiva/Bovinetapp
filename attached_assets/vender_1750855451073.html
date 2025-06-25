@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anunciar Gado - Bovinet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1b263b;
+      color: #fff;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4caf50;
+    }
+
+    form {
+      background-color: #1b263b;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background-color: #2c2c2c;
+      color: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #43a047;
+    }
+
+    #valorPorArroba {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #81c784;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-top: 20px;"><img src="logo.png" alt="Logo Bovinet" style="width: 120px;" /></div>
+
+
+  <h2>📢 Anunciar Gado à Venda</h2>
+
+  <form id="formAnuncio">
+    <label for="finalidade">Aptidão:</label>
+    <select id="finalidade" required>
+      <option value="">Selecione</option>
+      <option value="corte">Corte</option>
+      <option value="leite">Leite</option>
+    </select>
+
+    <label for="sexo">Sexo:</label>
+    <select id="sexo" required>
+      <option value="">Selecione</option>
+      <option value="macho">Macho</option>
+      <option value="femea">Fêmea</option>
+    </select>
+
+    <label for="finalidade">Idade:</label>
+    <select id="finalidade" required>
+      <option value="">Selecione</option>
+      <option value="corte">até 12 meses</option>
+      <option value="leite">12 a 24</option>
+      <option value="leite">24 a 36</option>
+      <option value="leite">36 a 48</option>
+      <option value="leite">mais de 48</option>
+    </select>
+
+    <label for="quantidade">Quantidade de animais:</label>
+    <input type="number" id="quantidade" placeholder="Ex: 10" required>
+
+    <label for="pesoMedio">Peso médio por animal (kg):</label>
+    <input type="number" id="pesoMedio" placeholder="Ex: 450" required>
+
+    <label for="precoAnimal">Preço total por animal (R$):</label>
+    <input type="number" id="precoAnimal" placeholder="Ex: 1800" required oninput="calcularArroba()">
+
+    <div id="valorPorArroba"></div>
+
+    <label for="descricao">Descrição:</label>
+    <textarea id="descricao" rows="4" placeholder="Raça, manejo, observações..." required></textarea>
+
+    <label for="videoUpload">Vídeo dos animais:</label>
+    <input type="file" id="videoUpload" accept="video/*" required>
+
+    <label for="cidade">Cidade:</label>
+    <input type="text" id="cidade" placeholder="Ex: Araxá - MG" required>
+
+    <label>Localização dos Animais:</label>
+    <button type="button" onclick="capturarLocalizacao()">📍 Compartilhar Localização</button>
+    <input type="hidden" id="latitude" name="latitude">
+
+    <button type="submit">Publicar Anúncio</button>
+  </form>
+
+  <script>
+    function calcularArroba() {
+      const preco = parseFloat(document.getElementById("precoAnimal").value.replace(",", "."));
+      const peso = parseFloat(document.getElementById("pesoMedio").value);
+      if (!isNaN(preco) && !isNaN(peso)) {
+        const arrobas = peso / 15;
+        const precoPorArroba = preco / arrobas;
+        document.getElementById("valorPorArroba").innerText =
+          "💰 Valor por @: R$ " + precoPorArroba.toFixed(2);
+      } else {
+        document.getElementById("valorPorArroba").innerText = "";
+      }
+    }
+
+    function capturarLocalizacao() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          document.getElementById("latitude").value = position.coords.latitude;
+          document.getElementById("longitude").value = position.coords.longitude;
+          alert("📍 Localização capturada com sucesso!");
+        }, function() {
+          alert("Erro ao obter a localização.");
+        });
+      } else {
+        alert("Geolocalização não suportada pelo seu navegador.");
+      }
+    }
+
+    document.getElementById("formAnuncio").addEventListener("submit", function(e) {
+      e.preventDefault();
+      // Aqui você pode enviar os dados para o backend
+      alert("✅ Anúncio publicado com sucesso!");
+    });
+  </script>
+
+</body>
+</html>

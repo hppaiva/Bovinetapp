@@ -1,0 +1,121 @@
+  <!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BoiPlace - Cadastro de Animais</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
+            document.getElementById("locationField").value = `${lat}, ${lon}`;
+            alert("Localização adicionada com sucesso!");
+          },
+          function (error) {
+            alert("Erro ao obter localização: " + error.message);
+          }
+        );
+      } else {
+        alert("Geolocalização não suportada neste navegador.");
+      }
+    }
+
+    function calcularArroba() {
+      const peso = parseFloat(document.getElementById("peso").value);
+      const valor = parseFloat(document.getElementById("valor").value);
+      const resultado = document.getElementById("resultadoArroba");
+
+      if (!isNaN(peso) && !isNaN(valor) && peso > 0) {
+        const arrobas = peso / 30;
+        const precoPorArroba = valor / arrobas;
+        resultado.textContent = `R$ ${precoPorArroba.toFixed(2)} por @`;
+      } else {
+        resultado.textContent = "";
+      }
+    }
+  </script>
+</head>
+
+<body style="background-color: #0d1b2a; font-family: Arial, sans-serif; color: white; padding: 20px;">
+
+  <div style="text-align: center; margin-bottom: 20px;">
+    <img src="logo.png" alt="Bovinet Logo" style="width: 180px;" />
+  </div>
+
+  <form>
+    <!-- Quantidade e Sexo -->
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <input type="number" placeholder="Quantidade" style="flex: 1; padding: 10px; border-radius: 5px;" />
+
+      <select style="flex: 1; padding: 10px; border-radius: 5px;">
+        <option disabled selected>Sexo</option>
+        <option>Macho</option>
+        <option>Fêmea</option>
+          </select>
+    </div>
+
+    <!-- Peso e Idade -->
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <input type="number" id="peso" oninput="calcularArroba()" placeholder="Peso (kg)" style="flex: 1; padding: 10px; border-radius: 5px;" />
+
+      <select style="flex: 1; padding: 10px; border-radius: 5px;">
+        <option disabled selected>Idade (meses)</option>
+        <option>até 12</option>
+        <option>de 12 a 24</option>
+        <option>de 24 a 36</option>
+        <option>de 36 a 48</option>
+        <option>mais de 48</option>
+      </select>
+    </div>
+
+    <!-- Valor por cabeça + Aceita Oferta -->
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <div style="flex: 1;">
+        <label for="valor">Valor por cabeça (R$):</label>
+        <input type="number" id="valor" oninput="calcularArroba()" placeholder="Ex: 3500" style="width: 100%;" required />
+      </div>
+
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 10px;">
+          <label style="white-space: nowrap;">Aceita oferta:</label>
+          <label style="padding: 5px 12px; background-color: #ffffff; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; color: #000;">
+            <input type="radio" name="aceitaOferta" value="sim" style="display: none;" />
+            Sim
+          </label>
+          <label style="padding: 5px 12px; background-color: #ffffff; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; color: #000;">
+            <input type="radio" name="aceitaOferta" value="nao" style="display: none;" />
+            Não
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultado do cálculo -->
+    <div id="resultadoArroba" style="margin-bottom: 15px; font-weight: bold; font-size: 16px; color: #ffd60a;"></div>
+
+    <!-- Descrição -->
+    <textarea placeholder="Descrição (opcional)" style="width: 100%; padding: 10px; height: 80px; margin-bottom: 10px; border-radius: 5px;"></textarea>
+
+    <!-- Upload de vídeo -->
+    <input type="file" accept="video/*" style="margin-bottom: 10px;" />
+
+    <!-- Botão de localização -->
+    <button type="button" onclick="getLocation()" style="width: 100%; padding: 12px; background-color: #52b788; color: white; border: none; border-radius: 5px; font-weight: bold; margin-bottom: 10px;">
+      Compartilhar Localização
+    </button>
+
+    <!-- Campo oculto da localização -->
+    <input type="hidden" id="locationField" name="location">
+
+    <!-- Botão de envio -->
+    <button type="submit" style="width: 100%; padding: 12px; background-color: #00b4d8; color: white; border: none; border-radius: 5px; font-weight: bold;">
+      Enviar
+    </button>
+  </form>
+</body>
+
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buscar Frete - Bovinet</title>
+  <style>
+    body {
+      background-color: #1E2A38;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .field-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background-color: #FF5C5C;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #e04b4b;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="text-align:center; margin-top: 20px;"><img src="logo.png" alt="Logo Bovinet" style="width: 120px;" /></div>
+
+
+  <h2>🚚 Buscar Frete</h2>
+
+  <div class="field-group">
+    <label for="localizacao">📍 Localização de Origem</label>
+    <input type="text" id="localizacao" placeholder="Digite seu endereço ou cidade">
+    <button onclick="usarLocalizacao()">Usar Minha Localização</button>
+  </div>
+
+  <div class="field-group">
+    <label for="destino">📌 Destino</label>
+    <input type="text" id="destino" placeholder="Cidade ou nome da fazenda de destino">
+  </div>
+
+  <div class="field-group">
+    <label>Idade:</label>
+    <select id="idade">
+      <option value="">Todas</option>
+      <option value="ate12">Até 12 meses</option>
+      <option value="12a24">De 12 a 24 meses</option>
+      <option value="24a36">De 24 a 36 meses</option>
+      <option value="36a48">De 36 a 48 meses</option>
+    </select>
+  </div>
+
+  <div class="field-group">
+    <label for="quantidade">🐂 Quantidade de Animais</label>
+    <input type="number" id="quantidade" placeholder="Ex: 18">
+  </div>
+
+  <button onclick="chamarFrete()"> BUSCAR </button>
+
+  <script>
+    function usarLocalizacao() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const coords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+          document.getElementById('localizacao').value = coords;
+          alert("Localização capturada!");
+        }, () => {
+          alert("Não foi possível obter sua localização.");
+        });
+      } else {
+        alert("Geolocalização não suportada pelo navegador.");
+      }
+    }
+
+    function chamarFrete() {
+      const origem = document.getElementById("localizacao").value;
+      const destino = document.getElementById("destino").value;
+      const quantidade = document.getElementById("quantidade").value;
+
+      if (!origem || !destino || !quantidade) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      alert(`Chamado criado com sucesso!\nOrigem: ${origem}\nDestino: ${destino}\nAnimais: ${quantidade}`);
+
+      // Aqui você pode acionar a lógica de backend/filtro para os caminhoneiros
+    }
+  </script>
+
+</body>
+
+</html>

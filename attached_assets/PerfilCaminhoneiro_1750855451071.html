@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil Caminhoneiro</title>
+  <style>
+    body {
+      background-color: #1E2A38;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .info {
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    #status {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-top: 20px;"><img src="logo.png" alt="Logo Bovinet" style="width: 120px;" /></div>
+
+
+  <h2>Bem-vindo, João Caminhoneiro</h2>
+
+  <div class="info">
+    <p><strong>Caminhão:</strong> Truck</p>
+    <p><strong>Capacidade:</strong> 18 adultos</p>
+    <p><strong>Cidade base:</strong> Araxá - MG</p>
+    <p><strong>Preço por km:</strong> R$ 4,00</p>
+  </div>
+
+  <button onclick="marcarDisponivel()">Estou disponível para frete agora</button>
+
+  <div id="status">Status: Indisponível</div>
+
+  <script>
+    function marcarDisponivel() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+
+          // Simulação de envio para sistema (ex: backend, banco de dados)
+          console.log("Localização enviada:", latitude, longitude);
+
+          document.getElementById("status").innerText = 
+            "Status: Disponível (localização compartilhada)";
+          alert("Localização atual compartilhada com sucesso!");
+        }, function(error) {
+          alert("Erro ao obter localização: " + error.message);
+        });
+      } else {
+        alert("Seu navegador não suporta geolocalização.");
+      }
+    }
+  </script>
+
+</body>
+</html>

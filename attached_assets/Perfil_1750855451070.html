@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meu Perfil - Bovinet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f6f6f6;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    .section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    button {
+      background-color: #006400;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      margin: 10px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #008000;
+    }
+
+    .btn-voltar {
+      background-color: #555;
+    }
+
+    .btn-voltar:hover {
+      background-color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-top: 20px;"><img src="logo.png" alt="Logo Bovinet" style="width: 120px;" /></div>
+
+
+  <h2>👤 Meu Perfil</h2>
+
+  <div class="section">
+    <p><strong>Nome:</strong> João da Fazenda Boa Vista</p>
+    <p><strong>Cidade:</strong> Araxá - MG</p>
+    <p><strong>Telefone:</strong> (34) 99999-0000</p>
+  </div>
+
+  <div class="section">
+    <h3>📌 Minhas Atividades Recentes</h3>
+    <ul>
+      <li>✅ 2 animais vendidos em 10/06</li>
+      <li>📥 1 proposta recebida via WhatsApp</li>
+      <li>🚚 Frete contratado para Uberaba - 08/06</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h3>📎 Acessos Rápidos</h3><button onclick="window.location.href='Emitir-GTA.html'"> 🐄 Comprar </button>
+    <button onclick="window.location.href="vender.html"> 🐄 Vender </button>
+    <button onclick="window.location.href='comprar.html'">📄 Emitir GTA</button>
+    <button onclick="window.location.href='buscar-frete.html'">🚚 Buscar Frete</button>
+    <button onclick="window.location.href='oferecer-frete.html'">📦 Oferecer Frete</button>
+    <button class="btn-voltar" onclick="window.location.href='menu.html'">🔙 Voltar ao Menu</button>
+  </div>
+
+</body>
+</html>

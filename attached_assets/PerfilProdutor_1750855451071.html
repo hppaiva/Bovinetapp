@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfil do Produtor - Bovinet</title>
+  <style>
+    body {
+      background-color: #1E2A38;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #2F3E4E;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+    }
+
+    .dados {
+      margin-bottom: 20px;
+    }
+
+    .dados p {
+      margin: 5px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      color: black;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #ddd;
+    }
+
+    .botoes {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .frete {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .gta {
+      background-color: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-top: 20px;"><img src="logo.png" alt="Logo Bovinet" style="width: 120px;" /></div>
+
+  <div class="container">
+    <h1>Perfil do Produtor Rural</h1>
+
+    <div class="dados">
+      <p><strong>Nome da Fazenda:</strong> Fazenda Boa Esperança</p>
+      <p><strong>Produtor:</strong> João da Silva</p>
+      <p><strong>Município:</strong> Araxá - MG</p>
+      <p><strong>Telefone:</strong> (34) 99999-9999</p>
+    </div>
+
+    <h2>Histórico de Negócios</h2>
+    <table>
+      <tr>
+        <th>Data</th>
+        <th>Animal</th>
+        <th>Quantidade</th>
+        <th>Comprador</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>10/06/2025</td>
+        <td>Bezerros Nelore</td>
+        <td>15</td>
+        <td>Carlos Souza</td>
+        <td>Finalizado</td>
+      </tr>
+      <tr>
+        <td>02/06/2025</td>
+        <td>Vacas Prenhes</td>
+        <td>8</td>
+        <td>Maria Ferreira</td>
+        <td>Finalizado</td>
+      </tr>
+    </table>
+
+    <div class="botoes">
+      <button class="frete" onclick="window.location.href='BuscarFrete.html'">
+        Buscar Frete
+      </button>
+      <button class="gta" onclick="window.location.href='Emitir-GTA.html'">
+        Emitir GTA
+      </button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Emitir GTA - Bovinet</title>
+  <style>
+    body {
+      background-color: #1E2A38;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: #fff;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #FF5733;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-top: 20px;"><img src="logo.png" alt="Logo Bovinet" style="width: 120px;" /></div>
+
+  <h2>Solicitar Emissão de GTA</h2>
+
+  <form>
+    <label>Nome da Fazenda</label>
+    <input type="text" placeholder="Fazenda Santa Clara" required />
+
+    <label>Nome do Proprietário</label>
+    <input type="text" placeholder="João da Silva" required />
+
+    <label>Numero Produtor ou CPF </label>
+    <input type="text" required />
+
+    <label>Quantidade de Animais</label>
+    <input type="number" required />
+
+    <label>Espécie</label>
+    <select>
+      <option>Bovinos</option>
+      <option>Suínos</option>
+      <option>Equinos</option>
+      <option>Bubalinos</option>
+    </select>
+
+    <label>Sexo</label>
+    <select>
+      <option>Macho</option>
+      <option>Fêmea</option>
+    </select>
+
+    <label>Idade</label>
+    <select>
+      <option>até 12 meses</option>
+      <option>de 12 a 24</option>
+      <option>24 a 36</option>
+      <option>36 a 48</option>
+      <option>acima de 48</option>
+    </select>
+
+    <label>Destino</label>
+    <input type="text" placeholder="Cidade/Estado de destino" required />
+
+    <label> Fazenda Destinataria </label>
+    <input type="text" placeholder="Fazenda Morro Alto" required />
+
+    <label>Nome Destinatario </label>
+    <input type="text" required />
+
+    <label> Numero Produtor ou CPF do Destinatario</label>
+    <input type="text" required />
+
+    <label>Observações</label>
+    <textarea placeholder="Informações adicionais para o veterinário"></textarea>
+
+    <button type="submit">Enviar Solicitação</button>
+  </form>
+</body>
+</html>

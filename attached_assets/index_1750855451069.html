@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bovinet - Início</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1E2A38; /* Cor de fundo igual ao app */
+      font-family: Arial, sans-serif;
+      color: #fff;
+      text-align: center;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .logo {
+      width: 200px;
+      margin-top: 30px;
+    }
+
+    .button {
+      background-color: #ffffff;
+      color: #2c2c2c;
+      border: none;
+      padding: 15px 30px;
+      margin: 20px auto;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .form-container {
+      display: none;
+      margin-top: 30px;
+    }
+
+    input {
+      display: block;
+      width: 80%;
+      max-width: 300px;
+      padding: 12px;
+      margin: 10px auto;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .submit-btn {
+      background-color: #ffffff;
+      color: #2c2c2c;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="logo.png" alt="Logo Bovinet" class="logo" style="width: 150px; margin-top: 30px;" />
+
+    <button class="button" onclick="showLogin()">Já tenho uma conta</button>
+    <button class="button" onclick="showCadastro()">Criar uma conta</button>
+
+    <div id="loginForm" class="form-container">
+      <h2>Login</h2>
+      <input type="text" placeholder="E-mail ou telefone" id="loginUser"/>
+      <input type="password" placeholder="Senha" id="loginPassword"/>
+      <button class="submit-btn" onclick="login()">Entrar</button>
+    </div>
+
+    <div id="cadastroForm" class="form-container">
+      <h2>Cadastro</h2>
+      <input type="text" placeholder="Nome completo"/>
+      <input type="text" placeholder="CPF"/>
+      <input type="text" placeholder="Telefone"/>
+      <input type="text" placeholder="Endereço"/>
+      <input type="text" placeholder="Cidade"/>
+      <input type="text" placeholder="Estado"/>
+      <input type="password" placeholder="Senha"/>
+      <div class="cadastro-identidade">
+        <h2>Comprovação de Identidade</h2>
+
+        <label>Foto do Documento (Frente):</label>
+        <input type="file" accept="image/*" required />
+
+        <label>Foto do Documento (Verso):</label>
+        <input type="file" accept="image/*" required />
+
+        <label>Selfie segurando o documento:</label>
+        <input type="file" accept="image/*" required />
+      </div>
+
+      <button class="submit-btn" onclick="cadastrar()">Cadastrar</button>
+    </div>
+  </div>
+
+  <script>
+    function showLogin() {
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("cadastroForm").style.display = "none";
+    }
+
+    function showCadastro() {
+      document.getElementById("cadastroForm").style.display = "block";
+      document.getElementById("loginForm").style.display = "none";
+    }
+
+      function login() {
+        window.location.href = "menu.html";
+      }
+
+  
+
+    function cadastrar() {
+      alert("Cadastro efetuado com sucesso!");
+      // Você pode redirecionar ou salvar os dados aqui
+    }
+  </script>
+</body>
+</html>
