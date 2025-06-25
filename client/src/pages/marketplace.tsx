@@ -84,13 +84,14 @@ export default function Marketplace() {
   const form = useForm<ListingForm>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
-      title: "",
       quantity: 1,
       weight: 0,
       pricePerHead: 0,
       description: "",
       city: "",
-      acceptOffers: false,
+      sex: "",
+      aptitude: "",
+      age: "",
     },
   });
 
@@ -447,32 +448,29 @@ export default function Marketplace() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={form.handleSubmit((data) => createListingMutation.mutate(data))} className="space-y-6">
-                  <div>
-                    <Label className="text-white">Título do Anúncio</Label>
-                    <Input
-                      {...form.register("title")}
-                      placeholder="Ex: Vacas Nelore Prenhes"
-                      className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
-                    />
-                    {form.formState.errors.title && (
-                      <p className="text-accent-red text-sm mt-1">
-                        {form.formState.errors.title.message}
-                      </p>
-                    )}
-                  </div>
+
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label className="text-white">Aptidão</Label>
-                      <Select onValueChange={(value) => form.setValue("aptitude", value as "corte" | "leite")}>
-                        <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="corte">Corte</SelectItem>
-                          <SelectItem value="leite">Leite</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex space-x-4 mt-2">
+                        <Button
+                          type="button"
+                          variant={form.watch("aptitude") === "corte" ? "default" : "outline"}
+                          onClick={() => form.setValue("aptitude", "corte")}
+                          className={form.watch("aptitude") === "corte" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
+                        >
+                          Corte
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={form.watch("aptitude") === "leite" ? "default" : "outline"}
+                          onClick={() => form.setValue("aptitude", "leite")}
+                          className={form.watch("aptitude") === "leite" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
+                        >
+                          Leite
+                        </Button>
+                      </div>
                       {form.formState.errors.aptitude && (
                         <p className="text-accent-red text-sm mt-1">
                           {form.formState.errors.aptitude.message}
@@ -482,15 +480,24 @@ export default function Marketplace() {
                     
                     <div>
                       <Label className="text-white">Sexo</Label>
-                      <Select onValueChange={(value) => form.setValue("sex", value as "macho" | "femea")}>
-                        <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="macho">Macho</SelectItem>
-                          <SelectItem value="femea">Fêmea</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex space-x-4 mt-2">
+                        <Button
+                          type="button"
+                          variant={form.watch("sex") === "macho" ? "default" : "outline"}
+                          onClick={() => form.setValue("sex", "macho")}
+                          className={form.watch("sex") === "macho" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
+                        >
+                          Macho
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={form.watch("sex") === "femea" ? "default" : "outline"}
+                          onClick={() => form.setValue("sex", "femea")}
+                          className={form.watch("sex") === "femea" ? "bg-accent-green hover:bg-green-600 text-white" : "border-gray-600 text-white hover:bg-gray-700"}
+                        >
+                          Fêmea
+                        </Button>
+                      </div>
                       {form.formState.errors.sex && (
                         <p className="text-accent-red text-sm mt-1">
                           {form.formState.errors.sex.message}
@@ -613,16 +620,7 @@ export default function Marketplace() {
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="acceptOffers"
-                      checked={form.watch("acceptOffers")}
-                      onCheckedChange={(checked) => form.setValue("acceptOffers", checked as boolean)}
-                    />
-                    <Label htmlFor="acceptOffers" className="text-white">
-                      Aceita ofertas
-                    </Label>
-                  </div>
+
 
                   <div className="flex space-x-4">
                     <Button type="button" variant="outline" className="flex-1">
