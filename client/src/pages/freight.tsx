@@ -219,10 +219,32 @@ export default function Freight() {
         title: "Localização capturada!",
         description: "Sua localização atual foi adicionada",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erro de localização",
-        description: "Não foi possível obter sua localização",
+        description: error.message || "Não foi possível obter sua localização",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUseDestinationLocation = async () => {
+    try {
+      const position = await getCurrentLocation();
+      const coords = { 
+        lat: position.coords.latitude, 
+        lng: position.coords.longitude 
+      };
+      setDestinationCoordinates(coords);
+      freightForm.setValue("destinationAddress", `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
+      toast({
+        title: "Localização de destino capturada!",
+        description: "Localização foi adicionada como destino",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro de localização",
+        description: error.message || "Não foi possível obter sua localização",
         variant: "destructive",
       });
     }
@@ -301,11 +323,21 @@ export default function Freight() {
                       <MapPin className="w-4 h-4 mr-1" />
                       Destino
                     </Label>
-                    <Input
-                      {...freightForm.register("destinationAddress")}
-                      placeholder="Cidade ou nome da fazenda de destino"
-                      className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
-                    />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        {...freightForm.register("destinationAddress")}
+                        placeholder="Cidade ou nome da fazenda de destino"
+                        className="flex-1 bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleUseDestinationLocation}
+                        className="bg-accent-green hover:bg-green-600 text-white whitespace-nowrap"
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Usar localização atual
+                      </Button>
+                    </div>
                     {freightForm.formState.errors.destinationAddress && (
                       <p className="text-accent-red text-sm mt-1">
                         {freightForm.formState.errors.destinationAddress.message}

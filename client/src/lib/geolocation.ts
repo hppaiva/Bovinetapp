@@ -22,7 +22,7 @@ export interface GeolocationError {
 export function getCurrentLocation(options?: PositionOptions): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by this browser'));
+      reject(new Error('Geolocalização não é suportada neste navegador'));
       return;
     }
 
@@ -49,17 +49,17 @@ export function getCurrentLocation(options?: PositionOptions): Promise<Geolocati
         });
       },
       (error) => {
-        let message = 'Unknown error occurred';
+        let message = 'Erro desconhecido ao obter localização';
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            message = 'Location access denied by user';
+            message = 'Permissão de localização negada. Permita o acesso à localização nas configurações do navegador.';
             break;
           case error.POSITION_UNAVAILABLE:
-            message = 'Location information is unavailable';
+            message = 'Localização indisponível. Verifique se o GPS está ativado.';
             break;
           case error.TIMEOUT:
-            message = 'Location request timed out';
+            message = 'Tempo limite para obter localização. Tente novamente.';
             break;
         }
         
