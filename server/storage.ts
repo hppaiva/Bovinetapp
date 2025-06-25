@@ -148,13 +148,14 @@ export class DatabaseStorage implements IStorage {
 
   // Trucker methods
   async getTruckers(available?: boolean): Promise<Trucker[]> {
-    let query = db.select().from(truckers);
-    
     if (available !== undefined) {
-      query = query.where(eq(truckers.isAvailable, available));
+      return await db.select().from(truckers)
+        .where(eq(truckers.isAvailable, available))
+        .orderBy(desc(truckers.lastLocationUpdate));
     }
 
-    return await query.orderBy(desc(truckers.lastLocationUpdate));
+    return await db.select().from(truckers)
+      .orderBy(desc(truckers.lastLocationUpdate));
   }
 
   async getTrucker(id: number): Promise<Trucker | undefined> {
@@ -187,13 +188,14 @@ export class DatabaseStorage implements IStorage {
 
   // Freight request methods
   async getFreightRequests(userId?: number): Promise<FreightRequest[]> {
-    let query = db.select().from(freightRequests);
-    
     if (userId) {
-      query = query.where(eq(freightRequests.userId, userId));
+      return await db.select().from(freightRequests)
+        .where(eq(freightRequests.userId, userId))
+        .orderBy(desc(freightRequests.createdAt));
     }
 
-    return await query.orderBy(desc(freightRequests.createdAt));
+    return await db.select().from(freightRequests)
+      .orderBy(desc(freightRequests.createdAt));
   }
 
   async getFreightRequest(id: number): Promise<FreightRequest | undefined> {
@@ -213,13 +215,14 @@ export class DatabaseStorage implements IStorage {
 
   // GTA request methods
   async getGtaRequests(userId?: number): Promise<GtaRequest[]> {
-    let query = db.select().from(gtaRequests);
-    
     if (userId) {
-      query = query.where(eq(gtaRequests.userId, userId));
+      return await db.select().from(gtaRequests)
+        .where(eq(gtaRequests.userId, userId))
+        .orderBy(desc(gtaRequests.createdAt));
     }
 
-    return await query.orderBy(desc(gtaRequests.createdAt));
+    return await db.select().from(gtaRequests)
+      .orderBy(desc(gtaRequests.createdAt));
   }
 
   async getGtaRequest(id: number): Promise<GtaRequest | undefined> {
