@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +46,7 @@ export default function Marketplace() {
     sex: [] as string[],
     aptitude: [] as string[],
     age: "",
-    distance: "",
+    distance: 100, // Default to 100km
     search: "",
   });
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
@@ -64,7 +65,7 @@ export default function Marketplace() {
       if (filters.sex.length > 0) params.append("sex", filters.sex.join(","));
       if (filters.aptitude.length > 0) params.append("aptitude", filters.aptitude.join(","));
       if (filters.age && filters.age !== "all") params.append("age", filters.age);
-      if (filters.distance && filters.distance !== "all") params.append("maxDistance", filters.distance);
+      if (filters.distance) params.append("maxDistance", filters.distance.toString());
       if (filters.search) params.append("search", filters.search);
 
       const response = await fetch(`/api/listings?${params.toString()}`, {
@@ -155,8 +156,7 @@ export default function Marketplace() {
   useEffect(() => {
     setFilters(prev => ({
       ...prev,
-      age: prev.age || "all",
-      distance: prev.distance || "all"
+      age: prev.age || "all"
     }));
   }, []);
 
@@ -298,26 +298,23 @@ export default function Marketplace() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Raio de distância</Label>
-                    <Select value={filters.distance} onValueChange={(value) => handleFilterChange("distance", value)}>
-                      <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                        <SelectValue placeholder="Todas as distâncias" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas as distâncias</SelectItem>
-                        <SelectItem value="1">1 km</SelectItem>
-                        <SelectItem value="2">2 km</SelectItem>
-                        <SelectItem value="5">5 km</SelectItem>
-                        <SelectItem value="10">10 km</SelectItem>
-                        <SelectItem value="20">20 km</SelectItem>
-                        <SelectItem value="40">40 km</SelectItem>
-                        <SelectItem value="60">60 km</SelectItem>
-                        <SelectItem value="80">80 km</SelectItem>
-                        <SelectItem value="100">100 km</SelectItem>
-                        <SelectItem value="200">200 km</SelectItem>
-                        <SelectItem value="500">500 km</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-white mb-3 block">
+                      Raio de distância: {filters.distance} km
+                    </Label>
+                    <div className="space-y-3">
+                      <Slider
+                        value={[filters.distance]}
+                        onValueChange={(value) => handleFilterChange("distance", value[0])}
+                        max={500}
+                        min={1}
+                        step={1}
+                        className="w-full [&_.bg-primary]:bg-accent-green [&_[role=slider]]:border-accent-green [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-lg"
+                      />
+                      <div className="flex justify-between text-xs text-secondary">
+                        <span>1 km</span>
+                        <span>500 km</span>
+                      </div>
+                    </div>
                   </div>
 
 
