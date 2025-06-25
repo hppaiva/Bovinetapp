@@ -223,6 +223,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Session userId:", req.session.userId);
       console.log("Received listing data:", req.body);
       console.log("Received file:", req.file);
+      console.log("File details:", req.file ? {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        filename: req.file.filename,
+        path: req.file.path
+      } : "No file received");
       
       // Validate required fields
       if (!req.body.quantity || !req.body.weight || !req.body.pricePerHead || !req.body.city) {

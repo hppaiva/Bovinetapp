@@ -797,7 +797,9 @@ export default function Marketplace() {
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-white">{listing.quantity} animais - {listing.city}</h3>
+                          <h3 className="text-lg font-semibold text-white">
+                            {listing.title ? listing.title : `Lote ${listing.id.toString().padStart(2, '0')} - ${listing.city}`}
+                          </h3>
                           <p className="text-secondary">
                             Publicado em {new Date(listing.createdAt).toLocaleDateString('pt-BR')}
                           </p>
