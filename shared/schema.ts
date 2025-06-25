@@ -199,6 +199,8 @@ export const insertListingSchema = createInsertSchema(listings).omit({
   id: true,
   createdAt: true,
   userId: true,
+  title: true,
+  lotNumber: true,
 });
 
 export const insertTruckerSchema = createInsertSchema(truckers).omit({

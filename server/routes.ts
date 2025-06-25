@@ -241,15 +241,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parsedData = {
         ...req.body,
         quantity: parseInt(req.body.quantity),
-        weight: parseFloat(req.body.weight),
-        pricePerHead: parseFloat(req.body.pricePerHead),
-        latitude: req.body.latitude ? parseFloat(req.body.latitude) : undefined,
-        longitude: req.body.longitude ? parseFloat(req.body.longitude) : undefined,
+        weight: req.body.weight.toString(),
+        pricePerHead: req.body.pricePerHead.toString(),
+        latitude: req.body.latitude ? req.body.latitude.toString() : undefined,
+        longitude: req.body.longitude ? req.body.longitude.toString() : undefined,
         description: req.body.description || undefined,
       };
       
       console.log("Parsed data:", parsedData);
       
+      // Validate without title and lotNumber, we'll add them separately
       const listingData = insertListingSchema.parse(parsedData);
       console.log("Validated listing data:", listingData);
       
@@ -265,6 +266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const listing = await storage.createListing({
         ...listingData,
         title: lotTitle,
+        lotNumber: lotNumber,
         userId: req.session.userId!,
         videoUrl: videoFile ? `/uploads/${videoFile.filename}` : undefined,
       });

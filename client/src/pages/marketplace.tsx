@@ -54,13 +54,57 @@ export default function Marketplace() {
 
   const { data: user, error: userError, isLoading: userLoading } = useQuery({
     queryKey: ["/api/auth/me"],
-    retry: 1,
+    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
   
   console.log("=== USER AUTH STATUS ===");
   console.log("User data:", user);
   console.log("User error:", userError);
   console.log("User loading:", userLoading);
+  
+  // Redirect to login if not authenticated
+  if (userError && userError.message?.includes('401')) {
+    console.log("User not authenticated, redirecting to login");
+    window.location.href = '/login';
+    return null;
+  }
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-primary-bg">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-green mx-auto"></div>
+            <p className="text-white mt-4">Verificando autenticação...</p>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (!user || !user.user) {
+    return (
+      <div className="min-h-screen bg-primary-bg">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-white">Você precisa estar logado para acessar o marketplace.</p>
+            <Button 
+              onClick={() => setLocation('/login')}
+              className="mt-4 bg-accent-green hover:bg-green-600 text-white"
+            >
+              Fazer Login
+            </Button>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
 
   const { data: listings, isLoading: loadingListings } = useQuery({
     queryKey: ["/api/listings", filters],
@@ -107,8 +151,9 @@ export default function Marketplace() {
       console.log("Coordinates:", coordinates);
       console.log("User:", user);
 
-      if (!user?.user?.id) {
-        throw new Error("Você precisa estar logado para criar um anúncio");
+      if (!user || !user.user?.id) {
+        console.error("User not authenticated for listing creation");
+        throw new Error("Você precisa estar logado para criar um anúncio. Faça login novamente.");
       }
 
       const formData = new FormData();
@@ -128,9 +173,10 @@ export default function Marketplace() {
       }
 
       console.log("FormData entries:");
-      for (let [key, value] of formData.entries()) {
+      const entries = Array.from(formData.entries());
+      entries.forEach(([key, value]) => {
         console.log(`${key}:`, value);
-      }
+      });
 
       const response = await fetch("/api/listings", {
         method: "POST",
@@ -186,9 +232,9 @@ export default function Marketplace() {
       
       let errorMessage = "Erro desconhecido ao criar anúncio";
       
-      if (error.message.includes("401")) {
-        errorMessage = "Sessão expirada. Faça login novamente.";
-        setTimeout(() => window.location.reload(), 2000);
+      if (error.message.includes("401") || error.message.includes("Authentication")) {
+        errorMessage = "Sessão expirada. Redirecionando para login...";
+        setTimeout(() => window.location.href = '/login', 1500);
       } else if (error.message.includes("400")) {
         errorMessage = "Dados inválidos no formulário. Verifique os campos obrigatórios.";
       } else if (error.message.includes("500")) {

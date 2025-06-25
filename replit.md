@@ -123,6 +123,10 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Sistema completamente funcional - login, criação de fretes e alertas operacionais
 - June 25, 2025. Corrigido e testado sistema de publicação de anúncios no marketplace
 - June 25, 2025. Implementado validação robusta e logs detalhados para criação de listings
+- June 25, 2025. Corrigido erro de validação de esquema permitindo título e número de lote opcionais
+- June 25, 2025. Sistema de lotes funcionando - anúncios gerados automaticamente como "Lote 01", "Lote 02"
+- June 25, 2025. Melhorada geolocalização com tratamento robusto de erros de permissão
+- June 25, 2025. Upload de vídeo otimizado com suporte a mais formatos e validação melhorada
 
 ## User Preferences
 

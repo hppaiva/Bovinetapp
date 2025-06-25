@@ -142,7 +142,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(listings).where(eq(listings.userId, userId)).orderBy(desc(listings.createdAt));
   }
 
-  async createListing(listingData: InsertListing & { userId: number }): Promise<Listing> {
+  async createListing(listingData: any): Promise<Listing> {
     const [listing] = await db.insert(listings).values(listingData).returning();
     return listing;
   }
