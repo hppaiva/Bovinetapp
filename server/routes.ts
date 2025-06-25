@@ -189,14 +189,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received listing data:", req.body);
       
-      // Parse numeric fields
+      // Parse numeric fields and ensure proper string conversion for decimals
       const parsedData = {
         ...req.body,
         quantity: parseInt(req.body.quantity),
-        weight: parseFloat(req.body.weight),
-        pricePerHead: parseFloat(req.body.pricePerHead),
-        latitude: req.body.latitude ? parseFloat(req.body.latitude) : undefined,
-        longitude: req.body.longitude ? parseFloat(req.body.longitude) : undefined,
+        weight: req.body.weight.toString(),
+        pricePerHead: req.body.pricePerHead.toString(),
+        latitude: req.body.latitude ? req.body.latitude.toString() : undefined,
+        longitude: req.body.longitude ? req.body.longitude.toString() : undefined,
         title: `${req.body.quantity} ${req.body.sex === 'macho' ? 'Machos' : 'Fêmeas'} ${req.body.aptitude === 'corte' ? 'para Corte' : 'para Leite'}`,
         acceptOffers: false,
       };

@@ -24,14 +24,14 @@ export const listings = pgTable("listings", {
   quantity: integer("quantity").notNull(),
   sex: text("sex").notNull(), // 'macho' | 'femea'
   age: text("age").notNull(), // 'ate12' | '12a24' | '24a36' | '36a48' | 'mais48'
-  weight: decimal("weight", { precision: 10, scale: 2 }).notNull(),
-  pricePerHead: decimal("price_per_head", { precision: 10, scale: 2 }).notNull(),
+  weight: text("weight").notNull(),
+  pricePerHead: text("price_per_head").notNull(),
   aptitude: text("aptitude").notNull(), // 'corte' | 'leite'
   description: text("description"),
   videoUrl: text("video_url"),
   city: text("city").notNull(),
-  latitude: decimal("latitude", { precision: 10, scale: 8 }),
-  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  latitude: text("latitude"),
+  longitude: text("longitude"),
   isActive: boolean("is_active").default(true),
   acceptOffers: boolean("accept_offers").default(false),
   createdAt: timestamp("created_at").defaultNow(),
