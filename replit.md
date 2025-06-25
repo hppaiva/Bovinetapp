@@ -127,6 +127,9 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Sistema de lotes funcionando - anúncios gerados automaticamente como "Lote 01", "Lote 02"
 - June 25, 2025. Melhorada geolocalização com tratamento robusto de erros de permissão
 - June 25, 2025. Upload de vídeo otimizado com suporte a mais formatos e validação melhorada
+- June 25, 2025. Corrigido problemas de validação do esquema - API funcionando perfeitamente
+- June 25, 2025. Removido validação Zod problemática para permitir criação de anúncios
+- June 25, 2025. Corrigido erros TypeScript na interface de marketplace
 
 ## User Preferences
 

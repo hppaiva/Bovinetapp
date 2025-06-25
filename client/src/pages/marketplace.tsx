@@ -52,12 +52,22 @@ export default function Marketplace() {
 
   const queryClient = useQueryClient();
 
-  const { data: user, error: userError, isLoading: userLoading } = useQuery({
+  const { data: user, error: userError, isLoading: userLoading, refetch: refetchUser } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 0,
     refetchOnWindowFocus: true,
   });
+
+  // Auto-refetch user data every 5 seconds if not authenticated
+  useEffect(() => {
+    if (!(user as any)?.user && !userLoading) {
+      const interval = setInterval(() => {
+        refetchUser();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [user, userLoading, refetchUser]);
   
   console.log("=== USER AUTH STATUS ===");
   console.log("User data:", user);
@@ -86,7 +96,7 @@ export default function Marketplace() {
     );
   }
 
-  if (!user || !user.user) {
+  if (!user || !(user as any)?.user) {
     return (
       <div className="min-h-screen bg-primary-bg">
         <Header />
@@ -151,7 +161,7 @@ export default function Marketplace() {
       console.log("Coordinates:", coordinates);
       console.log("User:", user);
 
-      if (!user || !user.user?.id) {
+      if (!user || !(user as any)?.user?.id) {
         console.error("User not authenticated for listing creation");
         throw new Error("Você precisa estar logado para criar um anúncio. Faça login novamente.");
       }
