@@ -75,7 +75,7 @@ export default function Marketplace() {
   });
 
   const { data: userListings } = useQuery({
-    queryKey: ["/api/listings/user", user?.user?.id],
+    queryKey: ["/api/listings/user"],
     enabled: !!user?.user?.id,
   });
 

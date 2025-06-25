@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,13 +25,14 @@ import {
 
 export default function Profile() {
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: user } = useQuery({
     queryKey: ["/api/auth/me"],
   });
 
   const { data: userListings } = useQuery({
-    queryKey: ["/api/listings/user", user?.user?.id],
+    queryKey: ["/api/listings/user"],
     enabled: !!user?.user?.id,
   });
 
@@ -51,6 +53,7 @@ export default function Profile() {
     },
     onSuccess: () => {
       queryClient.clear();
+      setLocation("/login");
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso",

@@ -102,6 +102,8 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Implementado Service Worker e cache offline para PWA
 - June 25, 2025. Adicionado paginação nas consultas do banco para melhor performance
 - June 25, 2025. Configurado manifest.json para instalação como PWA
+- June 25, 2025. Corrigido função de logout para redirecionar corretamente para login
+- June 25, 2025. Corrigido erros da API /api/listings/user removendo parâmetro desnecessário
 
 ## User Preferences
 
