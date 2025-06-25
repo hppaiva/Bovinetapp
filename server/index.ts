@@ -1,10 +1,36 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Configure session once in the main server file
+const PgSession = connectPgSimple(session);
+app.use(
+  session({
+    store: new PgSession({
+      pool: pool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || "development-secret-key-bovinet-2025",
+    resave: false,
+    saveUninitialized: false,
+    name: "bovinet.sid",
+    cookie: {
+      secure: false, // Always false for development 
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      sameSite: "lax",
+    },
+    rolling: true, // Reset expiration on each request
+  })
+);
 
 // Serve uploaded files statically
 app.use('/uploads', express.static('uploads'));

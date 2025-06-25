@@ -31,37 +31,25 @@ const upload = multer({
 
 // Middleware to check if user is authenticated
 const requireAuth = (req: any, res: any, next: any) => {
-  console.log("Auth check - Session:", req.session);
-  console.log("Auth check - UserId:", req.session?.userId);
+  console.log("=== AUTH CHECK DEBUG ===");
+  console.log("Request URL:", req.url);
+  console.log("Request method:", req.method);
+  console.log("Session ID:", req.sessionID);
+  console.log("Session data:", req.session);
+  console.log("Session userId:", req.session?.userId);
+  console.log("Cookies:", req.headers.cookie);
   
   if (!req.session?.userId) {
-    console.log("No userId in session, authentication failed");
+    console.log("❌ Authentication failed - No userId in session");
     return res.status(401).json({ message: "Authentication required" });
   }
   
-  console.log("Authentication successful for user:", req.session.userId);
+  console.log("✅ Authentication successful for user:", req.session.userId);
   next();
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session
-  app.use(session({
-    store: new PgSession({
-      pool: pool,
-      tableName: "session",
-      createTableIfMissing: true,
-    }),
-    secret: process.env.SESSION_SECRET || "your-secret-key-development",
-    resave: false,
-    saveUninitialized: false,
-    name: "bovinet.sid", // Nome customizado para evitar conflitos
-    cookie: {
-      secure: false, // Set to true in production with HTTPS
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: 'lax',
-    },
-  }));
+  // Session configuration was moved to server/index.ts to avoid duplication
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
     try {

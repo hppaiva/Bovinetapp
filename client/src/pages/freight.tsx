@@ -51,9 +51,15 @@ export default function Freight() {
 
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery({
+  const { data: user, error: userError, isLoading: userLoading } = useQuery({
     queryKey: ["/api/auth/me"],
+    retry: 1,
   });
+  
+  console.log("=== USER AUTH STATUS ===");
+  console.log("User data:", user);
+  console.log("User error:", userError);
+  console.log("User loading:", userLoading);
 
   const { data: truckers } = useQuery({
     queryKey: ["/api/truckers", true],
