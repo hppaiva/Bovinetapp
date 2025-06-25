@@ -46,8 +46,6 @@ export default function Marketplace() {
     aptitude: [] as string[],
     age: "",
     distance: "",
-    minPrice: "",
-    maxPrice: "",
     search: "",
   });
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
@@ -217,7 +215,7 @@ export default function Marketplace() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label className="text-white">Sexo</Label>
                     <div className="flex space-x-4 mt-2">
@@ -314,25 +312,7 @@ export default function Marketplace() {
                     </Select>
                   </div>
 
-                  <div className="col-span-2">
-                    <Label className="text-white">Faixa de Preço</Label>
-                    <div className="flex space-x-2 mt-2">
-                      <Input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.minPrice}
-                        onChange={(e) => handleFilterChange("minPrice", e.target.value)}
-                        className="bg-primary-bg border-gray-600 text-white"
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Max"
-                        value={filters.maxPrice}
-                        onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
-                        className="bg-primary-bg border-gray-600 text-white"
-                      />
-                    </div>
-                  </div>
+
                 </div>
 
                 <Button className="w-full bg-accent-green hover:bg-green-600 text-white">
