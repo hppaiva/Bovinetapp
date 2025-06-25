@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Home, Dog, Truck, FileText } from "lucide-react";
+import { Home, ShoppingCart, Truck, FileText } from "lucide-react";
 
 export default function BottomNav() {
   const [location, setLocation] = useLocation();
@@ -13,7 +13,7 @@ export default function BottomNav() {
       path: "/",
     },
     {
-      icon: Dog,
+      icon: ShoppingCart,
       label: "Mercado",
       path: "/marketplace",
     },

@@ -139,8 +139,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-r from-teal-400 to-blue-500 rounded-2xl flex items-center justify-center">
-            <Dog className="text-white text-4xl w-16 h-16" />
+          <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Bovinet Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Bovinet</h1>
           <p className="text-secondary">Plataforma de Negociação de Gado</p>

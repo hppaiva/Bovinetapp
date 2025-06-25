@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Dog } from "lucide-react";
+import { Bell } from "lucide-react";
 
 export default function Header() {
   const { data: user } = useQuery({
@@ -22,8 +22,12 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-teal-400 to-blue-500 rounded-lg flex items-center justify-center">
-              <Dog className="text-white text-lg w-6 h-6" />
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img 
+                src="/logo.png" 
+                alt="Bovinet Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <h1 className="text-xl font-bold text-white">Bovinet</h1>
           </div>

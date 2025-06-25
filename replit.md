@@ -89,7 +89,9 @@ The application is configured for deployment on Replit with the following setup:
 
 ## Changelog
 - June 25, 2025. Initial setup
+- June 25, 2025. Substituído logo inicial pela logo original do Bovinet em todos os componentes
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Prefers communication in Portuguese.
