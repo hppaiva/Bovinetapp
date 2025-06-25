@@ -1,11 +1,19 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
 import express from "express";
+import session from "express-session";
 import { storage } from "./storage";
 import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema } from "@shared/schema";
+
+// Extend Request interface to include session
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
 
 // Configure multer for file uploads
 const upload = multer({
@@ -99,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/me", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId);
+      const user = await storage.getUser(req.session.userId!);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -162,7 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const listing = await storage.createListing({
         ...listingData,
-        userId: req.session.userId,
+        userId: req.session.userId!,
         videoUrl: videoFile ? videoFile.path : undefined,
       });
       
@@ -230,13 +238,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const trucker = await storage.createTrucker({
         ...truckerData,
-        userId: req.session.userId,
+        userId: req.session.userId!,
         truckPhotoUrl: files.truckPhoto ? files.truckPhoto[0].path : undefined,
         documentUrl: files.document ? files.document[0].path : undefined,
       });
       
       // Update user to mark as trucker
-      await storage.updateUser(req.session.userId, { isTrucker: true });
+      await storage.updateUser(req.session.userId!, { isTrucker: true });
       
       res.json({ trucker });
     } catch (error) {
@@ -289,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const request = await storage.createFreightRequest({
         ...requestData,
-        userId: req.session.userId,
+        userId: req.session.userId!,
       });
       
       res.json({ request });
@@ -317,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const request = await storage.createGtaRequest({
         ...requestData,
-        userId: req.session.userId,
+        userId: req.session.userId!,
       });
       
       res.json({ request });

@@ -19,7 +19,7 @@ import {
   type InsertIdentityVerification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -102,22 +102,24 @@ export class DatabaseStorage implements IStorage {
     userLat?: number;
     userLon?: number;
   }): Promise<Listing[]> {
-    let query = db.select().from(listings).where(eq(listings.isActive, true));
+    const conditions = [eq(listings.isActive, true)];
 
     if (filters?.sex) {
-      query = query.where(eq(listings.sex, filters.sex));
+      conditions.push(eq(listings.sex, filters.sex));
     }
     if (filters?.age) {
-      query = query.where(eq(listings.age, filters.age));
+      conditions.push(eq(listings.age, filters.age));
     }
     if (filters?.aptitude) {
-      query = query.where(eq(listings.aptitude, filters.aptitude));
+      conditions.push(eq(listings.aptitude, filters.aptitude));
     }
     if (filters?.city) {
-      query = query.where(eq(listings.city, filters.city));
+      conditions.push(eq(listings.city, filters.city));
     }
 
-    const results = await query.orderBy(desc(listings.createdAt));
+    const results = await db.select().from(listings)
+      .where(and(...conditions))
+      .orderBy(desc(listings.createdAt));
     return results;
   }
 
