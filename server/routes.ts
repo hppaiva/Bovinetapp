@@ -275,8 +275,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: lotTitle,
         lotNumber: lotNumber,
         userId: req.session.userId!,
-        videoUrl: videoFile ? `/uploads/${videoFile.filename}` : undefined,
+        videoUrl: videoFile ? `/uploads/${videoFile.filename}` : null,
       });
+      
+      console.log("=== VIDEO FILE PROCESSING ===");
+      if (videoFile) {
+        console.log("Video file saved to:", videoFile.path);
+        console.log("Video URL will be:", `/uploads/${videoFile.filename}`);
+        console.log("Full video path:", `${process.cwd()}/uploads/${videoFile.filename}`);
+      } else {
+        console.log("No video file uploaded");
+      }
       
       console.log("Created listing:", listing);
       res.json({ success: true, listing, message: "Anúncio criado com sucesso!" });

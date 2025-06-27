@@ -32,8 +32,20 @@ app.use(
   })
 );
 
-// Serve uploaded files statically
-app.use('/uploads', express.static('uploads'));
+// Serve uploaded files with proper headers for video playback
+app.use('/uploads', express.static('uploads', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4');
+    } else if (path.endsWith('.mov')) {
+      res.setHeader('Content-Type', 'video/quicktime');
+    } else if (path.endsWith('.avi')) {
+      res.setHeader('Content-Type', 'video/x-msvideo');
+    }
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -116,7 +116,7 @@ export default function Marketplace() {
     );
   }
 
-  const { data: listings, isLoading: loadingListings } = useQuery({
+  const { data: listings, isLoading: loadingListings, refetch: refetchListings } = useQuery({
     queryKey: ["/api/listings", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -126,12 +126,20 @@ export default function Marketplace() {
       if (filters.distance) params.append("maxDistance", filters.distance.toString());
       if (filters.search) params.append("search", filters.search);
 
+      console.log("=== FETCHING LISTINGS ===");
+      console.log("Filters:", filters);
+      console.log("URL:", `/api/listings?${params.toString()}`);
+
       const response = await fetch(`/api/listings?${params.toString()}`, {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to fetch listings");
-      return response.json();
+      const data = await response.json();
+      console.log("Listings fetched:", data);
+      return data;
     },
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const { data: userListings } = useQuery({
@@ -214,10 +222,15 @@ export default function Marketplace() {
       console.log("Success response:", result);
       return result;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log("Listing created successfully:", data);
-      queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
+      
+      // Invalidate and refetch all listing queries
+      await queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
+      await refetchListings();
+      
+      console.log("Queries invalidated and refetched");
       toast({
         title: "Anúncio criado com sucesso!",
         description: "Seu anúncio está agora disponível no marketplace",
@@ -459,18 +472,19 @@ export default function Marketplace() {
                         {listing.videoUrl ? (
                           <div className="h-48 md:h-full bg-gray-200 relative">
                             <video 
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover rounded-lg"
                               controls
                               preload="metadata"
+                              poster=""
                             >
                               <source src={listing.videoUrl} type="video/mp4" />
-                              <source src={listing.videoUrl} type="video/webm" />
                               <source src={listing.videoUrl} type="video/mov" />
+                              <source src={listing.videoUrl} type="video/avi" />
                               Seu navegador não suporta reprodução de vídeo.
                             </video>
                           </div>
                         ) : (
-                          <div className="h-48 md:h-full bg-gray-200 flex items-center justify-center">
+                          <div className="h-48 md:h-full bg-gray-200 flex items-center justify-center rounded-lg">
                             <div className="text-center">
                               <Eye className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                               <p className="text-gray-500 text-sm">Sem vídeo</p>
@@ -481,8 +495,10 @@ export default function Marketplace() {
                       <div className="md:w-2/3 p-6">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h3 className="text-xl font-bold">{listing.quantity} animais</h3>
-                            <p className="text-gray-600">{listing.city}</p>
+                            <h3 className="text-xl font-bold">
+                              {listing.title ? listing.title : `Lote ${listing.id.toString().padStart(2, '0')} - ${listing.city}`}
+                            </h3>
+                            <p className="text-gray-600">{listing.quantity} {listing.sex === "macho" ? "Machos" : "Fêmeas"} • {listing.city}</p>
                           </div>
                           <Badge className="bg-green-100 text-green-800">Disponível</Badge>
                         </div>
