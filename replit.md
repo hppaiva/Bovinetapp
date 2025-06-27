@@ -137,6 +137,7 @@ The application is configured for deployment on Replit with the following setup:
 - June 27, 2025. Adicionado seleção em cascata - estado determina cidades disponíveis
 - June 27, 2025. Integrado filtros de localização no marketplace com todos estados brasileiros
 - June 27, 2025. Atualizado esquema do banco para incluir campo estado em listings, truckers e users
+- June 27, 2025. Removido botão "Ver detalhes" das postagens mantendo configuração WhatsApp
 
 ## User Preferences
 
