@@ -549,12 +549,9 @@ export default function Marketplace() {
                           </div>
                         </div>
 
-                        <div className="flex space-x-3">
-                          <Button variant="outline" className="flex-1">
-                            Ver Detalhes
-                          </Button>
+                        <div className="mt-4">
                           <Button 
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
                             onClick={() => {
                               const message = `Olá, tenho interesse no lote "${listing.title}" anunciado no Bovinet.`;
                               const whatsappUrl = generateWhatsAppLink("5534991195042", message);
@@ -562,7 +559,7 @@ export default function Marketplace() {
                             }}
                           >
                             <MessageCircle className="w-4 h-4 mr-2" />
-                            Tenho Interesse
+                            Entrar em contato via WhatsApp
                           </Button>
                         </div>
                       </div>
