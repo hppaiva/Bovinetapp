@@ -133,6 +133,10 @@ The application is configured for deployment on Replit with the following setup:
 - June 25, 2025. Implementado sistema completo de numeração por lotes (Lote 01, Lote 02, etc.)
 - June 25, 2025. Atualizado todas as publicações existentes para seguir padrão de lotes
 - June 25, 2025. Melhorado logs de upload de vídeo para debug
+- June 27, 2025. Implementado sistema completo de estados e cidades brasileiras
+- June 27, 2025. Adicionado seleção em cascata - estado determina cidades disponíveis
+- June 27, 2025. Integrado filtros de localização no marketplace com todos estados brasileiros
+- June 27, 2025. Atualizado esquema do banco para incluir campo estado em listings, truckers e users
 
 ## User Preferences
 

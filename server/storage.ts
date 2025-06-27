@@ -36,6 +36,7 @@ export interface IStorage {
     sex?: string;
     age?: string;
     aptitude?: string;
+    state?: string;
     city?: string;
     maxDistance?: number;
     userLat?: number;

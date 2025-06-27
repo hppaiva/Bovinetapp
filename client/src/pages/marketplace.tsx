@@ -125,6 +125,8 @@ export default function Marketplace() {
       if (filters.age && filters.age !== "all") params.append("age", filters.age);
       if (filters.distance) params.append("maxDistance", filters.distance.toString());
       if (filters.search) params.append("search", filters.search);
+      if (filters.state) params.append("state", filters.state);
+      if (filters.city) params.append("city", filters.city);
 
       console.log("=== FETCHING LISTINGS ===");
       console.log("Filters:", filters);
