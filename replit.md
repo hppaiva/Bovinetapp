@@ -138,6 +138,10 @@ The application is configured for deployment on Replit with the following setup:
 - June 27, 2025. Integrado filtros de localização no marketplace com todos estados brasileiros
 - June 27, 2025. Atualizado esquema do banco para incluir campo estado em listings, truckers e users
 - June 27, 2025. Removido botão "Ver detalhes" das postagens - WhatsApp agora ocupa largura total
+- June 27, 2025. Implementado sistema automático de alertas WhatsApp para freteiros
+- June 27, 2025. Criado matching inteligente de frete com notificação automática via WhatsApp
+- June 27, 2025. Adicionado links de confirmação de frete direcionando para o app
+- June 27, 2025. Sistema completo: solicitação → busca caminhoneiro → WhatsApp → confirmação
 
 ## User Preferences
 

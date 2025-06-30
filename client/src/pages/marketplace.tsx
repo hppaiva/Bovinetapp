@@ -18,6 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
 import { calculateArrobaPrice } from "@/lib/utils";
+import { brazilianStates, getCitiesByState } from "../data/brazilian-locations";
 import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
 import VideoUpload from "@/components/video-upload";
@@ -46,9 +47,12 @@ export default function Marketplace() {
     age: "",
     distance: 100, // Default to 100km
     search: "",
+    state: "",
+    city: "",
   });
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
 
@@ -156,6 +160,7 @@ export default function Marketplace() {
       weight: 0,
       pricePerHead: 0,
       description: "",
+      state: "",
       city: "",
       sex: "" as "macho" | "femea",
       aptitude: "" as "corte" | "leite", 
@@ -426,6 +431,44 @@ export default function Marketplace() {
                         <SelectItem value="24a36">24 a 36 meses</SelectItem>
                         <SelectItem value="36a48">36 a 48 meses</SelectItem>
                         <SelectItem value="mais48">Mais de 48 meses</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-white mb-3 block">Estado</Label>
+                    <Select value={filters.state} onValueChange={(value) => handleFilterChange("state", value)}>
+                      <SelectTrigger className="bg-container-bg border-gray-600 text-white">
+                        <SelectValue placeholder="Selecione o estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos os estados</SelectItem>
+                        {brazilianStates.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.name} ({state.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-white mb-3 block">Cidade</Label>
+                    <Select 
+                      value={filters.city} 
+                      onValueChange={(value) => handleFilterChange("city", value)}
+                      disabled={!filters.state}
+                    >
+                      <SelectTrigger className="bg-container-bg border-gray-600 text-white">
+                        <SelectValue placeholder={filters.state ? "Selecione a cidade" : "Primeiro selecione o estado"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todas as cidades</SelectItem>
+                        {availableCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -764,12 +807,50 @@ export default function Marketplace() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Cidade</Label>
-                    <Input
-                      {...form.register("city")}
-                      placeholder="Ex: Araxá - MG"
-                      className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
-                    />
+                    <Label className="text-white">Estado *</Label>
+                    <Select onValueChange={(value) => {
+                      form.setValue("state", value);
+                      // Atualizar cidades disponíveis
+                      const cities = getCitiesByState(value);
+                      setAvailableCities(cities);
+                      // Limpar cidade se estado mudar
+                      form.setValue("city", "");
+                    }}>
+                      <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
+                        <SelectValue placeholder="Selecione o estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {brazilianStates.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.name} ({state.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.formState.errors.state && (
+                      <p className="text-accent-red text-sm mt-1">
+                        {form.formState.errors.state.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-white">Cidade *</Label>
+                    <Select 
+                      onValueChange={(value) => form.setValue("city", value)}
+                      disabled={!form.watch("state")}
+                    >
+                      <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
+                        <SelectValue placeholder={form.watch("state") ? "Selecione a cidade" : "Primeiro selecione o estado"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {form.formState.errors.city && (
                       <p className="text-accent-red text-sm mt-1">
                         {form.formState.errors.city.message}
