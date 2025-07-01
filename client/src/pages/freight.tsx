@@ -314,6 +314,7 @@ export default function Freight() {
             <TabsTrigger 
               value="search" 
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
+              onClick={() => setLocation("/request-freight")}
             >
               <Search className="w-4 h-4 mr-2" />
               Buscar Frete
@@ -321,6 +322,7 @@ export default function Freight() {
             <TabsTrigger 
               value="offer"
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
+              onClick={() => setLocation("/driver-dashboard")}
             >
               <Truck className="w-4 h-4 mr-2" />
               Oferecer Frete

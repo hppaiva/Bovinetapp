@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Marketplace from "@/pages/marketplace";
 import Freight from "@/pages/freight";
+import RequestFreight from "@/pages/request-freight";
+import DriverDashboard from "@/pages/driver-dashboard";
 import Services from "@/pages/services";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
@@ -20,6 +22,8 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/marketplace" component={Marketplace} />
         <Route path="/freight" component={Freight} />
+        <Route path="/request-freight" component={RequestFreight} />
+        <Route path="/driver-dashboard" component={DriverDashboard} />
         <Route path="/services" component={Services} />
         <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
