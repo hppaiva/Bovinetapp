@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import AppNew from "./App-new";
+import App from "./App";
 import "./index.css";
 
 // Registrar Service Worker para PWA
@@ -15,4 +15,4 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(<AppNew />);
+createRoot(document.getElementById("root")!).render(<App />);
