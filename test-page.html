@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Direto</title>
+    <style>
+        body {
+            background-color: #1E2A38;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .status {
+            background: #4CAF50;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🟢 Bovinet - Servidor Funcionando</h1>
+    <div class="status">✓ Servidor Express respondendo na porta 5000</div>
+    <div class="status">✓ HTML sendo servido corretamente</div>
+    <div class="status">✓ Se você vê esta página, o problema não é do servidor</div>
+    
+    <h2>Informações de Debug:</h2>
+    <p>Timestamp: <span id="time"></span></p>
+    <p>URL atual: <span id="url"></span></p>
+    <p>User Agent: <span id="ua"></span></p>
+    
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString();
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('ua').textContent = navigator.userAgent;
+        
+        console.log('Página carregada com sucesso!');
+        console.log('Se você vê este log, o JavaScript está funcionando');
+    </script>
+</body>
+</html>
