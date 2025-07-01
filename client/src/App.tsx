@@ -9,18 +9,31 @@ import Services from "@/pages/services";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
-import AuthPage from "@/pages/auth";
+import BovinetHome from "@/pages/bovinet-home";
 
 function Router() {
+  // Verificar se o usuário está logado
+  const userData = localStorage.getItem('user');
+  const isLoggedIn = !!userData;
+
   return (
     <Switch>
-      <Route path="/" component={AuthPage} />
-      <Route path="/auth" component={AuthPage} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/marketplace" component={Marketplace} />
-      <Route path="/services" component={Services} />
-      <Route path="/profile" component={Profile} />
-      <Route component={NotFound} />
+      {!isLoggedIn ? (
+        <>
+          <Route path="/" component={BovinetHome} />
+          <Route path="/home" component={BovinetHome} />
+          <Route component={BovinetHome} />
+        </>
+      ) : (
+        <>
+          <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/marketplace" component={Marketplace} />
+          <Route path="/services" component={Services} />
+          <Route path="/profile" component={Profile} />
+          <Route component={NotFound} />
+        </>
+      )}
     </Switch>
   );
 }
