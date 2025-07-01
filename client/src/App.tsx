@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Marketplace from "@/pages/marketplace";
-import Freight from "@/pages/freight";
+import FreightSimple from "@/pages/freight-simple";
 import RequestFreight from "@/pages/request-freight";
 import DriverDashboard from "@/pages/driver-dashboard";
 import Services from "@/pages/services";
@@ -21,7 +21,7 @@ function Router() {
         <Route path="/" component={Dashboard} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/marketplace" component={Marketplace} />
-        <Route path="/freight" component={Freight} />
+        <Route path="/freight" component={FreightSimple} />
         <Route path="/request-freight" component={RequestFreight} />
         <Route path="/driver-dashboard" component={DriverDashboard} />
         <Route path="/services" component={Services} />
