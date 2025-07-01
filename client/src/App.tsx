@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Dashboard from "@/pages/dashboard";
+import SimpleDashboard from "@/pages/simple-dashboard";
 import Marketplace from "@/pages/marketplace";
 import Services from "@/pages/services";
 import Profile from "@/pages/profile";
@@ -28,8 +28,8 @@ function Router() {
         </>
       ) : (
         <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/" component={SimpleDashboard} />
+          <Route path="/dashboard" component={SimpleDashboard} />
           <Route path="/marketplace" component={Marketplace} />
           <Route path="/services" component={Services} />
           <Route path="/freight" component={Freight} />
