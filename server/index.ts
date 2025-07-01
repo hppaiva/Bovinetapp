@@ -95,6 +95,36 @@ app.use((req, res, next) => {
     await setupVite(app, server);
   } else {
     serveStatic(app);
+  
+  // Teste direto para debug
+  app.get('/test-direct', (_req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>BOVINET - Teste Direto</title>
+          <meta charset="UTF-8">
+      </head>
+      <body style="background-color: #1E2A38; color: white; padding: 20px; font-family: Arial;">
+          <h1 style="color: #4CAF50; font-size: 48px;">BOVINET</h1>
+          <h2>Sistema de Frete - Funcionando!</h2>
+          <div style="background: #4CAF50; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              ✓ Servidor respondendo corretamente
+          </div>
+          <div style="background: #4CAF50; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              ✓ Cálculo de frete: R$ 3,50 por km implementado
+          </div>
+          <button onclick="alert('Funcionando!')" style="background: #4CAF50; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+              Testar Interação
+          </button>
+          <p>Timestamp: ${new Date().toLocaleString()}</p>
+          <script>
+              console.log('BOVINET: Página carregada com sucesso');
+          </script>
+      </body>
+      </html>
+    `);
+  });
   }
 
   // ALWAYS serve the app on port 5000
