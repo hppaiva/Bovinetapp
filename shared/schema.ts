@@ -49,6 +49,9 @@ export const truckers = pgTable("truckers", {
   workingArea: text("working_area"),
   truckPhotoUrl: text("truck_photo_url"),
   isAvailable: boolean("is_available").default(false),
+  isOnline: boolean("is_online").default(false),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("5.0"),
+  totalTrips: integer("total_trips").default(0),
   currentLatitude: decimal("current_latitude", { precision: 10, scale: 8 }),
   currentLongitude: decimal("current_longitude", { precision: 11, scale: 8 }),
   lastLocationUpdate: timestamp("last_location_update"),
@@ -57,8 +60,10 @@ export const truckers = pgTable("truckers", {
   // Índices para localização e disponibilidade
   userIdIdx: index("truckers_user_id_idx").on(table.userId),
   availabilityIdx: index("truckers_availability_idx").on(table.isAvailable),
+  onlineIdx: index("truckers_online_idx").on(table.isOnline),
   locationIdx: index("truckers_location_idx").on(table.currentLatitude, table.currentLongitude),
   priceIdx: index("truckers_price_idx").on(table.pricePerKm),
+  ratingIdx: index("truckers_rating_idx").on(table.rating),
 }));
 
 export const freightRequests = pgTable("freight_requests", {
@@ -121,6 +126,28 @@ export const freightAlerts = pgTable("freight_alerts", {
   estimatedPrice: decimal("estimated_price", { precision: 10, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow(),
   respondedAt: timestamp("responded_at"),
+});
+
+export const freightQuotes = pgTable("freight_quotes", {
+  id: serial("id").primaryKey(),
+  freightRequestId: integer("freight_request_id").references(() => freightRequests.id).notNull(),
+  truckerId: integer("trucker_id").references(() => truckers.id).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  estimatedArrival: integer("estimated_arrival"), // em minutos
+  notes: text("notes"),
+  status: text("status").default("pending"), // pending, accepted, declined
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const freightBookings = pgTable("freight_bookings", {
+  id: serial("id").primaryKey(),
+  freightRequestId: integer("freight_request_id").references(() => freightRequests.id).notNull(),
+  truckerId: integer("trucker_id").references(() => truckers.id).notNull(),
+  quoteId: integer("quote_id").references(() => freightQuotes.id),
+  status: text("status").default("confirmed"), // confirmed, in_progress, completed, cancelled
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Relations
@@ -189,6 +216,32 @@ export const freightAlertsRelations = relations(freightAlerts, ({ one }) => ({
   }),
 }));
 
+export const freightQuotesRelations = relations(freightQuotes, ({ one }) => ({
+  freightRequest: one(freightRequests, {
+    fields: [freightQuotes.freightRequestId],
+    references: [freightRequests.id],
+  }),
+  trucker: one(truckers, {
+    fields: [freightQuotes.truckerId],
+    references: [truckers.id],
+  }),
+}));
+
+export const freightBookingsRelations = relations(freightBookings, ({ one }) => ({
+  freightRequest: one(freightRequests, {
+    fields: [freightBookings.freightRequestId],
+    references: [freightRequests.id],
+  }),
+  trucker: one(truckers, {
+    fields: [freightBookings.truckerId],
+    references: [truckers.id],
+  }),
+  quote: one(freightQuotes, {
+    fields: [freightBookings.quoteId],
+    references: [freightQuotes.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -235,6 +288,16 @@ export const insertFreightAlertSchema = createInsertSchema(freightAlerts).omit({
   respondedAt: true,
 });
 
+export const insertFreightQuoteSchema = createInsertSchema(freightQuotes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFreightBookingSchema = createInsertSchema(freightBookings).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -250,3 +313,7 @@ export type IdentityVerification = typeof identityVerifications.$inferSelect;
 export type InsertIdentityVerification = z.infer<typeof insertIdentityVerificationSchema>;
 export type FreightAlert = typeof freightAlerts.$inferSelect;
 export type InsertFreightAlert = z.infer<typeof insertFreightAlertSchema>;
+export type FreightQuote = typeof freightQuotes.$inferSelect;
+export type InsertFreightQuote = z.infer<typeof insertFreightQuoteSchema>;
+export type FreightBooking = typeof freightBookings.$inferSelect;
+export type InsertFreightBooking = z.infer<typeof insertFreightBookingSchema>;
