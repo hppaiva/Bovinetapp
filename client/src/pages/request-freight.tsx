@@ -213,7 +213,15 @@ export default function RequestFreight() {
                       <span className="font-medium">{estimatedTime}h</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Preço estimado</span>
+                      <span className="text-gray-600">Distância</span>
+                      <span className="font-medium">{distance.toFixed(1)} km</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Preço por km</span>
+                      <span className="font-medium">R$ 3,50</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2">
+                      <span className="text-gray-600 font-semibold">Total estimado</span>
                       <span className="font-bold text-lg text-accent-green">
                         R$ {estimatedPrice.toFixed(2)}
                       </span>

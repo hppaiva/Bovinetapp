@@ -123,7 +123,8 @@ export const freightAlerts = pgTable("freight_alerts", {
   truckerId: integer("trucker_id").references(() => truckers.id).notNull(),
   status: text("status").default("pending"), // pending, accepted, rejected, expired
   distanceKm: decimal("distance_km", { precision: 10, scale: 2 }),
-  estimatedPrice: decimal("estimated_price", { precision: 10, scale: 2 }),
+  estimatedPrice: decimal("estimated_price", { precision: 10, scale: 2 }).notNull(),
+  pricePerKm: decimal("price_per_km", { precision: 5, scale: 2 }).default('3.50'),
   createdAt: timestamp("created_at").defaultNow(),
   respondedAt: timestamp("responded_at"),
 });
