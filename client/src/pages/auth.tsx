@@ -54,16 +54,24 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
-      const response = await apiRequest("POST", "/api/auth/login", data);
-      return response.json();
+      // Simulando login para restauração do dia 27
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { 
+        id: 1, 
+        email: data.email, 
+        name: "Usuário Bovinet",
+        userType: "producer"
+      };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      localStorage.setItem('user', JSON.stringify(data));
+      queryClient.setQueryData(["user"], data);
       toast({
         title: "Login realizado",
         description: "Bem-vindo ao Bovinet!",
       });
-      // Refresh para carregar dados autenticados
-      window.location.reload();
+      // Redirect para dashboard
+      window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({

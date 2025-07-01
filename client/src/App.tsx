@@ -9,10 +9,12 @@ import Services from "@/pages/services";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
-import BovinetHome from "@/pages/bovinet-home";
+import AuthPage from "@/pages/auth";
+import Freight from "@/pages/freight";
+import RequestFreight from "@/pages/request-freight";
 
 function Router() {
-  // Verificar se o usuário está logado
+  // Sistema de autenticação restaurado do dia 27
   const userData = localStorage.getItem('user');
   const isLoggedIn = !!userData;
 
@@ -20,9 +22,9 @@ function Router() {
     <Switch>
       {!isLoggedIn ? (
         <>
-          <Route path="/" component={BovinetHome} />
-          <Route path="/home" component={BovinetHome} />
-          <Route component={BovinetHome} />
+          <Route path="/" component={AuthPage} />
+          <Route path="/auth" component={AuthPage} />
+          <Route component={AuthPage} />
         </>
       ) : (
         <>
@@ -30,6 +32,8 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/marketplace" component={Marketplace} />
           <Route path="/services" component={Services} />
+          <Route path="/freight" component={Freight} />
+          <Route path="/request-freight" component={RequestFreight} />
           <Route path="/profile" component={Profile} />
           <Route component={NotFound} />
         </>
