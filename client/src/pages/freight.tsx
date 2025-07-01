@@ -20,6 +20,7 @@ import BottomNav from "@/components/bottom-nav";
 import LocationPicker from "@/components/location-picker";
 import FreightAlerts from "@/components/freight-alerts";
 import { Search, Truck, List, MapPin, MessageCircle, Clock, CheckCircle } from "lucide-react";
+import { CattleTruckIcon } from "@/components/ui/cattle-truck-icon";
 
 const freightRequestSchema = z.object({
   originAddress: z.string().min(1, "Endereço de origem é obrigatório"),
@@ -315,7 +316,7 @@ export default function Freight() {
               value="search" 
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
             >
-              <Search className="w-4 h-4 mr-2" />
+              <CattleTruckIcon className="w-4 h-4 mr-2" />
               Buscar Frete
             </TabsTrigger>
             <TabsTrigger 
@@ -339,7 +340,7 @@ export default function Freight() {
             <Card className="bg-container-bg border-gray-600">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
-                  <Truck className="w-5 h-5 mr-2" />
+                  <CattleTruckIcon className="w-5 h-5 mr-2" />
                   Buscar Frete para Transporte
                 </CardTitle>
               </CardHeader>
