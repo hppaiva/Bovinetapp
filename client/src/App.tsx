@@ -10,8 +10,6 @@ import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
 import AuthPage from "@/pages/auth";
-import Freight from "@/pages/freight";
-import RequestFreight from "@/pages/request-freight";
 
 function Router() {
   // Sistema de autenticação restaurado do dia 27
@@ -32,8 +30,6 @@ function Router() {
           <Route path="/dashboard" component={SimpleDashboard} />
           <Route path="/marketplace" component={Marketplace} />
           <Route path="/services" component={Services} />
-          <Route path="/freight" component={Freight} />
-          <Route path="/request-freight" component={RequestFreight} />
           <Route path="/profile" component={Profile} />
           <Route component={NotFound} />
         </>

@@ -120,8 +120,8 @@ export default function SimpleDashboard() {
             <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-colors cursor-pointer">
               <CardContent className="p-6 text-center">
                 <Truck className="mx-auto mb-3 text-[#4CAF50]" size={32} />
-                <h3 className="font-bold text-white mb-2">Frete</h3>
-                <p className="text-sm text-gray-300">R$ 3,50 por KM</p>
+                <h3 className="font-bold text-white mb-2">Serviços</h3>
+                <p className="text-sm text-gray-300">Frete e GTA</p>
               </CardContent>
             </Card>
           </Link>
@@ -161,11 +161,11 @@ export default function SimpleDashboard() {
 
           <Card className="bg-[#2A3A4A] border-gray-600">
             <CardHeader className="pb-2">
-              <CardTitle className="text-[#4CAF50] text-lg">Fretes</CardTitle>
+              <CardTitle className="text-[#4CAF50] text-lg">Serviços</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white mb-1">8</div>
-              <div className="text-sm text-gray-300">Solicitados</div>
+              <div className="text-3xl font-bold text-white mb-1">3</div>
+              <div className="text-sm text-gray-300">Utilizados</div>
             </CardContent>
           </Card>
 

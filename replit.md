@@ -166,6 +166,10 @@ The application is configured for deployment on Replit with the following setup:
 - July 01, 2025. Sistema restaurado para estado anterior às mudanças de frete
 - July 01, 2025. App.tsx original restaurado com todas as rotas funcionando
 - July 01, 2025. Preview funcionando novamente com React + Vite
+- July 01, 2025. CONFIGURAÇÃO ORIGINAL RESTAURADA: Removidas rotas /freight e /request-freight
+- July 01, 2025. Dashboard restaurado sem calculadora de frete R$ 3,50/km
+- July 01, 2025. Sistema voltou ao estado funcional antes das implementações de frete
+- July 01, 2025. Somente rotas básicas: /, /dashboard, /marketplace, /services, /profile
 
 ## User Preferences
 
