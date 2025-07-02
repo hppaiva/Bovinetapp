@@ -170,6 +170,9 @@ The application is configured for deployment on Replit with the following setup:
 - July 01, 2025. Dashboard restaurado sem calculadora de frete R$ 3,50/km
 - July 01, 2025. Sistema voltou ao estado funcional antes das implementações de frete
 - July 01, 2025. Somente rotas básicas: /, /dashboard, /marketplace, /services, /profile
+- July 02, 2025. PREVIEW RESTAURADO: Sistema funcionando completamente no preview
+- July 02, 2025. Removido service worker conflitante e App original restaurado
+- July 02, 2025. Todas as funcionalidades básicas operacionais: autenticação, marketplace, serviços, perfil
 
 ## User Preferences
 
