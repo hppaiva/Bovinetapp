@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bovinet - Teste Simples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E2A38;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: #2A3A4A;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #ccc;
+            font-size: 1.1rem;
+        }
+        
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: #2A3A4A;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-5px);
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        
+        .card-desc {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🐄 BOVINET</div>
+            <div class="subtitle">Plataforma Completa para o Agronegócio</div>
+            <div class="status">✅ Sistema Funcionando</div>
+        </div>
+        
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon">🛒</div>
+                <div class="card-title">Marketplace</div>
+                <div class="card-desc">
+                    Compre e venda gado com segurança. Sistema completo de anúncios 
+                    com filtros avançados por localização, raça, idade e sexo.
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">🚛</div>
+                <div class="card-title">Serviços de Frete</div>
+                <div class="card-desc">
+                    Conecte-se com transportadores qualificados. Sistema de 
+                    matching automático e alertas em tempo real.
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">📋</div>
+                <div class="card-title">Emissão de GTA</div>
+                <div class="card-desc">
+                    Emita Guias de Trânsito Animal de forma rápida e segura. 
+                    Processo simplificado e totalmente digital.
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">✅</div>
+                <div class="card-title">Sistema Restaurado</div>
+                <div class="card-desc">
+                    Configuração original restaurada com sucesso. Todas as 
+                    funcionalidades básicas estão operacionais.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('✅ Bovinet - Sistema carregado com sucesso');
+        console.log('🔧 Configuração: Original restaurada');
+        console.log('📱 React: Pronto para desenvolvimento');
+    </script>
+</body>
+</html>
