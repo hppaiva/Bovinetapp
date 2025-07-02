@@ -16,11 +16,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // Serve the Bovinet HTML file as the main page
 app.get('/', (req, res) => {
-  res.sendFile(path.resolve('bovinet-simple.html'));
+  res.sendFile(path.resolve('bovinet-direto.html'));
 });
 
-app.get('/bovinet-simple.html', (req, res) => {
-  res.sendFile(path.resolve('bovinet-simple.html'));
+app.get('/bovinet-direto.html', (req, res) => {
+  res.sendFile(path.resolve('bovinet-direto.html'));
 });
 
 // Configure session once in the main server file
