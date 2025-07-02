@@ -511,13 +511,16 @@ export default function Marketplace() {
                 </div>
               ) : listings?.listings?.length > 0 ? (
                 listings.listings.map((listing: any) => (
-                  <Card key={listing.id} className="bg-white text-gray-900 overflow-hidden">
+                  <Card key={listing.id} className="bg-white text-gray-900 overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
                     <div className="md:flex">
                       <div className="md:w-1/3">
                         {listing.videoUrl ? (
                           <div className="h-48 md:h-full bg-gray-200 relative">
+                            <div className="absolute top-2 left-2 z-10">
+                              <Badge className="bg-red-500 text-white">📹 VÍDEO</Badge>
+                            </div>
                             <video 
-                              className="w-full h-full object-cover rounded-lg"
+                              className="w-full h-full object-cover"
                               controls
                               preload="metadata"
                               poster=""
@@ -529,80 +532,112 @@ export default function Marketplace() {
                             </video>
                           </div>
                         ) : (
-                          <div className="h-48 md:h-full bg-gray-200 flex items-center justify-center rounded-lg">
+                          <div className="h-48 md:h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
                             <div className="text-center">
-                              <Eye className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                              <p className="text-gray-500 text-sm">Sem vídeo</p>
+                              <Eye className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                              <p className="text-green-700 font-medium">🐄 Bovinet</p>
+                              <p className="text-green-600 text-sm">Foto em breve</p>
                             </div>
                           </div>
                         )}
                       </div>
                       <div className="md:w-2/3 p-6">
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start mb-4">
                           <div>
-                            <h3 className="text-xl font-bold">
-                              {listing.title ? listing.title : `Lote ${listing.id.toString().padStart(2, '0')} - ${listing.city}`}
+                            <h3 className="text-xl font-bold text-gray-900 mb-1">
+                              {listing.title ? listing.title : `Lote ${listing.id.toString().padStart(2, '0')}`}
                             </h3>
-                            <p className="text-gray-600">{listing.quantity} {listing.sex === "macho" ? "Machos" : "Fêmeas"} • {listing.city}</p>
+                            <p className="text-gray-600 flex items-center">
+                              <MapPin className="w-4 h-4 mr-1" />
+                              {listing.quantity} {listing.sex === "macho" ? "Machos" : "Fêmeas"} • {listing.city}, {listing.state || 'SP'}
+                            </p>
                           </div>
-                          <Badge className="bg-green-100 text-green-800">Disponível</Badge>
+                          <Badge className="bg-green-100 text-green-800 px-3 py-1">✅ Disponível</Badge>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <p className="text-sm text-gray-600">Quantidade</p>
-                            <p className="font-semibold">{listing.quantity} animais</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Quantidade</p>
+                            <p className="font-bold text-lg">{listing.quantity}</p>
+                            <p className="text-xs text-gray-600">animais</p>
                           </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Sexo</p>
-                            <p className="font-semibold capitalize">{listing.sex}</p>
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Sexo</p>
+                            <p className="font-bold text-lg capitalize">{listing.sex}</p>
+                            <p className="text-xs text-gray-600">{listing.sex === 'macho' ? '♂️' : '♀️'}</p>
                           </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Idade</p>
-                            <p className="font-semibold">{listing.age}</p>
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Idade</p>
+                            <p className="font-bold text-sm">
+                              {listing.age === 'ate12' ? 'até 12m' :
+                               listing.age === '12a24' ? '12-24m' :
+                               listing.age === '24a36' ? '24-36m' :
+                               listing.age === '36a48' ? '36-48m' : '+48m'}
+                            </p>
+                            <p className="text-xs text-gray-600">meses</p>
                           </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Peso médio</p>
-                            <p className="font-semibold">{listing.weight} kg</p>
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Peso Médio</p>
+                            <p className="font-bold text-lg">{listing.weight}</p>
+                            <p className="text-xs text-gray-600">kg</p>
                           </div>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                        {listing.description && (
+                          <div className="bg-blue-50 p-3 rounded-lg mb-4 border-l-4 border-blue-400">
+                            <p className="text-sm text-gray-700">
+                              <strong>📋 Descrição:</strong> {listing.description}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="bg-green-50 p-4 rounded-lg mb-4 border border-green-200">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="font-semibold">Preço por cabeça:</span>
-                            <span className="text-xl font-bold text-green-600">
+                            <span className="font-semibold text-gray-700">💰 Preço por cabeça:</span>
+                            <span className="text-2xl font-bold text-green-600">
                               R$ {Number(listing.pricePerHead).toLocaleString('pt-BR')}
                             </span>
                           </div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">📏 Preço por arroba:</span>
+                            <span className="font-semibold text-green-700">
+                              R$ {calculateArrobaPrice(Number(listing.pricePerHead), Number(listing.weight)).toFixed(2)}
+                            </span>
+                          </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">Preço por arroba:</span>
-                            <span className="font-semibold">
-                              R$ {calculateArrobaPrice(Number(listing.weight), Number(listing.pricePerHead)).toFixed(2)}
+                            <span className="text-sm text-gray-600">🎯 Valor total do lote:</span>
+                            <span className="font-bold text-green-800">
+                              R$ {(Number(listing.pricePerHead) * listing.quantity).toLocaleString('pt-BR')}
                             </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="h-4 w-4 text-gray-500" />
-                            <span className="text-gray-600">{listing.city}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-gray-600 text-sm">Aptidão: {listing.aptitude}</span>
+                        <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+                          <div className="flex items-center space-x-4">
+                            <span>🏷️ Aptidão: <strong>{listing.aptitude}</strong></span>
+                            <span>📅 {new Date(listing.createdAt).toLocaleDateString('pt-BR')}</span>
                           </div>
                         </div>
 
-                        <div className="mt-4">
+                        <div className="space-y-2">
                           <Button 
-                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
                             onClick={() => {
-                              const message = `Olá, tenho interesse no lote "${listing.title}" anunciado no Bovinet.`;
+                              const message = `🐄 Olá! Vi seu anúncio no Bovinet:
+
+📋 *${listing.title || `Lote ${listing.id.toString().padStart(2, '0')}`}*
+📍 *Local:* ${listing.city}, ${listing.state || 'SP'}
+🔢 *Quantidade:* ${listing.quantity} animais (${listing.sex})
+💰 *Preço:* R$ ${Number(listing.pricePerHead).toLocaleString('pt-BR')}/cabeça
+💵 *Total:* R$ ${(Number(listing.pricePerHead) * listing.quantity).toLocaleString('pt-BR')}
+
+Tenho interesse! Podemos conversar?`;
                               const whatsappUrl = generateWhatsAppLink("5534991195042", message);
                               window.open(whatsappUrl, "_blank");
                             }}
                           >
-                            <MessageCircle className="w-4 h-4 mr-2" />
-                            Entrar em contato via WhatsApp
+                            <MessageCircle className="w-5 h-5 mr-2" />
+                            💬 Tenho Interesse - WhatsApp
                           </Button>
                         </div>
                       </div>
@@ -790,20 +825,41 @@ export default function Marketplace() {
                   )}
 
                   <div>
-                    <Label className="text-white">Descrição</Label>
+                    <Label className="text-white">Descrição detalhada *</Label>
                     <Textarea
                       {...form.register("description")}
                       rows={4}
-                      placeholder="Raça, manejo, observações especiais..."
+                      placeholder="Descreva: raça, manejo, histórico sanitário, observações especiais..."
                       className="bg-primary-bg border-gray-600 text-white focus:border-accent-green resize-none"
                     />
+                    <p className="text-gray-400 text-sm mt-1">
+                      Inclua informações sobre raça, vacinação, origem e outras características importantes
+                    </p>
                   </div>
 
-                  <div>
+                  <div className="bg-accent-green/10 border border-accent-green rounded-lg p-6">
+                    <div className="flex items-center mb-4">
+                      <Play className="w-6 h-6 text-accent-green mr-2" />
+                      <h3 className="text-white font-semibold text-lg">Vídeo dos Animais</h3>
+                      <Badge className="ml-2 bg-red-500 text-white">RECOMENDADO</Badge>
+                    </div>
+                    <p className="text-gray-300 mb-4">
+                      Adicione um vídeo para aumentar as chances de venda em até 80%! 
+                      Mostre os animais em movimento, aparência geral e comportamento.
+                    </p>
                     <VideoUpload
                       onVideoSelect={setSelectedVideo}
                       selectedVideo={selectedVideo}
                     />
+                    <div className="mt-3 text-sm text-gray-400">
+                      <p>💡 Dicas para um bom vídeo:</p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Filme durante o dia com boa iluminação</li>
+                        <li>Mostre os animais de diferentes ângulos</li>
+                        <li>Inclua close-ups e visão geral do lote</li>
+                        <li>Máximo 2 minutos de duração</li>
+                      </ul>
+                    </div>
                   </div>
 
                   <div>
