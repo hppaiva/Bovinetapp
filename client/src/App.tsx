@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
 import AuthPage from "@/pages/auth";
 
+
 function Router() {
   // Sistema de autenticação restaurado do dia 27
   const userData = localStorage.getItem('user');
@@ -30,6 +31,7 @@ function Router() {
           <Route path="/dashboard" component={SimpleDashboard} />
           <Route path="/marketplace" component={Marketplace} />
           <Route path="/services" component={Services} />
+          <Route path="/freight" component={Services} />
           <Route path="/profile" component={Profile} />
           <Route component={NotFound} />
         </>

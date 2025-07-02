@@ -16,7 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
-import { FileText, UserCheck, Folder, Info, Clock } from "lucide-react";
+import { FileText, UserCheck, Folder, Info, Clock, Truck, Search } from "lucide-react";
 
 const gtaRequestSchema = z.object({
   farmName: z.string().min(1, "Nome da fazenda é obrigatório"),
@@ -126,13 +126,20 @@ export default function Services() {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 md:pb-8 pt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-container-bg">
+          <TabsList className="grid w-full grid-cols-4 mb-6 bg-container-bg">
             <TabsTrigger 
               value="gta" 
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
             >
               <FileText className="w-4 h-4 mr-2" />
               Emitir GTA
+            </TabsTrigger>
+            <TabsTrigger 
+              value="freight"
+              className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
+            >
+              <Truck className="w-4 h-4 mr-2" />
+              Frete
             </TabsTrigger>
             <TabsTrigger 
               value="veterinary"
