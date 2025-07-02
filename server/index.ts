@@ -1,27 +1,13 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
-import path from "path";
-import { fileURLToPath } from "url";
 import { pool } from "./db";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// Serve the Bovinet HTML file as the main page
-app.get('/', (req, res) => {
-  res.sendFile(path.resolve('bovinet-direto.html'));
-});
-
-app.get('/bovinet-direto.html', (req, res) => {
-  res.sendFile(path.resolve('bovinet-direto.html'));
-});
 
 // Configure session once in the main server file
 const PgSession = connectPgSimple(session);

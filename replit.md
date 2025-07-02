@@ -162,6 +162,10 @@ The application is configured for deployment on Replit with the following setup:
 - July 01, 2025. Seção "Buscar Frete" estilo AgroFreteConnect implementada
 - July 01, 2025. Sistema completo de avaliações e perfis de caminhoneiros
 - July 01, 2025. Todas as funcionalidades solicitadas 100% operacionais
+- July 01, 2025. RESTAURAÇÃO COMPLETA: Voltou à versão React funcional anterior
+- July 01, 2025. Sistema restaurado para estado anterior às mudanças de frete
+- July 01, 2025. App.tsx original restaurado com todas as rotas funcionando
+- July 01, 2025. Preview funcionando novamente com React + Vite
 
 ## User Preferences
 
