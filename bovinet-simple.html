@@ -12,8 +12,8 @@
         }
         
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1E2A38;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1E2A38 0%, #2A3A4A 100%);
             color: white;
             min-height: 100vh;
         }
@@ -25,15 +25,18 @@
         }
         
         .header {
-            background-color: #2A3A4A;
-            padding: 15px 0;
+            background: linear-gradient(90deg, #2A3A4A 0%, #1E2A38 50%, #2A3A4A 100%);
+            padding: 20px 0;
             margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
         .header h1 {
             color: #4CAF50;
-            font-size: 2.5rem;
+            font-size: 3rem;
             text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: bold;
         }
         
         .nav {
@@ -77,10 +80,17 @@
         }
         
         .card {
-            background-color: #2A3A4A;
+            background: linear-gradient(145deg, #2A3A4A 0%, #1E2A38 100%);
             border: 2px solid #4CAF50;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.2);
         }
         
         .card h3 {
@@ -111,19 +121,78 @@
         }
         
         .btn {
-            background-color: #4CAF50;
+            background: linear-gradient(45deg, #4CAF50 0%, #45a049 100%);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
+            padding: 14px 24px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
             width: 100%;
             margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
         }
         
         .btn:hover {
-            background-color: #45a049;
+            background: linear-gradient(45deg, #45a049 0%, #4CAF50 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-upload-label {
+            background: linear-gradient(45deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px dashed #FF6B35;
+        }
+        
+        .file-upload-label:hover {
+            background: linear-gradient(45deg, #F7931E 0%, #FF6B35 100%);
+            transform: translateY(-2px);
+        }
+        
+        .video-preview {
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .location-btn {
+            background: linear-gradient(45deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .location-btn:hover {
+            background: linear-gradient(45deg, #1976D2 0%, #2196F3 100%);
+            transform: translateY(-1px);
         }
         
         .stats {
@@ -195,12 +264,45 @@
 <body>
     <div class="header">
         <div class="container">
-            <h1>BOVINET</h1>
-            <p style="text-align: center; color: #ccc; margin-top: 10px;">Plataforma Completa para o Mercado de Gado</p>
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                <div style="width: 60px; height: 60px; margin-right: 15px; background: linear-gradient(45deg, #00BCD4, #4CAF50); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,188,212,0.3);">
+                    <svg width="40" height="40" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Caminhão -->
+                        <rect x="50" y="200" width="200" height="120" rx="15" fill="white" stroke="white" stroke-width="6"/>
+                        <rect x="250" y="220" width="80" height="100" rx="10" fill="white"/>
+                        
+                        <!-- Rodas -->
+                        <circle cx="100" cy="350" r="25" fill="white"/>
+                        <circle cx="100" cy="350" r="15" fill="#1E2A38"/>
+                        <circle cx="280" cy="350" r="25" fill="white"/>
+                        <circle cx="280" cy="350" r="15" fill="#1E2A38"/>
+                        
+                        <!-- Vaca dentro do caminhão -->
+                        <g transform="translate(80, 230)">
+                            <!-- Corpo da vaca -->
+                            <ellipse cx="60" cy="40" rx="45" ry="25" fill="white"/>
+                            <!-- Cabeça -->
+                            <ellipse cx="20" cy="35" rx="18" ry="15" fill="white"/>
+                            <!-- Chifres -->
+                            <path d="M10 25 L5 20 M30 25 L35 20" stroke="white" stroke-width="3" fill="none"/>
+                            <!-- Pernas -->
+                            <rect x="30" y="60" width="6" height="15" fill="white"/>
+                            <rect x="45" y="60" width="6" height="15" fill="white"/>
+                            <rect x="60" y="60" width="6" height="15" fill="white"/>
+                            <rect x="75" y="60" width="6" height="15" fill="white"/>
+                            <!-- Cauda -->
+                            <path d="M105 45 Q115 50 110 60" stroke="white" stroke-width="3" fill="none"/>
+                        </g>
+                    </svg>
+                </div>
+                <h1 style="margin: 0;">BOVINET</h1>
+            </div>
+            <p style="text-align: center; color: #ccc; margin-top: 5px;">Plataforma Completa para o Mercado de Gado</p>
             <div class="nav">
                 <button onclick="showSection('dashboard')" class="active" id="dashboard-btn">Dashboard</button>
                 <button onclick="showSection('marketplace')" id="marketplace-btn">Marketplace</button>
                 <button onclick="showSection('services')" id="services-btn">Serviços</button>
+                <button onclick="showSection('freight')" id="freight-btn">Buscar Frete</button>
             </div>
         </div>
     </div>
@@ -237,67 +339,236 @@
             <div class="grid">
                 <!-- Vender Gado -->
                 <div class="card">
-                    <h3>Vender Gado</h3>
+                    <h3>🐄 Vender Gado</h3>
                     <form onsubmit="publicarAnuncio(event)">
                         <div class="form-group">
-                            <label>Quantidade de Animais</label>
+                            <label>📊 Quantidade de Animais</label>
                             <input type="number" id="quantidade" placeholder="Ex: 50" required>
                         </div>
-                        <div class="form-group">
-                            <label>Sexo</label>
-                            <select id="sexo" required>
-                                <option value="">Selecione</option>
-                                <option value="macho">Macho</option>
-                                <option value="femea">Fêmea</option>
-                                <option value="misto">Misto</option>
-                            </select>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>🔢 Sexo</label>
+                                <select id="sexo" required>
+                                    <option value="">Selecione</option>
+                                    <option value="macho">Macho</option>
+                                    <option value="femea">Fêmea</option>
+                                    <option value="misto">Misto</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>🏷️ Aptidão</label>
+                                <select id="aptidao">
+                                    <option value="">Selecione</option>
+                                    <option value="corte">Corte</option>
+                                    <option value="leite">Leite</option>
+                                    <option value="dupla">Dupla Aptidão</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Peso Médio (kg)</label>
-                            <input type="number" id="peso" placeholder="Ex: 400" required>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>⚖️ Peso Médio (kg)</label>
+                                <input type="number" id="peso" placeholder="Ex: 400" required>
+                            </div>
+                            <div class="form-group">
+                                <label>🎂 Idade Média (meses)</label>
+                                <input type="number" id="idade" placeholder="Ex: 24">
+                            </div>
                         </div>
+                        
                         <div class="form-group">
-                            <label>Preço por Cabeça (R$)</label>
+                            <label>💰 Preço por Cabeça (R$)</label>
                             <input type="number" id="preco" placeholder="Ex: 2500" required>
                         </div>
+                        
                         <div class="form-group">
-                            <label>Localização</label>
-                            <input type="text" id="localizacao" placeholder="Cidade, Estado" required>
+                            <label>📍 Localização</label>
+                            <div style="display: flex; align-items: center;">
+                                <input type="text" id="localizacao" placeholder="Cidade, Estado" required style="flex: 1;">
+                                <button type="button" class="location-btn" onclick="obterLocalizacao()">
+                                    📍 GPS
+                                </button>
+                            </div>
                         </div>
-                        <button type="submit" class="btn">Publicar Anúncio</button>
+                        
+                        <div class="form-group">
+                            <label>🐎 Raça</label>
+                            <select id="raca">
+                                <option value="">Selecione a raça</option>
+                                <option value="nelore">Nelore</option>
+                                <option value="angus">Angus</option>
+                                <option value="brahman">Brahman</option>
+                                <option value="canchim">Canchim</option>
+                                <option value="simental">Simental</option>
+                                <option value="limousin">Limousin</option>
+                                <option value="charolês">Charolês</option>
+                                <option value="gir">Gir</option>
+                                <option value="holandês">Holandês</option>
+                                <option value="jersey">Jersey</option>
+                                <option value="mista">Mista</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>📝 Observações</label>
+                            <textarea id="observacoes-venda" placeholder="Informações adicionais sobre o lote..." rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>🎥 Vídeo dos Animais</label>
+                            <div class="file-upload">
+                                <input type="file" id="video-upload" accept="video/*" onchange="previewVideo(this)">
+                                <label for="video-upload" class="file-upload-label">
+                                    📹 Selecionar Vídeo (Recomendado)
+                                </label>
+                            </div>
+                            <div id="video-preview"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>📸 Fotos dos Animais</label>
+                            <div class="file-upload">
+                                <input type="file" id="fotos-upload" accept="image/*" multiple onchange="previewImages(this)">
+                                <label for="fotos-upload" class="file-upload-label">
+                                    📷 Selecionar Fotos
+                                </label>
+                            </div>
+                            <div id="fotos-preview"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn">🚀 Publicar Anúncio</button>
                     </form>
                 </div>
 
                 <!-- Comprar Gado -->
                 <div class="card">
-                    <h3>Comprar Gado</h3>
+                    <h3>🛒 Comprar Gado</h3>
+                    
+                    <!-- Filtros de Busca -->
+                    <div style="background-color: #1E2A38; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #4CAF50; margin-bottom: 10px;">🔍 Filtros de Busca</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <select id="filtro-sexo" onchange="filtrarLotes()">
+                                <option value="">Todos os Sexos</option>
+                                <option value="macho">Macho</option>
+                                <option value="femea">Fêmea</option>
+                                <option value="misto">Misto</option>
+                            </select>
+                            <select id="filtro-aptidao" onchange="filtrarLotes()">
+                                <option value="">Todas Aptidões</option>
+                                <option value="corte">Corte</option>
+                                <option value="leite">Leite</option>
+                                <option value="dupla">Dupla Aptidão</option>
+                            </select>
+                            <select id="filtro-raca" onchange="filtrarLotes()">
+                                <option value="">Todas as Raças</option>
+                                <option value="nelore">Nelore</option>
+                                <option value="angus">Angus</option>
+                                <option value="brahman">Brahman</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="filtro-cidade" placeholder="Filtrar por cidade..." style="flex: 1;" onchange="filtrarLotes()">
+                            <button type="button" class="location-btn" onclick="buscarPorDistancia()">
+                                📍 Buscar próximo a mim
+                            </button>
+                        </div>
+                    </div>
+                    
                     <p style="color: #ccc; margin-bottom: 20px;">Lotes Disponíveis</p>
                     
                     <div class="listing">
-                        <h4>Lote 01 - Nelore</h4>
-                        <p>🐄 50 cabeças • ⚖️ 400kg • 💰 R$ 2.500/cabeça</p>
-                        <p style="color: #888; font-size: 14px;">📍 Goiânia, GO</p>
-                        <button class="whatsapp-btn" onclick="contatarVendedor('5562999999999', 'Lote 01 Nelore')">
-                            💬 WhatsApp
-                        </button>
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <h4>Lote 01 - Nelore PO</h4>
+                                <p style="color: #888; font-size: 14px; margin-bottom: 8px;">👨‍🌾 João Carlos Silva • ⭐ 4.8 (89 avaliações)</p>
+                                <p>🐄 50 cabeças • ♂️ Machos • ⚖️ 420kg • 🎂 18-24 meses</p>
+                                <p>🏷️ Aptidão: Corte • 📍 Goiânia, GO (12 km de você)</p>
+                            </div>
+                            <div style="text-align: right; margin-left: 15px;">
+                                <div style="color: #4CAF50; font-weight: bold; font-size: 24px;">R$ 2.500</div>
+                                <div style="color: #888; font-size: 12px;">por cabeça</div>
+                                <div style="color: #4CAF50; font-size: 14px; margin-top: 4px;">Total: R$ 125.000</div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #ccc; font-size: 14px; margin-bottom: 8px;">📝 Animais de excelente qualidade, vacinados, com certificado de origem.</p>
+                            <div style="background-color: #1E2A38; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                                <video controls style="width: 100%; height: 200px; border-radius: 4px;" poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfjK4gVsOtZGVvIGRvcyBBbmltYWlzPC90ZXh0Pjwvc3ZnPg==">
+                                    <source src="#" type="video/mp4">
+                                    Seu navegador não suporta vídeo.
+                                </video>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="whatsapp-btn" onclick="contatarVendedor('5562999999999', 'Lote 01 Nelore PO', 'R$ 2.500/cabeça')" style="flex: 1;">
+                                💬 WhatsApp Vendedor
+                            </button>
+                            <button class="btn" onclick="verDetalhes('lote-01')" style="background-color: #666; width: auto; padding: 8px 16px;">
+                                👁️ Ver Detalhes
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="listing">
-                        <h4>Lote 02 - Angus</h4>
-                        <p>🐄 30 cabeças • ⚖️ 350kg • 💰 R$ 3.200/cabeça</p>
-                        <p style="color: #888; font-size: 14px;">📍 Campo Grande, MS</p>
-                        <button class="whatsapp-btn" onclick="contatarVendedor('5567888888888', 'Lote 02 Angus')">
-                            💬 WhatsApp
-                        </button>
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <h4>Lote 02 - Angus Red</h4>
+                                <p style="color: #888; font-size: 14px; margin-bottom: 8px;">👩‍🌾 Maria Santos • ⭐ 4.9 (156 avaliações)</p>
+                                <p>🐄 30 cabeças • ♀️ Fêmeas • ⚖️ 380kg • 🎂 20-30 meses</p>
+                                <p>🏷️ Aptidão: Corte • 📍 Campo Grande, MS (45 km de você)</p>
+                            </div>
+                            <div style="text-align: right; margin-left: 15px;">
+                                <div style="color: #4CAF50; font-weight: bold; font-size: 24px;">R$ 3.200</div>
+                                <div style="color: #888; font-size: 12px;">por cabeça</div>
+                                <div style="color: #4CAF50; font-size: 14px; margin-top: 4px;">Total: R$ 96.000</div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #ccc; font-size: 14px; margin-bottom: 8px;">📝 Fêmeas jovens, ideais para reprodução, com histórico genético completo.</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNDQ0Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfk7cgRm90byAxPC90ZXh0Pjwvc3ZnPg==" style="width: 100%; height: 100px; border-radius: 4px;">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNDQ0Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfk7cgRm90byAyPC90ZXh0Pjwvc3ZnPg==" style="width: 100%; height: 100px; border-radius: 4px;">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNDQ0Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfk7cgRm90byAzPC90ZXh0Pjwvc3ZnPg==" style="width: 100%; height: 100px; border-radius: 4px;">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="whatsapp-btn" onclick="contatarVendedor('5567888888888', 'Lote 02 Angus Red', 'R$ 3.200/cabeça')" style="flex: 1;">
+                                💬 WhatsApp Vendedor
+                            </button>
+                            <button class="btn" onclick="verDetalhes('lote-02')" style="background-color: #666; width: auto; padding: 8px 16px;">
+                                👁️ Ver Detalhes
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="listing">
-                        <h4>Lote 03 - Brahman</h4>
-                        <p>🐄 80 cabeças • ⚖️ 450kg • 💰 R$ 2.800/cabeça</p>
-                        <p style="color: #888; font-size: 14px;">📍 Uberlândia, MG</p>
-                        <button class="whatsapp-btn" onclick="contatarVendedor('5534777777777', 'Lote 03 Brahman')">
-                            💬 WhatsApp
-                        </button>
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <h4>Lote 03 - Brahman Cinza</h4>
+                                <p style="color: #888; font-size: 14px; margin-bottom: 8px;">👨‍🌾 Carlos Oliveira • ⭐ 4.7 (234 avaliações)</p>
+                                <p>🐄 80 cabeças • 🔀 Misto • ⚖️ 450kg • 🎂 24-36 meses</p>
+                                <p>🏷️ Aptidão: Dupla • 📍 Uberlândia, MG (89 km de você)</p>
+                            </div>
+                            <div style="text-align: right; margin-left: 15px;">
+                                <div style="color: #4CAF50; font-weight: bold; font-size: 24px;">R$ 2.800</div>
+                                <div style="color: #888; font-size: 12px;">por cabeça</div>
+                                <div style="color: #4CAF50; font-size: 14px; margin-top: 4px;">Total: R$ 224.000</div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #ccc; font-size: 14px; margin-bottom: 8px;">📝 Animais adaptados ao clima tropical, excelente conversão alimentar.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="whatsapp-btn" onclick="contatarVendedor('5534777777777', 'Lote 03 Brahman Cinza', 'R$ 2.800/cabeça')" style="flex: 1;">
+                                💬 WhatsApp Vendedor
+                            </button>
+                            <button class="btn" onclick="verDetalhes('lote-03')" style="background-color: #666; width: auto; padding: 8px 16px;">
+                                👁️ Ver Detalhes
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -314,11 +585,27 @@
                     <p style="color: #ccc; margin-bottom: 15px;">R$ 3,50 por quilômetro</p>
                     
                     <div class="form-group">
+                        <label>Origem</label>
+                        <input type="text" id="origem-frete" placeholder="Cidade de origem">
+                    </div>
+                    <div class="form-group">
+                        <label>Destino</label>
+                        <input type="text" id="destino-frete" placeholder="Cidade de destino">
+                    </div>
+                    <div class="form-group">
                         <label>Distância (km)</label>
                         <input type="number" id="distancia" placeholder="Ex: 400" oninput="calcularFrete()">
                     </div>
+                    <div class="form-group">
+                        <label>Peso da Carga (toneladas)</label>
+                        <input type="number" id="peso-carga" placeholder="Ex: 15" step="0.1">
+                    </div>
                     
                     <div id="resultado-frete"></div>
+                    
+                    <button type="button" class="btn" onclick="solicitarFrete()" style="margin-top: 15px;">
+                        Solicitar Frete
+                    </button>
                 </div>
 
                 <!-- Emitir GTA -->
@@ -344,6 +631,130 @@
                 </div>
             </div>
         </div>
+
+        <!-- Freight Section (AgroFreteConnect style) -->
+        <div id="freight" class="section">
+            <h2 style="color: #4CAF50; margin-bottom: 20px;">Buscar Frete - Estilo AgroFreteConnect</h2>
+            
+            <div class="card" style="margin-bottom: 20px;">
+                <h3>🚛 Solicitar Transporte</h3>
+                <form onsubmit="buscarFrete(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>🏁 Origem</label>
+                            <input type="text" id="origem-busca" placeholder="Cidade, Estado" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🎯 Destino</label>
+                            <input type="text" id="destino-busca" placeholder="Cidade, Estado" required>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>📦 Tipo de Carga</label>
+                            <select id="tipo-carga" required>
+                                <option value="">Selecione</option>
+                                <option value="gado-corte">Gado de Corte</option>
+                                <option value="gado-leite">Gado Leiteiro</option>
+                                <option value="suinos">Suínos</option>
+                                <option value="aves">Aves</option>
+                                <option value="grãos">Grãos</option>
+                                <option value="equipamentos">Equipamentos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>⚖️ Peso (toneladas)</label>
+                            <input type="number" id="peso-total" placeholder="Ex: 20" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Data</label>
+                            <input type="date" id="data-transporte" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📝 Observações</label>
+                        <textarea id="observacoes" placeholder="Informações adicionais sobre a carga..." rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="background-color: #FF6B35;">
+                        🔍 Buscar Caminhoneiros
+                    </button>
+                </form>
+            </div>
+
+            <!-- Caminhoneiros Disponíveis -->
+            <div id="caminhoneiros-lista">
+                <h3 style="color: #4CAF50; margin-bottom: 15px;">🚛 Caminhoneiros Disponíveis</h3>
+                
+                <div class="listing">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div>
+                            <h4>João Silva - Truck 3 Eixos</h4>
+                            <p style="color: #888; font-size: 14px;">⭐ 4.8 (127 avaliações) • 📍 Goiânia, GO</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #4CAF50; font-weight: bold; font-size: 18px;">R$ 1.400,00</div>
+                            <div style="color: #888; font-size: 12px;">400 km × R$ 3,50</div>
+                        </div>
+                    </div>
+                    <p style="margin-bottom: 10px;">🚛 Capacidade: 25t • 🛡️ Seguro total • 📋 Licenças em dia</p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="whatsapp-btn" onclick="contatarCaminhoneiro('5562988887777', 'João Silva', 'R$ 1.400,00')">
+                            💬 WhatsApp
+                        </button>
+                        <button class="btn" onclick="verPerfil('joao-silva')" style="background-color: #666; padding: 8px 15px; width: auto;">
+                            👤 Perfil
+                        </button>
+                    </div>
+                </div>
+
+                <div class="listing">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div>
+                            <h4>Carlos Mendes - Carreta LS</h4>
+                            <p style="color: #888; font-size: 14px;">⭐ 4.9 (89 avaliações) • 📍 Anápolis, GO</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #4CAF50; font-weight: bold; font-size: 18px;">R$ 1.350,00</div>
+                            <div style="color: #888; font-size: 12px;">380 km × R$ 3,55</div>
+                        </div>
+                    </div>
+                    <p style="margin-bottom: 10px;">🚛 Capacidade: 30t • 🛡️ Seguro total • 🏆 Caminhoneiro Premium</p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="whatsapp-btn" onclick="contatarCaminhoneiro('5562977776666', 'Carlos Mendes', 'R$ 1.350,00')">
+                            💬 WhatsApp
+                        </button>
+                        <button class="btn" onclick="verPerfil('carlos-mendes')" style="background-color: #666; padding: 8px 15px; width: auto;">
+                            👤 Perfil
+                        </button>
+                    </div>
+                </div>
+
+                <div class="listing">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div>
+                            <h4>Maria Santos - Truck Gaiola</h4>
+                            <p style="color: #888; font-size: 14px;">⭐ 4.7 (203 avaliações) • 📍 Aparecida de Goiânia, GO</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #4CAF50; font-weight: bold; font-size: 18px;">R$ 1.450,00</div>
+                            <div style="color: #888; font-size: 12px;">410 km × R$ 3,54</div>
+                        </div>
+                    </div>
+                    <p style="margin-bottom: 10px;">🚛 Especialista em gado • 🛡️ Seguro total • 🎯 100% entregas no prazo</p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="whatsapp-btn" onclick="contatarCaminhoneiro('5562966665555', 'Maria Santos', 'R$ 1.450,00')">
+                            💬 WhatsApp
+                        </button>
+                        <button class="btn" onclick="verPerfil('maria-santos')" style="background-color: #666; padding: 8px 15px; width: auto;">
+                            👤 Perfil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -365,21 +776,50 @@
 
         function calcularFrete() {
             const distancia = document.getElementById('distancia').value;
+            const pesoCarga = document.getElementById('peso-carga').value || 0;
             const resultado = document.getElementById('resultado-frete');
             
             if (distancia && distancia > 0) {
-                const valor = distancia * 3.50;
+                const valorBase = distancia * 3.50;
+                const adicionalPeso = pesoCarga > 20 ? (pesoCarga - 20) * 50 : 0;
+                const valorTotal = valorBase + adicionalPeso;
+                
                 resultado.innerHTML = `
                     <div class="calc-result">
-                        R$ ${valor.toFixed(2)}
+                        R$ ${valorTotal.toFixed(2)}
                         <div style="font-size: 0.8em; margin-top: 5px;">
-                            ${distancia} km × R$ 3,50/km
+                            ${distancia} km × R$ 3,50 = R$ ${valorBase.toFixed(2)}<br>
+                            ${pesoCarga > 20 ? `Adicional peso: R$ ${adicionalPeso.toFixed(2)}` : 'Peso dentro do limite (até 20t)'}
                         </div>
                     </div>
                 `;
             } else {
                 resultado.innerHTML = '';
             }
+        }
+
+        function solicitarFrete() {
+            const origem = document.getElementById('origem-frete').value;
+            const destino = document.getElementById('destino-frete').value;
+            const distancia = document.getElementById('distancia').value;
+            const peso = document.getElementById('peso-carga').value;
+            
+            if (!origem || !destino || !distancia) {
+                alert('Preencha origem, destino e distância para solicitar o frete.');
+                return;
+            }
+            
+            const valorBase = distancia * 3.50;
+            const adicionalPeso = peso > 20 ? (peso - 20) * 50 : 0;
+            const valorTotal = valorBase + adicionalPeso;
+            
+            alert(`Solicitação de Frete Enviada!\n\n` +
+                  `Origem: ${origem}\n` +
+                  `Destino: ${destino}\n` +
+                  `Distância: ${distancia} km\n` +
+                  `Peso: ${peso || 'Não informado'} toneladas\n` +
+                  `Valor: R$ ${valorTotal.toFixed(2)}\n\n` +
+                  `Caminhoneiros próximos serão notificados via WhatsApp!`);
         }
 
         function publicarAnuncio(event) {
@@ -418,10 +858,224 @@
             event.target.reset();
         }
 
-        function contatarVendedor(telefone, lote) {
-            const mensagem = encodeURIComponent(`Olá! Tenho interesse no ${lote} anunciado no Bovinet. Poderia me passar mais informações?`);
+        function contatarVendedor(telefone, lote, preco) {
+            const mensagem = encodeURIComponent(`Olá! Tenho interesse no ${lote} anunciado no Bovinet por ${preco || 'preço a consultar'}. Poderia me passar mais informações sobre os animais?`);
             const url = `https://wa.me/${telefone}?text=${mensagem}`;
             window.open(url, '_blank');
+        }
+
+        function contatarCaminhoneiro(telefone, nome, valor) {
+            const mensagem = encodeURIComponent(`Olá ${nome}! Vi seu perfil no Bovinet e tenho interesse no frete por ${valor}. Podemos conversar sobre os detalhes?`);
+            const url = `https://wa.me/${telefone}?text=${mensagem}`;
+            window.open(url, '_blank');
+        }
+
+        function previewVideo(input) {
+            const preview = document.getElementById('video-preview');
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const fileURL = URL.createObjectURL(file);
+                
+                preview.innerHTML = `
+                    <div class="video-preview">
+                        <video controls style="width: 100%; max-height: 250px; border-radius: 8px;">
+                            <source src="${fileURL}" type="${file.type}">
+                            Seu navegador não suporta vídeo.
+                        </video>
+                        <p style="color: #4CAF50; font-size: 12px; margin-top: 5px;">
+                            ✅ Vídeo selecionado: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function previewImages(input) {
+            const preview = document.getElementById('fotos-preview');
+            if (input.files && input.files.length > 0) {
+                let imagesHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 10px;">';
+                
+                Array.from(input.files).forEach((file, index) => {
+                    const fileURL = URL.createObjectURL(file);
+                    imagesHTML += `
+                        <div style="position: relative;">
+                            <img src="${fileURL}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 6px; border: 2px solid #4CAF50;">
+                            <div style="position: absolute; top: 2px; right: 2px; background: #4CAF50; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px;">
+                                ${index + 1}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                imagesHTML += '</div>';
+                imagesHTML += `<p style="color: #4CAF50; font-size: 12px; margin-top: 5px;">✅ ${input.files.length} foto(s) selecionada(s)</p>`;
+                preview.innerHTML = imagesHTML;
+            }
+        }
+
+        function obterLocalizacao() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        try {
+                            // Simular reverse geocoding (em produção, usaria uma API real)
+                            const cidades = [
+                                "Goiânia, GO", "Campo Grande, MS", "Uberlândia, MG", 
+                                "Brasília, DF", "Cuiabá, MT", "Anápolis, GO"
+                            ];
+                            const cidadeAleatoria = cidades[Math.floor(Math.random() * cidades.length)];
+                            
+                            document.getElementById('localizacao').value = cidadeAleatoria;
+                            
+                            // Feedback visual
+                            const btn = event.target;
+                            const originalText = btn.innerHTML;
+                            btn.innerHTML = '✅ Localização obtida!';
+                            btn.style.backgroundColor = '#4CAF50';
+                            
+                            setTimeout(() => {
+                                btn.innerHTML = originalText;
+                                btn.style.backgroundColor = '#2196F3';
+                            }, 2000);
+                            
+                        } catch (error) {
+                            alert('Erro ao obter endereço. Por favor, digite manualmente.');
+                        }
+                    },
+                    function(error) {
+                        let mensagem;
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                mensagem = "Permissão negada para acessar localização.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                mensagem = "Localização não disponível.";
+                                break;
+                            case error.TIMEOUT:
+                                mensagem = "Tempo limite excedido.";
+                                break;
+                            default:
+                                mensagem = "Erro desconhecido.";
+                                break;
+                        }
+                        alert(mensagem + " Por favor, digite sua localização manualmente.");
+                    }
+                );
+            } else {
+                alert("Geolocalização não é suportada neste navegador. Digite sua localização manualmente.");
+            }
+        }
+
+        function buscarPorDistancia() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        alert(`Buscando lotes em um raio de 50km da sua localização...\n\nEncontrados 3 lotes próximos:\n- Lote 01: 12km\n- Lote 02: 45km\n- Lote 03: 89km`);
+                        
+                        // Simular ordenação por distância
+                        const listings = document.querySelectorAll('.listing');
+                        listings.forEach((listing, index) => {
+                            const distancias = ['12 km', '45 km', '89 km'];
+                            const distanciaText = listing.querySelector('p:last-of-type');
+                            if (distanciaText) {
+                                distanciaText.innerHTML = distanciaText.innerHTML.replace(/\(\d+ km de você\)/, `(${distancias[index]} de você)`);
+                            }
+                        });
+                    },
+                    function(error) {
+                        alert("Não foi possível obter sua localização. Mostrando todos os lotes disponíveis.");
+                    }
+                );
+            }
+        }
+
+        function filtrarLotes() {
+            const sexoFiltro = document.getElementById('filtro-sexo').value;
+            const aptidaoFiltro = document.getElementById('filtro-aptidao').value;
+            const racaFiltro = document.getElementById('filtro-raca').value;
+            const cidadeFiltro = document.getElementById('filtro-cidade').value.toLowerCase();
+            
+            // Simular filtros (em produção, faria requisição ao backend)
+            alert(`Filtros aplicados:\n${sexoFiltro ? '- Sexo: ' + sexoFiltro + '\n' : ''}${aptidaoFiltro ? '- Aptidão: ' + aptidaoFiltro + '\n' : ''}${racaFiltro ? '- Raça: ' + racaFiltro + '\n' : ''}${cidadeFiltro ? '- Cidade: ' + cidadeFiltro + '\n' : ''}\nResultados atualizados!`);
+        }
+
+        function verDetalhes(loteId) {
+            const detalhes = {
+                'lote-01': {
+                    titulo: 'Lote 01 - Nelore PO',
+                    detalhes: 'Animais com certificado de origem, vacinação completa, peso uniforme entre 400-440kg. Ideais para engorda ou reprodução.'
+                },
+                'lote-02': {
+                    titulo: 'Lote 02 - Angus Red',
+                    detalhes: 'Fêmeas jovens, primeira cria, excelente histórico genético. Todas prenhas confirmadas por ultrassom.'
+                },
+                'lote-03': {
+                    titulo: 'Lote 03 - Brahman Cinza',
+                    detalhes: 'Animais adaptados ao clima tropical, ótima conversão alimentar, mansos e fáceis de manejar.'
+                }
+            };
+            
+            const lote = detalhes[loteId];
+            if (lote) {
+                alert(`${lote.titulo}\n\n${lote.detalhes}\n\nPara mais informações e visita à propriedade, entre em contato via WhatsApp.`);
+            }
+        }
+
+        function verPerfil(caminhoneiroId) {
+            const perfis = {
+                'joao-silva': {
+                    nome: 'João Silva',
+                    detalhes: 'Caminhoneiro há 15 anos, especialista em transporte de gado. Caminhão próprio, seguro completo, licenças em dia.'
+                },
+                'carlos-mendes': {
+                    nome: 'Carlos Mendes',
+                    detalhes: 'Caminhoneiro Premium com 20 anos de experiência. Frota própria de 3 veículos, 100% de entregas no prazo.'
+                },
+                'maria-santos': {
+                    nome: 'Maria Santos',
+                    detalhes: 'Especialista em transporte de gado leiteiro e de corte. Veículo climatizado, rastreamento em tempo real.'
+                }
+            };
+            
+            const perfil = perfis[caminhoneiroId];
+            if (perfil) {
+                alert(`Perfil: ${perfil.nome}\n\n${perfil.detalhes}\n\nAvaliações verificadas de clientes anteriores disponíveis no WhatsApp.`);
+            }
+        }
+
+        function buscarFrete(event) {
+            event.preventDefault();
+            
+            const origem = document.getElementById('origem-busca').value;
+            const destino = document.getElementById('destino-busca').value;
+            const tipoCarga = document.getElementById('tipo-carga').value;
+            const peso = document.getElementById('peso-total').value;
+            const data = document.getElementById('data-transporte').value;
+            const observacoes = document.getElementById('observacoes').value;
+            
+            // Simular busca de caminhoneiros
+            const loadingMsg = "🔍 Buscando caminhoneiros disponíveis...\n\n" +
+                              "📡 Enviando alertas via WhatsApp...\n" +
+                              "📍 Calculando rotas e preços...\n" +
+                              "⏰ Processando disponibilidade...";
+            
+            alert(loadingMsg);
+            
+            setTimeout(() => {
+                alert(`✅ Busca concluída!\n\n` +
+                      `📋 Rota: ${origem} → ${destino}\n` +
+                      `📦 Carga: ${tipoCarga}\n` +
+                      `⚖️ Peso: ${peso}t\n` +
+                      `📅 Data: ${data}\n\n` +
+                      `🚛 3 caminhoneiros encontrados e notificados!\n` +
+                      `💬 Eles entrarão em contato via WhatsApp em breve.`);
+                
+                // Limpar formulário
+                event.target.reset();
+            }, 2000);
         }
     </script>
 </body>
