@@ -34,6 +34,7 @@ const listingSchema = z.object({
   aptitude: z.enum(["corte", "leite"], { required_error: "Aptidão é obrigatória" }),
   description: z.string().optional(),
   city: z.string().min(1, "Cidade é obrigatória"),
+  state: z.string().min(1, "Estado é obrigatório"),
 });
 
 type ListingForm = z.infer<typeof listingSchema>;
@@ -506,12 +507,12 @@ export default function Marketplace() {
             <div className="space-y-6">
               {loadingListings ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-green mx-auto"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-green mx-auto loading-pulse"></div>
                   <p className="text-secondary mt-4">Carregando anúncios...</p>
                 </div>
               ) : listings?.listings?.length > 0 ? (
                 listings.listings.map((listing: any) => (
-                  <Card key={listing.id} className="bg-white text-gray-900 overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                  <Card key={listing.id} className="card-enhanced bg-white text-gray-900 overflow-hidden">
                     <div className="md:flex">
                       <div className="md:w-1/3">
                         {listing.videoUrl ? (
@@ -621,7 +622,7 @@ export default function Marketplace() {
 
                         <div className="space-y-2">
                           <Button 
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
+                            className="btn-primary w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
                             onClick={() => {
                               const message = `🐄 Olá! Vi seu anúncio no Bovinet:
 
@@ -658,7 +659,7 @@ Tenho interesse! Podemos conversar?`;
 
           {/* Sell Tab */}
           <TabsContent value="sell">
-            <Card className="bg-container-bg border-gray-600">
+            <Card className="bg-container-bg border-gray-600 form-enhanced">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
@@ -930,9 +931,16 @@ Tenho interesse! Podemos conversar?`;
                     <Button
                       type="submit"
                       disabled={createListingMutation.isPending}
-                      className="flex-1 bg-accent-green hover:bg-green-600 text-white"
+                      className="btn-primary flex-1 bg-accent-green hover:bg-green-600 text-white"
                     >
-                      {createListingMutation.isPending ? "Publicando..." : "Publicar Anúncio"}
+                      {createListingMutation.isPending ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Publicando...
+                        </div>
+                      ) : (
+                        "🚀 Publicar Anúncio"
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -943,9 +951,9 @@ Tenho interesse! Podemos conversar?`;
           {/* My Listings Tab */}
           <TabsContent value="my-listings">
             <div className="space-y-4">
-              {userListings?.listings?.length > 0 ? (
-                userListings.listings.map((listing: any) => (
-                  <Card key={listing.id} className="bg-container-bg border-gray-600">
+              {userListings?.length > 0 ? (
+                userListings.map((listing: any) => (
+                  <Card key={listing.id} className="card-enhanced bg-container-bg border-gray-600">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>

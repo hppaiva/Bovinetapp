@@ -24,13 +24,19 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
 
-  /* Bovinet specific colors */
+  /* Bovinet specific colors - Optimized */
   --primary-bg: hsl(212, 38%, 23%);
   --container-bg: hsl(217, 28%, 31%);
   --accent-green: hsl(141, 64%, 58%);
   --accent-red: hsl(1, 100%, 68%);
   --success-green: hsl(142, 100%, 50%);
   --text-secondary: hsl(200, 7%, 70%);
+  
+  /* Enhanced gradients and shadows */
+  --gradient-primary: linear-gradient(135deg, hsl(141, 64%, 58%) 0%, hsl(141, 64%, 48%) 100%);
+  --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(0, 0%, 98%) 100%);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .dark {
@@ -131,4 +137,50 @@
 
 .nav-item:hover:not(.active) {
   color: hsl(0, 0%, 98%);
+}
+
+/* Enhanced card styling */
+.card-enhanced {
+  background: var(--gradient-card);
+  box-shadow: var(--shadow-card);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.card-enhanced:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* Enhanced button styling */
+.btn-primary {
+  background: var(--gradient-primary);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+/* Loading animations */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Enhanced form styling */
+.form-enhanced input, .form-enhanced textarea, .form-enhanced select {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.form-enhanced input:focus, .form-enhanced textarea:focus, .form-enhanced select:focus {
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+  transform: translateY(-1px);
 }

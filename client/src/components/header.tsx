@@ -18,18 +18,17 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-container-bg border-b border-gray-600 sticky top-0 z-50">
+    <header className="bg-container-bg border-b border-gray-600 sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <img 
-                src="/logo.png" 
-                alt="Bovinet Logo" 
-                className="w-full h-full object-contain"
-              />
+            <div className="w-10 h-10 bg-gradient-to-br from-accent-green to-green-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-lg">🐄</span>
             </div>
-            <h1 className="text-xl font-bold text-white">Bovinet</h1>
+            <div>
+              <h1 className="text-xl font-bold text-white">Bovinet</h1>
+              <p className="text-xs text-gray-400">Marketplace do Gado</p>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
