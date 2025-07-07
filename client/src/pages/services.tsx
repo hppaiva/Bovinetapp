@@ -16,7 +16,16 @@ import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
-import { FileText, UserCheck, Folder, Info, Clock, Truck, Search } from "lucide-react";
+import { FileText, UserCheck, Folder, Info, Clock, Truck, Search, MapPin, Calculator, MessageCircle } from "lucide-react";
+
+const freightRequestSchema = z.object({
+  originAddress: z.string().min(1, "Endereço de origem é obrigatório"),
+  destinationAddress: z.string().min(1, "Destino é obrigatório"),
+  animalQuantity: z.number().min(1, "Quantidade deve ser maior que 0"),
+  animalAge: z.enum(["ate12", "12a24", "24a36", "36a48"], { required_error: "Idade é obrigatória" }),
+  preferredDate: z.string().optional(),
+  observations: z.string().optional(),
+});
 
 const gtaRequestSchema = z.object({
   farmName: z.string().min(1, "Nome da fazenda é obrigatório"),
@@ -36,10 +45,15 @@ const gtaRequestSchema = z.object({
   observations: z.string().optional(),
 });
 
+type FreightRequestForm = z.infer<typeof freightRequestSchema>;
 type GTARequestForm = z.infer<typeof gtaRequestSchema>;
 
 export default function Services() {
-  const [activeTab, setActiveTab] = useState("gta");
+  const [activeTab, setActiveTab] = useState("freight");
+  const [distance, setDistance] = useState("");
+  const [freightPrice, setFreightPrice] = useState(0);
+  const [originCoordinates, setOriginCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [destinationCoordinates, setDestinationCoordinates] = useState<{ lat: number; lng: number } | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -50,6 +64,23 @@ export default function Services() {
   const { data: gtaRequests } = useQuery({
     queryKey: ["/api/gta-requests", user?.user?.id],
     enabled: !!user?.user?.id,
+  });
+
+  const { data: freightRequests } = useQuery({
+    queryKey: ["/api/freight-requests", user?.user?.id],
+    enabled: !!user?.user?.id,
+  });
+
+  const freightForm = useForm<FreightRequestForm>({
+    resolver: zodResolver(freightRequestSchema),
+    defaultValues: {
+      originAddress: "",
+      destinationAddress: "",
+      animalQuantity: 1,
+      animalAge: "ate12" as any,
+      preferredDate: "",
+      observations: "",
+    },
   });
 
   const gtaForm = useForm<GTARequestForm>({
@@ -66,6 +97,39 @@ export default function Services() {
       destinationOwner: "",
       destinationDocument: "",
       observations: "",
+    },
+  });
+
+  const createFreightRequestMutation = useMutation({
+    mutationFn: async (data: FreightRequestForm) => {
+      const requestData = {
+        ...data,
+        originLatitude: originCoordinates?.lat,
+        originLongitude: originCoordinates?.lng,
+        destinationLatitude: destinationCoordinates?.lat,
+        destinationLongitude: destinationCoordinates?.lng,
+        preferredDate: data.preferredDate ? new Date(data.preferredDate).toISOString() : null,
+      };
+      
+      const response = await apiRequest("POST", "/api/freight-requests", requestData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/freight-requests"] });
+      toast({
+        title: "🚚 Solicitação de frete enviada!",
+        description: "Transportadores próximos serão notificados via WhatsApp",
+      });
+      freightForm.reset();
+      setOriginCoordinates(null);
+      setDestinationCoordinates(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao solicitar frete",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -95,10 +159,61 @@ export default function Services() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get("tab");
-    if (tab && ["gta", "veterinary", "documents"].includes(tab)) {
+    if (tab && ["freight", "gta", "veterinary", "documents"].includes(tab)) {
       setActiveTab(tab);
     }
   }, []);
+
+  // Calculate freight price
+  const calculateFreight = () => {
+    const dist = parseFloat(distance);
+    if (dist > 0) {
+      const pricePerKm = 3.50; // R$ 3,50 por km
+      const totalPrice = dist * pricePerKm;
+      setFreightPrice(totalPrice);
+      
+      toast({
+        title: "Cálculo realizado!",
+        description: `Distância: ${dist}km • Preço: R$ ${totalPrice.toFixed(2)}`,
+      });
+    }
+  };
+
+  // Get current location
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setOriginCoordinates(coords);
+          
+          // Reverse geocoding simulation
+          freightForm.setValue("originAddress", `Localização atual: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+          
+          toast({
+            title: "Localização obtida!",
+            description: "Sua localização atual foi definida como origem",
+          });
+        },
+        () => {
+          toast({
+            title: "Erro de localização",
+            description: "Não foi possível obter sua localização",
+            variant: "destructive",
+          });
+        }
+      );
+    } else {
+      toast({
+        title: "Localização não suportada",
+        description: "Seu navegador não suporta geolocalização",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -128,34 +243,278 @@ export default function Services() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6 bg-container-bg">
             <TabsTrigger 
-              value="gta" 
-              className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              Emitir GTA
-            </TabsTrigger>
-            <TabsTrigger 
               value="freight"
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
             >
               <Truck className="w-4 h-4 mr-2" />
-              Frete
+              🚚 Frete
+            </TabsTrigger>
+            <TabsTrigger 
+              value="gta" 
+              className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              📄 GTA
             </TabsTrigger>
             <TabsTrigger 
               value="veterinary"
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
             >
               <UserCheck className="w-4 h-4 mr-2" />
-              Veterinários
+              👨‍⚕️ Veterinários
             </TabsTrigger>
             <TabsTrigger 
               value="documents"
               className="data-[state=active]:bg-accent-green data-[state=active]:text-white"
             >
               <Folder className="w-4 h-4 mr-2" />
-              Documentos
+              📁 Documentos
             </TabsTrigger>
           </TabsList>
+
+          {/* Freight Tab */}
+          <TabsContent value="freight" className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Freight Request Form */}
+              <Card className="card-enhanced bg-container-bg border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Search className="w-5 h-5 mr-2" />
+                    Solicitar Transporte de Gado
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={freightForm.handleSubmit((data) => createFreightRequestMutation.mutate(data))} className="form-enhanced space-y-6">
+                    <div>
+                      <Label className="text-white flex items-center mb-2">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Localização de Origem *
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          {...freightForm.register("originAddress")}
+                          placeholder="Digite seu endereço ou cidade"
+                          className="flex-1 bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                        />
+                        <Button
+                          type="button"
+                          onClick={getCurrentLocation}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3"
+                        >
+                          📍 GPS
+                        </Button>
+                      </div>
+                      {freightForm.formState.errors.originAddress && (
+                        <p className="text-accent-red text-sm mt-1">
+                          {freightForm.formState.errors.originAddress.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label className="text-white flex items-center mb-2">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Destino *
+                      </Label>
+                      <Input
+                        {...freightForm.register("destinationAddress")}
+                        placeholder="Para onde você quer transportar?"
+                        className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                      />
+                      {freightForm.formState.errors.destinationAddress && (
+                        <p className="text-accent-red text-sm mt-1">
+                          {freightForm.formState.errors.destinationAddress.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white">Quantidade de Animais *</Label>
+                        <Input
+                          {...freightForm.register("animalQuantity", { valueAsNumber: true })}
+                          type="number"
+                          placeholder="Ex: 50"
+                          className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                        />
+                        {freightForm.formState.errors.animalQuantity && (
+                          <p className="text-accent-red text-sm mt-1">
+                            {freightForm.formState.errors.animalQuantity.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label className="text-white">Idade dos Animais *</Label>
+                        <Select onValueChange={(value) => freightForm.setValue("animalAge", value as any)}>
+                          <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ate12">Até 12 meses</SelectItem>
+                            <SelectItem value="12a24">12 a 24 meses</SelectItem>
+                            <SelectItem value="24a36">24 a 36 meses</SelectItem>
+                            <SelectItem value="36a48">36 a 48 meses</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {freightForm.formState.errors.animalAge && (
+                          <p className="text-accent-red text-sm mt-1">
+                            {freightForm.formState.errors.animalAge.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Data Preferencial</Label>
+                      <Input
+                        {...freightForm.register("preferredDate")}
+                        type="date"
+                        className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-white">Observações</Label>
+                      <Textarea
+                        {...freightForm.register("observations")}
+                        rows={3}
+                        placeholder="Informações adicionais sobre o transporte..."
+                        className="bg-primary-bg border-gray-600 text-white focus:border-accent-green resize-none"
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={createFreightRequestMutation.isPending}
+                      className="btn-primary w-full bg-accent-green hover:bg-green-600 text-white py-3"
+                    >
+                      {createFreightRequestMutation.isPending ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Enviando...
+                        </div>
+                      ) : (
+                        "🚚 Solicitar Frete Agora"
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Freight Calculator */}
+              <Card className="card-enhanced bg-container-bg border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Calculator className="w-5 h-5 mr-2" />
+                    Calculadora de Frete
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <Label className="text-white">Distância (km)</Label>
+                    <Input
+                      type="number"
+                      value={distance}
+                      onChange={(e) => setDistance(e.target.value)}
+                      placeholder="Ex: 400"
+                      className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={calculateFreight}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={!distance || parseFloat(distance) <= 0}
+                  >
+                    <Calculator className="mr-2" size={16} />
+                    Calcular Frete
+                  </Button>
+
+                  {freightPrice > 0 && (
+                    <div className="bg-green-100 p-4 rounded-lg border border-green-300">
+                      <h4 className="font-semibold text-green-800 mb-2">💰 Resultado do Cálculo</h4>
+                      <div className="text-green-700 space-y-1">
+                        <p>📏 Distância: {distance} km</p>
+                        <p>💵 Preço por km: R$ 3,50</p>
+                        <p className="text-lg font-bold">🎯 Total estimado: R$ {freightPrice.toFixed(2)}</p>
+                      </div>
+                      <p className="text-xs text-green-600 mt-2">
+                        * Valor estimado. Preço final pode variar conforme negociação.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 mb-2">ℹ️ Como funciona</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Valor base: R$ 3,50 por quilômetro</li>
+                      <li>• Inclui combustível e pedágio</li>
+                      <li>• Transportadores verificados</li>
+                      <li>• Notificação automática via WhatsApp</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Freight Requests History */}
+            {freightRequests?.requests?.length > 0 && (
+              <Card className="card-enhanced bg-container-bg border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <List className="w-5 h-5 mr-2" />
+                    Suas Solicitações de Frete
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {freightRequests.requests.map((request: any) => (
+                      <div key={request.id} className="bg-primary-bg p-4 rounded-lg border border-gray-600">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="text-white font-semibold">
+                              {request.originAddress} → {request.destinationAddress}
+                            </h4>
+                            <p className="text-gray-400 text-sm">
+                              {request.animalQuantity} animais • {new Date(request.createdAt).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                          <Badge className={
+                            request.status === 'pending' ? "bg-yellow-500 text-yellow-900" :
+                            request.status === 'matched' ? "bg-blue-500 text-blue-900" :
+                            request.status === 'completed' ? "bg-green-500 text-green-900" :
+                            "bg-gray-500 text-gray-900"
+                          }>
+                            {request.status === 'pending' ? "⏳ Aguardando" :
+                             request.status === 'matched' ? "🚛 Transportador encontrado" :
+                             request.status === 'completed' ? "✅ Concluído" :
+                             "❓ Status desconhecido"}
+                          </Badge>
+                        </div>
+
+                        {request.matchedTruckerId && (
+                          <div className="mt-3 p-3 bg-green-100 rounded-lg">
+                            <p className="text-green-800 font-semibold">🚛 Transportador encontrado!</p>
+                            <Button
+                              className="mt-2 bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => {
+                                const message = `Olá! Sobre o frete de ${request.animalQuantity} animais de ${request.originAddress} para ${request.destinationAddress}. Gostaria de confirmar o transporte.`;
+                                window.open(`https://wa.me/5534991195042?text=${encodeURIComponent(message)}`, '_blank');
+                              }}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Falar no WhatsApp
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
           {/* GTA Tab */}
           <TabsContent value="gta" className="space-y-8">
