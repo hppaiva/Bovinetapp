@@ -23,7 +23,8 @@ import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
 import VideoUpload from "@/components/video-upload";
 import LocationPicker from "@/components/location-picker";
-import { Search, Plus, List, MapPin, MessageCircle, Play, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Plus, List, MapPin, MessageCircle, Play, Eye, Gavel, TrendingUp } from "lucide-react";
 
 const listingSchema = z.object({
   quantity: z.number().min(1, "Quantidade deve ser maior que 0"),
@@ -59,6 +60,8 @@ export default function Marketplace() {
   const [sliderDistance, setSliderDistance] = useState(100);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [bidListing, setBidListing] = useState<any | null>(null);
+  const [bidAmount, setBidAmount] = useState<string>("");
 
   const queryClient = useQueryClient();
 
@@ -151,6 +154,38 @@ export default function Marketplace() {
         return { listings: [] };
       }
       return response.json();
+    },
+  });
+
+  const { data: bidsData, refetch: refetchBids } = useQuery({
+    queryKey: ["/api/listings", bidListing?.id, "bids"],
+    enabled: !!bidListing?.id,
+    queryFn: async () => {
+      const response = await fetch(`/api/listings/${bidListing.id}/bids`, { credentials: "include" });
+      if (!response.ok) return { bids: [] };
+      return response.json();
+    },
+  });
+
+  const createBidMutation = useMutation({
+    mutationFn: async ({ listingId, amount }: { listingId: number; amount: number }) => {
+      const response = await fetch(`/api/listings/${listingId}/bids`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ amount }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Erro ao registrar lance");
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: "Lance registrado!", description: "Seu lance foi registrado com sucesso." });
+      setBidAmount("");
+      refetchBids();
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
     },
   });
 
@@ -681,10 +716,19 @@ export default function Marketplace() {
                               R$ {Number(listing.pricePerHead).toLocaleString('pt-BR')}
                             </span>
                           </div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm text-gray-600">📏 Preço por arroba:</span>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm text-gray-600">📏 Preço por arroba (@):</span>
                             <span className="font-semibold text-green-700">
-                              R$ {calculateArrobaPrice(Number(listing.pricePerHead), Number(listing.weight)).toFixed(2)}
+                              R$ {calculateArrobaPrice(Number(listing.weight), Number(listing.pricePerHead)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">⚖️ Preço por kg:</span>
+                            <span className="font-semibold text-green-700">
+                              R$ {Number(listing.weight) > 0
+                                ? (Number(listing.pricePerHead) / Number(listing.weight)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                : "—"}
+                              /kg
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
@@ -703,24 +747,15 @@ export default function Marketplace() {
                         </div>
 
                         <div className="space-y-2">
-                          <Button 
-                            className="btn-primary w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
+                          <Button
+                            className="btn-primary w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3"
                             onClick={() => {
-                              const message = `🐄 Olá! Vi seu anúncio no Bovinet:
-
-📋 *${listing.title || `Lote ${listing.id.toString().padStart(2, '0')}`}*
-📍 *Local:* ${listing.city}, ${listing.state || 'SP'}
-🔢 *Quantidade:* ${listing.quantity} animais (${listing.sex})
-💰 *Preço:* R$ ${Number(listing.pricePerHead).toLocaleString('pt-BR')}/cabeça
-💵 *Total:* R$ ${(Number(listing.pricePerHead) * listing.quantity).toLocaleString('pt-BR')}
-
-Tenho interesse! Podemos conversar?`;
-                              const whatsappUrl = generateWhatsAppLink("5534991195042", message);
-                              window.open(whatsappUrl, "_blank");
+                              setBidListing(listing);
+                              setBidAmount("");
                             }}
                           >
-                            <MessageCircle className="w-5 h-5 mr-2" />
-                            💬 Tenho Interesse - WhatsApp
+                            <Gavel className="w-5 h-5 mr-2" />
+                            🔨 Ofertar Lance
                           </Button>
                         </div>
                       </div>
@@ -738,6 +773,96 @@ Tenho interesse! Podemos conversar?`;
               )}
             </div>
           </TabsContent>
+
+          {/* Bid Dialog */}
+          <Dialog open={!!bidListing} onOpenChange={(open) => { if (!open) setBidListing(null); }}>
+            <DialogContent className="bg-container-bg border-gray-600 text-white max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  <Gavel className="w-5 h-5 text-amber-400" />
+                  Ofertar Lance — {bidListing?.title || `Lote ${bidListing?.id?.toString().padStart(2, '0')}`}
+                </DialogTitle>
+              </DialogHeader>
+
+              {/* Price reference */}
+              <div className="bg-green-900/30 border border-green-600 rounded-lg p-3 text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Lance inicial (preço tabela):</span>
+                  <span className="font-bold text-green-400">R$ {Number(bidListing?.pricePerHead || 0).toLocaleString('pt-BR')}/cab</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Preço por arroba (@):</span>
+                  <span className="font-semibold text-green-300">
+                    R$ {bidListing ? calculateArrobaPrice(Number(bidListing.weight), Number(bidListing.pricePerHead)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-300">Preço por kg:</span>
+                  <span className="font-semibold text-green-300">
+                    R$ {bidListing && Number(bidListing.weight) > 0 ? (Number(bidListing.pricePerHead) / Number(bidListing.weight)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}/kg
+                  </span>
+                </div>
+              </div>
+
+              {/* Current bids */}
+              <div>
+                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-amber-400" />
+                  Lances atuais {bidsData?.bids?.length > 0 ? `(${bidsData.bids.length})` : ""}
+                </h4>
+                {bidsData?.bids?.length > 0 ? (
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {bidsData.bids.map((bid: any, idx: number) => (
+                      <div key={bid.id} className={`flex justify-between items-center p-2 rounded ${idx === 0 ? "bg-amber-900/50 border border-amber-600" : "bg-gray-800/50"}`}>
+                        <span className="text-gray-300 text-sm">
+                          {idx === 0 && "🏆 "}{bid.bidderInitial}***
+                        </span>
+                        <span className={`font-bold ${idx === 0 ? "text-amber-400" : "text-gray-300"}`}>
+                          R$ {Number(bid.amount).toLocaleString('pt-BR')}
+                          {idx === 0 && <span className="text-xs ml-1 text-amber-300">— maior lance</span>}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm">Nenhum lance ainda. Seja o primeiro!</p>
+                )}
+              </div>
+
+              {/* Bid form */}
+              <div className="space-y-3">
+                <Label className="text-white">Seu lance por cabeça (R$)</Label>
+                <Input
+                  type="number"
+                  placeholder="Ex: 3500"
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  className="bg-primary-bg border-gray-600 text-white text-lg"
+                  min={1}
+                />
+                {bidAmount && Number(bidAmount) > 0 && bidListing && (
+                  <div className="text-xs text-gray-400 space-y-1">
+                    <div>Arroba: R$ {calculateArrobaPrice(Number(bidListing.weight), Number(bidAmount)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <div>Total do lote: R$ {(Number(bidAmount) * bidListing.quantity).toLocaleString('pt-BR')}</div>
+                  </div>
+                )}
+                <Button
+                  onClick={() => {
+                    if (!bidAmount || Number(bidAmount) <= 0) {
+                      toast({ title: "Valor inválido", description: "Digite um valor de lance maior que zero.", variant: "destructive" });
+                      return;
+                    }
+                    createBidMutation.mutate({ listingId: bidListing.id, amount: Number(bidAmount) });
+                  }}
+                  disabled={createBidMutation.isPending}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3"
+                >
+                  <Gavel className="w-5 h-5 mr-2" />
+                  {createBidMutation.isPending ? "Registrando..." : "Confirmar Lance"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Sell Tab */}
           <TabsContent value="sell">
@@ -935,8 +1060,8 @@ Tenho interesse! Podemos conversar?`;
                       )}
                       <p className="text-xs text-gray-400 mt-1">
                         {form.watch("pricePerHead") && form.watch("weight") ? 
-                          `💰 Preço por arroba: R$ ${calculateArrobaPrice(form.watch("pricePerHead"), form.watch("weight")).toFixed(2)}` : 
-                          "Digite peso e preço para ver valor por arroba"}
+                          `💰 Preço por arroba: R$ ${calculateArrobaPrice(form.watch("weight"), form.watch("pricePerHead")).toFixed(2)} | R$ ${(form.watch("pricePerHead") / form.watch("weight")).toFixed(2)}/kg` : 
+                          "Digite peso e preço para ver valor por arroba e por kg"}
                       </p>
                     </div>
                   </div>

@@ -173,6 +173,15 @@ The application is configured for deployment on Replit with the following setup:
 - July 02, 2025. PREVIEW RESTAURADO: Sistema funcionando completamente no preview
 - July 02, 2025. Removido service worker conflitante e App original restaurado
 - July 02, 2025. Todas as funcionalidades básicas operacionais: autenticação, marketplace, serviços, perfil
+- March 24, 2026. Implementado sistema de lances (leilão) nos anúncios do marketplace
+- March 24, 2026. Corrigido cálculo do preço por arroba (1@ = 30kg) que estava com parâmetros trocados
+- March 24, 2026. Adicionado exibição do preço por kg nos cards e no formulário de venda
+- March 24, 2026. Substituído botão WhatsApp por botão "Ofertar Lance" no marketplace
+- March 24, 2026. Lances visíveis com apenas a inicial do nome do lançador
+- March 24, 2026. Maior lance destacado em amarelo dourado como vencedor atual
+- March 24, 2026. Adicionada tabela bids no banco de dados para armazenar lances
+- March 24, 2026. Botão "Usar Minha Localização" adicionado na aba Comprar
+- March 24, 2026. Slider de distância com debounce para evitar múltiplas chamadas à API
 
 ## User Preferences
 

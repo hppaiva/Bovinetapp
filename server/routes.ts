@@ -642,5 +642,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bid routes
+  app.get("/api/listings/:id/bids", async (req, res) => {
+    try {
+      const listingId = parseInt(req.params.id);
+      if (isNaN(listingId)) return res.status(400).json({ message: "ID inválido" });
+      const bids = await storage.getBidsByListing(listingId);
+      res.json({ bids });
+    } catch (error) {
+      console.error("Get bids error:", error);
+      res.status(500).json({ message: "Erro ao buscar lances" });
+    }
+  });
+
+  app.post("/api/listings/:id/bids", requireAuth, async (req, res) => {
+    try {
+      const listingId = parseInt(req.params.id);
+      if (isNaN(listingId)) return res.status(400).json({ message: "ID inválido" });
+      const { amount } = req.body;
+      if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+        return res.status(400).json({ message: "Valor do lance inválido" });
+      }
+      const highest = await storage.getHighestBid(listingId);
+      if (highest && Number(amount) <= Number(highest.amount)) {
+        return res.status(400).json({ message: `Lance deve ser maior que o atual: R$ ${Number(highest.amount).toLocaleString('pt-BR')}` });
+      }
+      const bid = await storage.createBid({ listingId, userId: req.session.userId!, amount: amount.toString() });
+      res.status(201).json({ bid });
+    } catch (error) {
+      console.error("Create bid error:", error);
+      res.status(500).json({ message: "Erro ao registrar lance" });
+    }
+  });
+
   return httpServer;
 }

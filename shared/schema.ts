@@ -243,6 +243,33 @@ export const freightBookingsRelations = relations(freightBookings, ({ one }) => 
   }),
 }));
 
+export const bids = pgTable("bids", {
+  id: serial("id").primaryKey(),
+  listingId: integer("listing_id").references(() => listings.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const bidsRelations = relations(bids, ({ one }) => ({
+  listing: one(listings, { fields: [bids.listingId], references: [listings.id] }),
+  user: one(users, { fields: [bids.userId], references: [users.id] }),
+}));
+
+export const listingsRelationsUpdated = relations(listings, ({ one, many }) => ({
+  user: one(users, { fields: [listings.userId], references: [users.id] }),
+  bids: many(bids),
+}));
+
+export const insertBidSchema = createInsertSchema(bids).omit({
+  id: true,
+  createdAt: true,
+  userId: true,
+});
+
+export type Bid = typeof bids.$inferSelect;
+export type InsertBid = z.infer<typeof insertBidSchema>;
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,

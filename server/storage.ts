@@ -6,6 +6,7 @@ import {
   gtaRequests,
   identityVerifications,
   freightAlerts,
+  bids,
   type User,
   type InsertUser,
   type Listing,
@@ -20,6 +21,8 @@ import {
   type InsertIdentityVerification,
   type FreightAlert,
   type InsertFreightAlert,
+  type Bid,
+  type InsertBid,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -79,6 +82,11 @@ export interface IStorage {
   updateFreightAlert(id: number, alert: Partial<InsertFreightAlert>): Promise<FreightAlert>;
   deleteFreightAlert(id: number): Promise<void>;
   findNearbyTruckers(latitude: number, longitude: number, maxDistanceKm: number): Promise<Trucker[]>;
+
+  // Bid methods
+  getBidsByListing(listingId: number): Promise<(Bid & { bidderInitial: string })[]>;
+  createBid(bid: InsertBid & { userId: number }): Promise<Bid>;
+  getHighestBid(listingId: number): Promise<Bid | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -372,6 +380,36 @@ export class DatabaseStorage implements IStorage {
 
   toRadians(degrees: number): number {
     return degrees * (Math.PI / 180);
+  }
+
+  // Bid methods
+  async getBidsByListing(listingId: number): Promise<(Bid & { bidderInitial: string })[]> {
+    const result = await db
+      .select({ bid: bids, userName: users.name })
+      .from(bids)
+      .innerJoin(users, eq(bids.userId, users.id))
+      .where(eq(bids.listingId, listingId))
+      .orderBy(desc(bids.amount));
+
+    return result.map(({ bid, userName }) => ({
+      ...bid,
+      bidderInitial: userName ? userName.charAt(0).toUpperCase() + "." : "?",
+    }));
+  }
+
+  async createBid(bid: InsertBid & { userId: number }): Promise<Bid> {
+    const [newBid] = await db.insert(bids).values(bid).returning();
+    return newBid;
+  }
+
+  async getHighestBid(listingId: number): Promise<Bid | undefined> {
+    const [bid] = await db
+      .select()
+      .from(bids)
+      .where(eq(bids.listingId, listingId))
+      .orderBy(desc(bids.amount))
+      .limit(1);
+    return bid || undefined;
   }
 }
 
