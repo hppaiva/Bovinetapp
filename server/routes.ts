@@ -189,6 +189,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/listings/user", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const listings = await storage.getUserListings(userId);
+      res.json({ listings });
+    } catch (error) {
+      console.error("Get user listings error:", error);
+      res.status(500).json({ message: "Failed to get user listings" });
+    }
+  });
+
   app.get("/api/listings/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -203,17 +214,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get listing error:", error);
       res.status(500).json({ message: "Failed to get listing" });
-    }
-  });
-
-  app.get("/api/listings/user", requireAuth, async (req, res) => {
-    try {
-      const userId = req.session.userId!;
-      const listings = await storage.getUserListings(userId);
-      res.json({ listings });
-    } catch (error) {
-      console.error("Get user listings error:", error);
-      res.status(500).json({ message: "Failed to get user listings" });
     }
   });
 

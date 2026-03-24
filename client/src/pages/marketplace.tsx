@@ -59,22 +59,14 @@ export default function Marketplace() {
 
   const queryClient = useQueryClient();
 
-  const { data: user, error: userError, isLoading: userLoading, refetch: refetchUser } = useQuery({
+  const { data: user, error: userError, isLoading: userLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 0,
     refetchOnWindowFocus: true,
   });
 
-  // Auto-refetch user data every 5 seconds if not authenticated
-  useEffect(() => {
-    if (!(user as any)?.user && !userLoading) {
-      const interval = setInterval(() => {
-        refetchUser();
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [user, userLoading, refetchUser]);
+  // No polling - use localStorage auth as fallback
 
   // Check localStorage auth as fallback (computed before hooks that depend on it)
   const localAuth = localStorage.getItem('user');
