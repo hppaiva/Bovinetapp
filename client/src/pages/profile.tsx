@@ -16,8 +16,6 @@ import {
   LogOut,
   TrendingUp,
   ShoppingCart,
-  Truck,
-  FileText,
   MapPin,
   Phone,
   ChevronRight
@@ -186,27 +184,6 @@ export default function Profile() {
                   </div>
                 </Button>
 
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 justify-start border-gray-600 hover:bg-primary-bg"
-                  onClick={() => window.location.href = "/freight?tab=search"}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Truck className="h-5 w-5 text-accent-green" />
-                    <span className="text-white">Buscar Frete</span>
-                  </div>
-                </Button>
-
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-4 justify-start border-gray-600 hover:bg-primary-bg"
-                  onClick={() => window.location.href = "/services?tab=gta"}
-                >
-                  <div className="flex items-center space-x-3">
-                    <FileText className="h-5 w-5 text-accent-green" />
-                    <span className="text-white">Emitir GTA</span>
-                  </div>
-                </Button>
               </div>
             </div>
 

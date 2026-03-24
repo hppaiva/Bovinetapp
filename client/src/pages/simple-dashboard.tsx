@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Plus, Search, Truck, FileText, LogOut, Menu, X } from "lucide-react";
+import { Plus, Search, LogOut, Menu, X, User } from "lucide-react";
 import bovinetLogo from "@assets/logo_1750855451070.png";
 
 export default function SimpleDashboard() {
@@ -16,7 +15,7 @@ export default function SimpleDashboard() {
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
-    <div className="min-h-screen bg-[#1E2A38] text-white">
+    <div className="min-h-screen bg-[#1E2A38] text-white pb-20">
       {/* Header */}
       <header className="bg-[#2A3A4A] p-4 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -26,26 +25,25 @@ export default function SimpleDashboard() {
               alt="Bovinet Logo" 
               className="h-10 w-10 rounded-lg"
             />
-            <h1 className="text-2xl font-bold text-[#4CAF50]">BOVINET</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-[#4CAF50]">BOVINET</h1>
+              <p className="text-xs text-gray-400">Marketplace do Gado</p>
+            </div>
           </div>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
-            <Link href="/marketplace" className="flex items-center space-x-2 hover:text-[#4CAF50]">
+            <Link href="/marketplace" className="flex items-center space-x-2 hover:text-[#4CAF50] transition-colors">
               <Search size={20} />
               <span>Marketplace</span>
             </Link>
-            <Link href="/services" className="flex items-center space-x-2 hover:text-[#4CAF50]">
-              <Truck size={20} />
-              <span>Serviços</span>
-            </Link>
-            <Link href="/profile" className="flex items-center space-x-2 hover:text-[#4CAF50]">
-              <FileText size={20} />
+            <Link href="/profile" className="flex items-center space-x-2 hover:text-[#4CAF50] transition-colors">
+              <User size={20} />
               <span>Perfil</span>
             </Link>
             <button 
               onClick={handleLogout}
-              className="flex items-center space-x-2 hover:text-red-400"
+              className="flex items-center space-x-2 hover:text-red-400 transition-colors"
             >
               <LogOut size={20} />
               <span>Sair</span>
@@ -65,19 +63,16 @@ export default function SimpleDashboard() {
         {isMobileMenuOpen && (
           <nav className="md:hidden mt-4 space-y-2">
             <Link href="/marketplace" className="block px-4 py-2 hover:bg-[#1E2A38] rounded">
-              Marketplace
-            </Link>
-            <Link href="/services" className="block px-4 py-2 hover:bg-[#1E2A38] rounded">
-              Serviços
+              🛒 Marketplace
             </Link>
             <Link href="/profile" className="block px-4 py-2 hover:bg-[#1E2A38] rounded">
-              Perfil
+              👤 Perfil
             </Link>
             <button 
               onClick={handleLogout}
               className="block w-full text-left px-4 py-2 hover:bg-[#1E2A38] rounded text-red-400"
             >
-              Sair
+              🚪 Sair
             </button>
           </nav>
         )}
@@ -87,126 +82,86 @@ export default function SimpleDashboard() {
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-[#4CAF50] mb-2">
-            Bem-vindo, {userData.name || 'Usuário'}!
+            Bem-vindo, {userData.name || 'Usuário'}! 👋
           </h2>
           <p className="text-gray-300">
-            Gerencie suas atividades no mercado de gado
+            Compre e venda gado com segurança no Bovinet
           </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Link href="/marketplace">
-            <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-colors cursor-pointer">
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <Link href="/marketplace?tab=sell">
+            <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-all cursor-pointer hover:scale-105">
               <CardContent className="p-6 text-center">
-                <Plus className="mx-auto mb-3 text-[#4CAF50]" size={32} />
-                <h3 className="font-bold text-white mb-2">Vender Gado</h3>
-                <p className="text-sm text-gray-300">Publique seus lotes</p>
+                <div className="text-5xl mb-3">🐄</div>
+                <h3 className="font-bold text-white mb-2 text-lg">Vender Gado</h3>
+                <p className="text-sm text-gray-300">Publique seus lotes e alcance compradores em todo Brasil</p>
               </CardContent>
             </Card>
           </Link>
 
-          <Link href="/marketplace">
-            <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-colors cursor-pointer">
+          <Link href="/marketplace?tab=buy">
+            <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-all cursor-pointer hover:scale-105">
               <CardContent className="p-6 text-center">
-                <Search className="mx-auto mb-3 text-[#4CAF50]" size={32} />
-                <h3 className="font-bold text-white mb-2">Comprar Gado</h3>
-                <p className="text-sm text-gray-300">Encontre lotes disponíveis</p>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/freight">
-            <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-colors cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <Truck className="mx-auto mb-3 text-[#4CAF50]" size={32} />
-                <h3 className="font-bold text-white mb-2">Frete</h3>
-                <p className="text-sm text-gray-300">Solicitar transporte</p>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/services">
-            <Card className="bg-[#2A3A4A] border-gray-600 hover:border-[#4CAF50] transition-colors cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <FileText className="mx-auto mb-3 text-[#4CAF50]" size={32} />
-                <h3 className="font-bold text-white mb-2">GTA</h3>
-                <p className="text-sm text-gray-300">Emitir documentos</p>
+                <div className="text-5xl mb-3">🔍</div>
+                <h3 className="font-bold text-white mb-2 text-lg">Comprar Gado</h3>
+                <p className="text-sm text-gray-300">Encontre lotes disponíveis perto de você</p>
               </CardContent>
             </Card>
           </Link>
         </div>
 
         {/* Statistics */}
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-6 mb-8">
           <Card className="bg-[#2A3A4A] border-gray-600">
             <CardHeader className="pb-2">
               <CardTitle className="text-[#4CAF50] text-lg">Meus Anúncios</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white mb-1">5</div>
-              <div className="text-sm text-gray-300">Ativos</div>
+              <div className="text-sm text-gray-300">Ativos no marketplace</div>
             </CardContent>
           </Card>
 
           <Card className="bg-[#2A3A4A] border-gray-600">
             <CardHeader className="pb-2">
-              <CardTitle className="text-[#4CAF50] text-lg">Vendas</CardTitle>
+              <CardTitle className="text-[#4CAF50] text-lg">Negociações</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-white mb-1">12</div>
               <div className="text-sm text-gray-300">Este mês</div>
             </CardContent>
           </Card>
-
-          <Card className="bg-[#2A3A4A] border-gray-600">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#4CAF50] text-lg">Fretes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-white mb-1">8</div>
-              <div className="text-sm text-gray-300">Solicitados</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-[#2A3A4A] border-gray-600">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#4CAF50] text-lg">GTAs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-white mb-1">3</div>
-              <div className="text-sm text-gray-300">Pendentes</div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Recent Activity */}
-        <Card className="mt-8 bg-[#2A3A4A] border-gray-600">
+        <Card className="bg-[#2A3A4A] border-gray-600">
           <CardHeader>
-            <CardTitle className="text-[#4CAF50]">Atividade Recente</CardTitle>
+            <CardTitle className="text-[#4CAF50]">📋 Atividade Recente</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-2 border-b border-gray-600">
                 <div>
-                  <p className="text-white font-medium">Lote 01 - Nelore publicado</p>
+                  <p className="text-white font-medium">🐄 Lote 01 - Nelore publicado</p>
                   <p className="text-sm text-gray-400">2 horas atrás</p>
                 </div>
-                <span className="text-green-400 text-sm">Ativo</span>
+                <span className="text-green-400 text-sm font-semibold">Ativo</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-600">
                 <div>
-                  <p className="text-white font-medium">Frete solicitado para Goiânia</p>
+                  <p className="text-white font-medium">💬 Contato recebido pelo WhatsApp</p>
                   <p className="text-sm text-gray-400">1 dia atrás</p>
                 </div>
-                <span className="text-yellow-400 text-sm">Pendente</span>
+                <span className="text-yellow-400 text-sm font-semibold">Pendente</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <div>
-                  <p className="text-white font-medium">GTA emitida</p>
+                  <p className="text-white font-medium">✅ Venda de Lote 03 concluída</p>
                   <p className="text-sm text-gray-400">3 dias atrás</p>
                 </div>
-                <span className="text-green-400 text-sm">Concluído</span>
+                <span className="text-green-400 text-sm font-semibold">Concluído</span>
               </div>
             </div>
           </CardContent>

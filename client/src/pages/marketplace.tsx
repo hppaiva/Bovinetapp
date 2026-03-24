@@ -41,7 +41,9 @@ type ListingForm = z.infer<typeof listingSchema>;
 
 export default function Marketplace() {
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState("buy");
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTab = urlParams.get("tab") || "buy";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [filters, setFilters] = useState({
     sex: [] as string[],
     aptitude: [] as string[],
