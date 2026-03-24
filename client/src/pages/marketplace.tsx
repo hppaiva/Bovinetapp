@@ -447,12 +447,24 @@ export default function Marketplace() {
 
                   <div>
                     <Label className="text-white mb-3 block">Estado</Label>
-                    <Select value={filters.state} onValueChange={(value) => handleFilterChange("state", value)}>
+                    <Select
+                      value={filters.state || "todos"}
+                      onValueChange={(value) => {
+                        const stateVal = value === "todos" ? "" : value;
+                        handleFilterChange("state", stateVal);
+                        handleFilterChange("city", "");
+                        if (stateVal) {
+                          setAvailableCities(getCitiesByState(stateVal));
+                        } else {
+                          setAvailableCities([]);
+                        }
+                      }}
+                    >
                       <SelectTrigger className="bg-container-bg border-gray-600 text-white">
-                        <SelectValue placeholder="Selecione o estado" />
+                        <SelectValue placeholder="Todos os estados" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos os estados</SelectItem>
+                        <SelectItem value="todos">Todos os estados</SelectItem>
                         {brazilianStates.map((state) => (
                           <SelectItem key={state.code} value={state.code}>
                             {state.name} ({state.code})
@@ -464,16 +476,16 @@ export default function Marketplace() {
 
                   <div>
                     <Label className="text-white mb-3 block">Cidade</Label>
-                    <Select 
-                      value={filters.city} 
-                      onValueChange={(value) => handleFilterChange("city", value)}
+                    <Select
+                      value={filters.city || "todas"}
+                      onValueChange={(value) => handleFilterChange("city", value === "todas" ? "" : value)}
                       disabled={!filters.state}
                     >
                       <SelectTrigger className="bg-container-bg border-gray-600 text-white">
-                        <SelectValue placeholder={filters.state ? "Selecione a cidade" : "Primeiro selecione o estado"} />
+                        <SelectValue placeholder={filters.state ? "Selecione a cidade" : "Selecione o estado primeiro"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas as cidades</SelectItem>
+                        <SelectItem value="todas">Todas as cidades</SelectItem>
                         {availableCities.map((city) => (
                           <SelectItem key={city} value={city}>
                             {city}
