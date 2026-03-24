@@ -75,69 +75,21 @@ export default function Marketplace() {
       return () => clearInterval(interval);
     }
   }, [user, userLoading, refetchUser]);
-  
-  console.log("=== USER AUTH STATUS ===");
-  console.log("User data:", user);
-  console.log("User error:", userError);
-  console.log("User loading:", userLoading);
-  
-  // Check localStorage auth as fallback
+
+  // Check localStorage auth as fallback (computed before hooks that depend on it)
   const localAuth = localStorage.getItem('user');
   const isLocallyAuthenticated = !!localAuth;
-  
-  // Redirect to login if not authenticated
-  if (userError && userError.message?.includes('401') && !isLocallyAuthenticated) {
-    console.log("User not authenticated, redirecting to home");
-    window.location.href = '/';
-    return null;
-  }
-
-  if (userLoading) {
-    return (
-      <div className="min-h-screen bg-primary-bg">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-green mx-auto"></div>
-            <p className="text-white mt-4">Verificando autenticação...</p>
-          </div>
-        </div>
-        <BottomNav />
-      </div>
-    );
-  }
-
-  // Use local auth if server auth fails
-  let currentUser = user;
+  let currentUser: any = user;
   if (!currentUser?.user && isLocallyAuthenticated) {
     try {
-      const userData = JSON.parse(localAuth);
+      const userData = JSON.parse(localAuth!);
       currentUser = { user: userData };
     } catch (e) {
-      console.error("Failed to parse local user data");
+      // ignore parse errors
     }
   }
 
-  if (!currentUser?.user && !isLocallyAuthenticated) {
-    return (
-      <div className="min-h-screen bg-primary-bg">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-white">Você precisa estar logado para acessar o marketplace.</p>
-            <Button 
-              onClick={() => setLocation('/')}
-              className="mt-4 bg-accent-green hover:bg-green-600 text-white"
-            >
-              Fazer Login
-            </Button>
-          </div>
-        </div>
-        <BottomNav />
-      </div>
-    );
-  }
-
+  // All queries/hooks must come before any conditional return
   const { data: listings, isLoading: loadingListings, refetch: refetchListings } = useQuery({
     queryKey: ["/api/listings", filters],
     queryFn: async () => {
@@ -335,6 +287,42 @@ export default function Marketplace() {
   const watchedWeight = form.watch("weight");
   const watchedPrice = form.watch("pricePerHead");
   const arrobaPrice = watchedWeight && watchedPrice ? calculateArrobaPrice(watchedWeight, watchedPrice) : 0;
+
+  // Conditional returns AFTER all hooks
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-primary-bg">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-green mx-auto"></div>
+            <p className="text-white mt-4">Verificando autenticação...</p>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (!currentUser?.user && !isLocallyAuthenticated) {
+    return (
+      <div className="min-h-screen bg-primary-bg">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-white">Você precisa estar logado para acessar o marketplace.</p>
+            <Button
+              onClick={() => window.location.href = '/'}
+              className="mt-4 bg-accent-green hover:bg-green-600 text-white"
+            >
+              Fazer Login
+            </Button>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-primary-bg">
