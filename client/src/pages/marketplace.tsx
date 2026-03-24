@@ -57,6 +57,8 @@ export default function Marketplace() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [sliderDistance, setSliderDistance] = useState(100);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -82,9 +84,34 @@ export default function Marketplace() {
     }
   }
 
+  // Function to get user geolocation
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      toast({ title: "GPS não disponível", description: "Seu navegador não suporta geolocalização.", variant: "destructive" });
+      return;
+    }
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const loc = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserLocation(loc);
+        setLocationLoading(false);
+        toast({ title: "📍 Localização ativada!", description: "Buscando anúncios perto de você." });
+      },
+      (error) => {
+        setLocationLoading(false);
+        const msg = error.code === 1 ? "Permissão negada. Ative o GPS nas configurações do navegador." :
+                    error.code === 2 ? "Não foi possível determinar sua localização." :
+                    "Tempo esgotado. Tente novamente.";
+        toast({ title: "Erro de localização", description: msg, variant: "destructive" });
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
+
   // All queries/hooks must come before any conditional return
   const { data: listings, isLoading: loadingListings, refetch: refetchListings } = useQuery({
-    queryKey: ["/api/listings", filters],
+    queryKey: ["/api/listings", filters, userLocation],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters.sex.length > 0) params.append("sex", filters.sex.join(","));
@@ -94,10 +121,10 @@ export default function Marketplace() {
       if (filters.search) params.append("search", filters.search);
       if (filters.state) params.append("state", filters.state);
       if (filters.city) params.append("city", filters.city);
-
-      console.log("=== FETCHING LISTINGS ===");
-      console.log("Filters:", filters);
-      console.log("URL:", `/api/listings?${params.toString()}`);
+      if (userLocation) {
+        params.append("userLat", userLocation.lat.toString());
+        params.append("userLon", userLocation.lng.toString());
+      }
 
       const response = await fetch(`/api/listings?${params.toString()}`, {
         credentials: "include",
@@ -355,6 +382,38 @@ export default function Marketplace() {
                 <CardTitle className="text-white">Filtrar Animais</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Location Button */}
+                <div className={`flex items-center gap-3 p-3 rounded-lg border ${userLocation ? "bg-green-900/30 border-green-600" : "bg-primary-bg border-gray-600"}`}>
+                  <Button
+                    type="button"
+                    onClick={userLocation ? () => setUserLocation(null) : getUserLocation}
+                    disabled={locationLoading}
+                    className={`flex items-center gap-2 font-semibold ${userLocation ? "bg-green-600 hover:bg-red-600" : "bg-accent-green hover:bg-green-600"} text-white`}
+                  >
+                    {locationLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                        Obtendo GPS...
+                      </>
+                    ) : userLocation ? (
+                      <>
+                        <MapPin className="w-4 h-4" />
+                        📍 Localização Ativa — Clique para remover
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="w-4 h-4" />
+                        Usar Minha Localização
+                      </>
+                    )}
+                  </Button>
+                  {userLocation && (
+                    <span className="text-green-400 text-sm">
+                      Mostrando anúncios no raio de {sliderDistance} km de você
+                    </span>
+                  )}
+                </div>
+
                 <div>
                   <Input
                     placeholder="Buscar por raça, cidade..."
