@@ -9,11 +9,12 @@ import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
 import AuthPage from "@/pages/auth";
+import { getAuthToken } from "@/lib/queryClient";
 
 
 function Router() {
   const userData = localStorage.getItem('user');
-  const isLoggedIn = !!userData;
+  const isLoggedIn = !!userData && !!getAuthToken();
 
   return (
     <Switch>

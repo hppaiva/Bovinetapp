@@ -50,9 +50,10 @@ export default function Profile() {
       return response.json();
     },
     onSuccess: () => {
-      // Limpar cache e redirecionar
       queryClient.clear();
-      window.location.href = "/login";
+      localStorage.removeItem('user');
+      localStorage.removeItem('authToken');
+      window.location.href = "/";
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso",

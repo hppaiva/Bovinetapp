@@ -9,6 +9,7 @@ export default function SimpleDashboard() {
   
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
     window.location.href = "/";
   };
 

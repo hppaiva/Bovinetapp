@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, setAuthToken } from "@/lib/queryClient";
 import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -54,29 +54,27 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
-      // Simulando login para restauração do dia 27
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { 
-        id: 1, 
-        email: data.email, 
-        name: "Usuário Bovinet",
-        userType: "producer"
-      };
+      const response = await apiRequest("POST", "/api/auth/login", data);
+      return response.json();
     },
     onSuccess: (data) => {
-      localStorage.setItem('user', JSON.stringify(data));
-      queryClient.setQueryData(["user"], data);
+      if (data.token) {
+        setAuthToken(data.token);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
         title: "Login realizado",
         description: "Bem-vindo ao Bovinet!",
       });
-      // Redirect para dashboard
       window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({
         title: "Erro no login",
-        description: error.message,
+        description: "E-mail ou senha incorretos",
         variant: "destructive",
       });
     },
@@ -87,13 +85,18 @@ export default function AuthPage() {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data.token) {
+        setAuthToken(data.token);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
       toast({
         title: "Conta criada",
         description: "Sua conta foi criada com sucesso!",
       });
-      // Refresh para carregar dados autenticados
-      window.location.reload();
+      window.location.href = "/dashboard";
     },
     onError: (error: Error) => {
       toast({

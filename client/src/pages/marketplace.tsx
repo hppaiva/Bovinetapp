@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getAuthToken } from "@/lib/queryClient";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
 import { calculateArrobaPrice, getCityDistanceKm } from "@/lib/utils";
 import { brazilianStates, getCitiesByState } from "../data/brazilian-locations";
@@ -169,9 +169,10 @@ export default function Marketplace() {
 
   const createBidMutation = useMutation({
     mutationFn: async ({ listingId, amount }: { listingId: number; amount: number }) => {
+      const token = getAuthToken();
       const response = await fetch(`/api/listings/${listingId}/bids`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         credentials: "include",
         body: JSON.stringify({ amount }),
       });
@@ -240,8 +241,10 @@ export default function Marketplace() {
         console.log(`${key}:`, value);
       });
 
+      const token = getAuthToken();
       const response = await fetch("/api/listings", {
         method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
         credentials: "include",
       });

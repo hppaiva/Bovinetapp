@@ -6,6 +6,7 @@ import path from "path";
 import express from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { pool } from "./db";
 import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema, insertFreightAlertSchema } from "@shared/schema";
@@ -13,11 +14,20 @@ import { WebSocketServer } from "ws";
 
 
 const PgSession = connectPgSimple(session);
+const JWT_SECRET = process.env.SESSION_SECRET || "development-secret-key-bovinet-2025";
 
-// Extend Request interface to include session
+// Extend Request interface to include session and jwtUserId
 declare module 'express-session' {
   interface SessionData {
     userId?: number;
+  }
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      jwtUserId?: number;
+    }
   }
 }
 
@@ -29,23 +39,27 @@ const upload = multer({
   },
 });
 
-// Middleware to check if user is authenticated
+// Middleware to check if user is authenticated (session OR JWT token)
 const requireAuth = (req: any, res: any, next: any) => {
-  console.log("=== AUTH CHECK DEBUG ===");
-  console.log("Request URL:", req.url);
-  console.log("Request method:", req.method);
-  console.log("Session ID:", req.sessionID);
-  console.log("Session data:", req.session);
-  console.log("Session userId:", req.session?.userId);
-  console.log("Cookies:", req.headers.cookie);
-  
-  if (!req.session?.userId) {
-    console.log("❌ Authentication failed - No userId in session");
-    return res.status(401).json({ message: "Authentication required" });
+  // Check JWT token first (Authorization: Bearer <token>)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+      req.session.userId = decoded.userId;
+      return next();
+    } catch (e) {
+      // Invalid token, fall through to session check
+    }
   }
-  
-  console.log("✅ Authentication successful for user:", req.session.userId);
-  next();
+
+  // Fallback to session
+  if (req.session?.userId) {
+    return next();
+  }
+
+  return res.status(401).json({ message: "Authentication required" });
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -91,7 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log("Session after save:", req.session);
-      res.json({ user: { ...user, password: undefined } });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });
+      res.json({ user: { ...user, password: undefined }, token });
     } catch (error: any) {
       console.error("Registration error:", error);
       
@@ -142,7 +157,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log("Session after save:", req.session);
-      res.json({ user: { ...user, password: undefined } });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });
+      res.json({ user: { ...user, password: undefined }, token });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
