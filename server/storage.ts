@@ -123,22 +123,45 @@ export class DatabaseStorage implements IStorage {
   }): Promise<Listing[]> {
     const conditions = [eq(listings.isActive, true)];
 
-    if (filters?.sex) {
+    if (filters?.sex && filters.sex !== "all") {
       conditions.push(eq(listings.sex, filters.sex));
     }
-    if (filters?.age) {
+    if (filters?.age && filters.age !== "all") {
       conditions.push(eq(listings.age, filters.age));
     }
-    if (filters?.aptitude) {
+    if (filters?.aptitude && filters.aptitude !== "all") {
       conditions.push(eq(listings.aptitude, filters.aptitude));
     }
     if (filters?.city) {
       conditions.push(eq(listings.city, filters.city));
     }
 
-    const results = await db.select().from(listings)
+    let results = await db.select().from(listings)
       .where(and(...conditions))
       .orderBy(desc(listings.createdAt));
+
+    if (filters?.userLat && filters?.userLon && filters?.maxDistance) {
+      const userLat = filters.userLat;
+      const userLon = filters.userLon;
+      const maxDist = filters.maxDistance;
+
+      const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      };
+
+      results = results.filter(listing => {
+        if (!listing.latitude || !listing.longitude) return true;
+        const dist = haversine(userLat, userLon, parseFloat(listing.latitude), parseFloat(listing.longitude));
+        return dist <= maxDist;
+      });
+    }
+
     return results;
   }
 

@@ -46,18 +46,15 @@ export default function Marketplace() {
   const initialTab = urlParams.get("tab") || "buy";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [filters, setFilters] = useState({
-    sex: [] as string[],
-    aptitude: [] as string[],
-    age: "",
-    distance: 100, // Default to 100km
-    search: "",
-    state: "",
+    sex: "all",
+    age: "all",
+    distance: 200,
     city: "",
   });
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
-  const [sliderDistance, setSliderDistance] = useState(100);
+
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [bidListing, setBidListing] = useState<any | null>(null);
@@ -117,16 +114,13 @@ export default function Marketplace() {
     queryKey: ["/api/listings", filters, userLocation],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (filters.sex.length > 0) params.append("sex", filters.sex.join(","));
-      if (filters.aptitude.length > 0) params.append("aptitude", filters.aptitude.join(","));
+      if (filters.sex && filters.sex !== "all") params.append("sex", filters.sex);
       if (filters.age && filters.age !== "all") params.append("age", filters.age);
-      if (filters.distance) params.append("maxDistance", filters.distance.toString());
-      if (filters.search) params.append("search", filters.search);
-      if (filters.state) params.append("state", filters.state);
       if (filters.city) params.append("city", filters.city);
       if (userLocation) {
         params.append("userLat", userLocation.lat.toString());
         params.append("userLon", userLocation.lng.toString());
+        params.append("maxDistance", filters.distance.toString());
       }
 
       const response = await fetch(`/api/listings?${params.toString()}`, {
@@ -330,15 +324,7 @@ export default function Marketplace() {
     }
   }, []);
 
-  // Set default values for filters to avoid empty string errors
-  useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      age: prev.age || "all"
-    }));
-  }, []);
-
-  const handleFilterChange = (type: string, value: string | string[]) => {
+  const handleFilterChange = (type: string, value: string | number) => {
     setFilters(prev => ({ ...prev, [type]: value }));
   };
 
@@ -417,209 +403,108 @@ export default function Marketplace() {
             {/* Filters */}
             <Card className="bg-container-bg border-gray-600">
               <CardHeader>
-                <CardTitle className="text-white">Filtrar Animais</CardTitle>
+                <CardTitle className="text-white text-lg">Buscar Animais</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Location Button */}
-                <div className={`flex items-center gap-3 p-3 rounded-lg border ${userLocation ? "bg-green-900/30 border-green-600" : "bg-primary-bg border-gray-600"}`}>
-                  <Button
-                    type="button"
-                    onClick={userLocation ? () => setUserLocation(null) : getUserLocation}
-                    disabled={locationLoading}
-                    className={`flex items-center gap-2 font-semibold ${userLocation ? "bg-green-600 hover:bg-red-600" : "bg-accent-green hover:bg-green-600"} text-white`}
-                  >
-                    {locationLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                        Obtendo GPS...
-                      </>
-                    ) : userLocation ? (
-                      <>
-                        <MapPin className="w-4 h-4" />
-                        📍 Localização Ativa — Clique para remover
-                      </>
-                    ) : (
-                      <>
-                        <MapPin className="w-4 h-4" />
-                        Usar Minha Localização
-                      </>
+              <CardContent className="space-y-5">
+
+                {/* Location: GPS or City */}
+                <div className="space-y-2">
+                  <Label className="text-white font-semibold">Localização</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={userLocation ? () => setUserLocation(null) : getUserLocation}
+                      disabled={locationLoading}
+                      className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 ${userLocation ? "bg-green-600 hover:bg-red-600" : "bg-accent-green hover:bg-green-600"} text-white`}
+                    >
+                      {locationLoading ? (
+                        <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> GPS...</>
+                      ) : userLocation ? (
+                        <><MapPin className="w-4 h-4" /> Localização Ativa</>
+                      ) : (
+                        <><MapPin className="w-4 h-4" /> Usar GPS</>
+                      )}
+                    </Button>
+                    {!userLocation && (
+                      <Input
+                        placeholder="Ou digite a cidade..."
+                        value={filters.city}
+                        onChange={(e) => handleFilterChange("city", e.target.value)}
+                        className="bg-primary-bg border-gray-600 text-white flex-1"
+                      />
                     )}
-                  </Button>
+                  </div>
                   {userLocation && (
-                    <span className="text-green-400 text-sm">
-                      Mostrando anúncios no raio de {sliderDistance} km de você
-                    </span>
+                    <p className="text-green-400 text-sm">
+                      📍 GPS ativo — mostrando anúncios no raio de {filters.distance} km
+                    </p>
                   )}
                 </div>
 
-                <div>
-                  <Input
-                    placeholder="Buscar por raça, cidade..."
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange("search", e.target.value)}
-                    className="bg-primary-bg border-gray-600 text-white"
-                  />
+                {/* Sex */}
+                <div className="space-y-2">
+                  <Label className="text-white font-semibold">Sexo</Label>
+                  <div className="flex gap-2">
+                    {[
+                      { value: "all", label: "Todos" },
+                      { value: "macho", label: "Macho" },
+                      { value: "femea", label: "Fêmea" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => handleFilterChange("sex", opt.value)}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                          filters.sex === opt.value
+                            ? "bg-accent-green border-accent-green text-white"
+                            : "bg-primary-bg border-gray-600 text-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label className="text-white">Sexo</Label>
-                    <div className="flex space-x-4 mt-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="macho"
-                          checked={filters.sex.includes("macho")}
-                          onCheckedChange={(checked) => {
-                            const newSex = checked 
-                              ? [...filters.sex, "macho"]
-                              : filters.sex.filter(s => s !== "macho");
-                            handleFilterChange("sex", newSex);
-                          }}
-                        />
-                        <Label htmlFor="macho" className="text-white">Macho</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="femea"
-                          checked={filters.sex.includes("femea")}
-                          onCheckedChange={(checked) => {
-                            const newSex = checked 
-                              ? [...filters.sex, "femea"]
-                              : filters.sex.filter(s => s !== "femea");
-                            handleFilterChange("sex", newSex);
-                          }}
-                        />
-                        <Label htmlFor="femea" className="text-white">Fêmea</Label>
-                      </div>
-                    </div>
-                  </div>
+                {/* Age */}
+                <div className="space-y-2">
+                  <Label className="text-white font-semibold">Idade</Label>
+                  <Select value={filters.age} onValueChange={(value) => handleFilterChange("age", value)}>
+                    <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
+                      <SelectValue placeholder="Todas as idades" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as idades</SelectItem>
+                      <SelectItem value="ate12">Até 12 meses</SelectItem>
+                      <SelectItem value="12a24">12 a 24 meses</SelectItem>
+                      <SelectItem value="24a36">24 a 36 meses</SelectItem>
+                      <SelectItem value="36a48">36 a 48 meses</SelectItem>
+                      <SelectItem value="mais48">Mais de 48 meses</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  <div>
-                    <Label className="text-white">Aptidão</Label>
-                    <div className="flex space-x-4 mt-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="corte"
-                          checked={filters.aptitude.includes("corte")}
-                          onCheckedChange={(checked) => {
-                            const newAptitude = checked 
-                              ? [...filters.aptitude, "corte"]
-                              : filters.aptitude.filter(a => a !== "corte");
-                            handleFilterChange("aptitude", newAptitude);
-                          }}
-                        />
-                        <Label htmlFor="corte" className="text-white">Corte</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="leite"
-                          checked={filters.aptitude.includes("leite")}
-                          onCheckedChange={(checked) => {
-                            const newAptitude = checked 
-                              ? [...filters.aptitude, "leite"]
-                              : filters.aptitude.filter(a => a !== "leite");
-                            handleFilterChange("aptitude", newAptitude);
-                          }}
-                        />
-                        <Label htmlFor="leite" className="text-white">Leite</Label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-white">Idade</Label>
-                    <Select value={filters.age} onValueChange={(value) => handleFilterChange("age", value)}>
-                      <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                        <SelectValue placeholder="Todas as idades" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas as idades</SelectItem>
-                        <SelectItem value="ate12">Até 12 meses</SelectItem>
-                        <SelectItem value="12a24">12 a 24 meses</SelectItem>
-                        <SelectItem value="24a36">24 a 36 meses</SelectItem>
-                        <SelectItem value="36a48">36 a 48 meses</SelectItem>
-                        <SelectItem value="mais48">Mais de 48 meses</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-white mb-3 block">Estado</Label>
-                    <Select
-                      value={filters.state || "todos"}
-                      onValueChange={(value) => {
-                        const stateVal = value === "todos" ? "" : value;
-                        handleFilterChange("state", stateVal);
-                        handleFilterChange("city", "");
-                        if (stateVal) {
-                          setAvailableCities(getCitiesByState(stateVal));
-                        } else {
-                          setAvailableCities([]);
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="bg-container-bg border-gray-600 text-white">
-                        <SelectValue placeholder="Todos os estados" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todos">Todos os estados</SelectItem>
-                        {brazilianStates.map((state) => (
-                          <SelectItem key={state.code} value={state.code}>
-                            {state.name} ({state.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-white mb-3 block">Cidade</Label>
-                    <Select
-                      value={filters.city || "todas"}
-                      onValueChange={(value) => handleFilterChange("city", value === "todas" ? "" : value)}
-                      disabled={!filters.state}
-                    >
-                      <SelectTrigger className="bg-container-bg border-gray-600 text-white">
-                        <SelectValue placeholder={filters.state ? "Selecione a cidade" : "Selecione o estado primeiro"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todas">Todas as cidades</SelectItem>
-                        {availableCities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-white mb-3 block">
-                      Raio de distância: {sliderDistance} km
+                {/* Distance — only shown when GPS active */}
+                {userLocation && (
+                  <div className="space-y-2">
+                    <Label className="text-white font-semibold">
+                      Raio de distância: {filters.distance} km
                     </Label>
-                    <div className="space-y-3">
-                      <Slider
-                        value={[sliderDistance]}
-                        onValueChange={(value) => setSliderDistance(value[0])}
-                        onValueCommit={(value) => handleFilterChange("distance", value[0])}
-                        max={500}
-                        min={1}
-                        step={5}
-                        className="w-full [&_.bg-primary]:bg-accent-green [&_[role=slider]]:border-accent-green [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-lg"
-                      />
-                      <div className="flex justify-between text-xs text-secondary">
-                        <span>1 km</span>
-                        <span>500 km</span>
-                      </div>
+                    <Slider
+                      value={[filters.distance]}
+                      onValueChange={(value) => handleFilterChange("distance", value[0])}
+                      max={500}
+                      min={10}
+                      step={10}
+                      className="w-full [&_.bg-primary]:bg-accent-green [&_[role=slider]]:border-accent-green [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-lg"
+                    />
+                    <div className="flex justify-between text-xs text-secondary">
+                      <span>10 km</span>
+                      <span>500 km</span>
                     </div>
                   </div>
+                )}
 
-
-                </div>
-
-                <Button className="w-full bg-accent-green hover:bg-green-600 text-white">
-                  Aplicar Filtros
-                </Button>
               </CardContent>
             </Card>
 
