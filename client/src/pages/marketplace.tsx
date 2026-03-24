@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
-import { calculateArrobaPrice } from "@/lib/utils";
+import { calculateArrobaPrice, getCityDistanceKm } from "@/lib/utils";
 import { brazilianStates, getCitiesByState } from "../data/brazilian-locations";
 import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
@@ -669,6 +669,19 @@ export default function Marketplace() {
                               <MapPin className="w-4 h-4 mr-1" />
                               {listing.quantity} {listing.sex === "macho" ? "Machos" : "Fêmeas"} • {listing.city}, {listing.state || 'SP'}
                             </p>
+                            {userLocation && (() => {
+                              const dist = listing.latitude && listing.longitude
+                                ? Math.round(Math.sqrt(
+                                    Math.pow((Number(listing.latitude) - userLocation.lat) * 111, 2) +
+                                    Math.pow((Number(listing.longitude) - userLocation.lng) * 111, 2)
+                                  ))
+                                : getCityDistanceKm(listing.city, userLocation.lat, userLocation.lng);
+                              return dist !== null ? (
+                                <span className="inline-flex items-center gap-1 mt-1 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5">
+                                  🚗 ~{dist.toLocaleString('pt-BR')} km de você
+                                </span>
+                              ) : null;
+                            })()}
                           </div>
                           <Badge className="bg-green-100 text-green-800 px-3 py-1">✅ Disponível</Badge>
                         </div>
