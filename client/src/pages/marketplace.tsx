@@ -56,6 +56,7 @@ export default function Marketplace() {
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [sliderDistance, setSliderDistance] = useState(100);
 
   const queryClient = useQueryClient();
 
@@ -497,15 +498,16 @@ export default function Marketplace() {
 
                   <div>
                     <Label className="text-white mb-3 block">
-                      Raio de distância: {filters.distance} km
+                      Raio de distância: {sliderDistance} km
                     </Label>
                     <div className="space-y-3">
                       <Slider
-                        value={[filters.distance]}
-                        onValueChange={(value) => handleFilterChange("distance", value[0])}
+                        value={[sliderDistance]}
+                        onValueChange={(value) => setSliderDistance(value[0])}
+                        onValueCommit={(value) => handleFilterChange("distance", value[0])}
                         max={500}
                         min={1}
-                        step={1}
+                        step={5}
                         className="w-full [&_.bg-primary]:bg-accent-green [&_[role=slider]]:border-accent-green [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-lg"
                       />
                       <div className="flex justify-between text-xs text-secondary">
