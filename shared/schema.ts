@@ -29,7 +29,7 @@ export const listings = pgTable("listings", {
   aptitude: text("aptitude").notNull(), // 'corte' | 'leite'
   description: text("description"),
   videoUrl: text("video_url"),
-  city: text("city").notNull(),
+  city: text("city"),
   latitude: text("latitude"),
   longitude: text("longitude"),
   isActive: boolean("is_active").default(true),

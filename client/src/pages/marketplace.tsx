@@ -34,8 +34,8 @@ const listingSchema = z.object({
   pricePerHead: z.number().min(1, "Preço deve ser maior que 0"),
   aptitude: z.enum(["corte", "leite"], { required_error: "Aptidão é obrigatória" }),
   description: z.string().optional(),
-  city: z.string().min(1, "Cidade é obrigatória"),
-  state: z.string().min(1, "Estado é obrigatório"),
+  city: z.string().optional(),
+  state: z.string().optional(),
 });
 
 type ListingForm = z.infer<typeof listingSchema>;
@@ -797,32 +797,14 @@ export default function Marketplace() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={form.handleSubmit((data) => createListingMutation.mutate(data))} className="space-y-6">
+                <form onSubmit={form.handleSubmit((data) => {
+                  if (!coordinates && !data.city) {
+                    toast({ title: "Localização necessária", description: "Informe a cidade ou use sua localização atual.", variant: "destructive" });
+                    return;
+                  }
+                  createListingMutation.mutate(data);
+                })} className="space-y-6">
                   
-                  {/* Video Upload Section - Destacado */}
-                  <div className="bg-blue-50 p-6 rounded-lg border-2 border-dashed border-blue-300">
-                    <div className="text-center mb-4">
-                      <Play className="h-12 w-12 text-blue-500 mx-auto mb-2" />
-                      <h3 className="text-lg font-bold text-blue-800">📹 Vídeo dos Animais</h3>
-                      <p className="text-blue-600 text-sm">Anúncios com vídeo vendem 3x mais rápido!</p>
-                    </div>
-                    
-                    <VideoUpload 
-                      onVideoSelect={setSelectedVideo}
-                      selectedVideo={selectedVideo}
-                    />
-                    
-                    <div className="mt-4 bg-blue-100 p-3 rounded border-l-4 border-blue-400">
-                      <h4 className="font-semibold text-blue-800 mb-2">💡 Dicas para um bom vídeo:</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Filme em local bem iluminado</li>
-                        <li>• Mostre os animais em movimento</li>
-                        <li>• Inclua diferentes ângulos</li>
-                        <li>• Duração entre 30s e 2 minutos</li>
-                      </ul>
-                    </div>
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label className="text-white">Aptidão</Label>
@@ -1037,63 +1019,59 @@ export default function Marketplace() {
                   </div>
 
                   <div>
-                    <Label className="text-white">Estado *</Label>
-                    <Select onValueChange={(value) => {
-                      form.setValue("state", value);
-                      // Atualizar cidades disponíveis
-                      const cities = getCitiesByState(value);
-                      setAvailableCities(cities);
-                      // Limpar cidade se estado mudar
-                      form.setValue("city", "");
-                    }}>
-                      <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                        <SelectValue placeholder="Selecione o estado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {brazilianStates.map((state) => (
-                          <SelectItem key={state.code} value={state.code}>
-                            {state.name} ({state.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {form.formState.errors.state && (
-                      <p className="text-accent-red text-sm mt-1">
-                        {form.formState.errors.state.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="text-white">Cidade *</Label>
-                    <Select 
-                      onValueChange={(value) => form.setValue("city", value)}
-                      disabled={!form.watch("state")}
-                    >
-                      <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
-                        <SelectValue placeholder={form.watch("state") ? "Selecione a cidade" : "Primeiro selecione o estado"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {form.formState.errors.city && (
-                      <p className="text-accent-red text-sm mt-1">
-                        {form.formState.errors.city.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
                     <LocationPicker
                       onLocationSelect={setCoordinates}
                       coordinates={coordinates}
                     />
                   </div>
+
+                  {!coordinates && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <MapPin className="h-4 w-4" />
+                        <span>Ou informe a localização manualmente:</span>
+                      </div>
+                      <div>
+                        <Label className="text-white">Estado {!coordinates && "*"}</Label>
+                        <Select onValueChange={(value) => {
+                          form.setValue("state", value);
+                          const cities = getCitiesByState(value);
+                          setAvailableCities(cities);
+                          form.setValue("city", "");
+                        }}>
+                          <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
+                            <SelectValue placeholder="Selecione o estado" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {brazilianStates.map((state) => (
+                              <SelectItem key={state.code} value={state.code}>
+                                {state.name} ({state.code})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-white">Cidade {!coordinates && "*"}</Label>
+                        <Select 
+                          onValueChange={(value) => form.setValue("city", value)}
+                          disabled={!form.watch("state")}
+                        >
+                          <SelectTrigger className="bg-primary-bg border-gray-600 text-white">
+                            <SelectValue placeholder={form.watch("state") ? "Selecione a cidade" : "Primeiro selecione o estado"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableCities.map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
 
 
 

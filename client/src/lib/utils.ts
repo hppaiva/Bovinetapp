@@ -143,7 +143,6 @@ const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
   "patos de minas": { lat: -18.5789, lng: -46.5181 },
   "ituiutaba": { lat: -18.9714, lng: -49.4653 },
   "araguari": { lat: -18.6483, lng: -48.1858 },
-  "três lagoas": { lat: -20.7517, lng: -51.6783 },
   "pará de minas": { lat: -19.8581, lng: -44.6092 },
   // Goiás
   "goiânia": { lat: -16.6869, lng: -49.2648 },

@@ -231,10 +231,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         path: req.file.path
       } : "No file received");
       
-      // Validate required fields
-      if (!req.body.quantity || !req.body.weight || !req.body.pricePerHead || !req.body.city) {
+      // Validate required fields - city is only required if no coordinates are provided
+      const hasCoordinates = req.body.latitude && req.body.longitude;
+      if (!req.body.quantity || !req.body.weight || !req.body.pricePerHead) {
         return res.status(400).json({ 
-          message: "Campos obrigatórios: quantidade, peso, preço e cidade" 
+          message: "Campos obrigatórios: quantidade, peso e preço" 
+        });
+      }
+      if (!hasCoordinates && !req.body.city) {
+        return res.status(400).json({ 
+          message: "Informe a cidade ou use sua localização atual" 
         });
       }
 
