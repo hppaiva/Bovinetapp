@@ -47,6 +47,7 @@ export default function Marketplace() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [filters, setFilters] = useState({
     sex: "all",
+    aptitude: "all",
     age: "all",
     distance: 200,
     city: "",
@@ -115,6 +116,7 @@ export default function Marketplace() {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters.sex && filters.sex !== "all") params.append("sex", filters.sex);
+      if (filters.aptitude && filters.aptitude !== "all") params.append("aptitude", filters.aptitude);
       if (filters.age && filters.age !== "all") params.append("age", filters.age);
       if (filters.city) params.append("city", filters.city);
       if (userLocation) {
@@ -456,6 +458,31 @@ export default function Marketplace() {
                         onClick={() => handleFilterChange("sex", opt.value)}
                         className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
                           filters.sex === opt.value
+                            ? "bg-accent-green border-accent-green text-white"
+                            : "bg-primary-bg border-gray-600 text-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Aptitude */}
+                <div className="space-y-2">
+                  <Label className="text-white font-semibold">Aptidão</Label>
+                  <div className="flex gap-2">
+                    {[
+                      { value: "all", label: "Todos" },
+                      { value: "corte", label: "Corte" },
+                      { value: "leite", label: "Leite" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => handleFilterChange("aptitude", opt.value)}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                          filters.aptitude === opt.value
                             ? "bg-accent-green border-accent-green text-white"
                             : "bg-primary-bg border-gray-600 text-gray-300 hover:border-gray-400"
                         }`}
