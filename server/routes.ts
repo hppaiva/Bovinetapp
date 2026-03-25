@@ -697,5 +697,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all bids for the current seller's listings
+  app.get("/api/seller/bids", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const bids = await storage.getSellerBids(userId);
+      res.json({ bids });
+    } catch (error) {
+      console.error("Get seller bids error:", error);
+      res.status(500).json({ message: "Erro ao buscar propostas" });
+    }
+  });
+
+  // Accept or reject a bid
+  app.patch("/api/listings/:id/bids/:bidId/status", requireAuth, async (req, res) => {
+    try {
+      const listingId = parseInt(req.params.id);
+      const bidId = parseInt(req.params.bidId);
+      const { status } = req.body;
+      if (!["accepted", "rejected"].includes(status)) {
+        return res.status(400).json({ message: "Status inválido" });
+      }
+      // Verify this listing belongs to the current user
+      const listing = await storage.getListing(listingId);
+      if (!listing) return res.status(404).json({ message: "Anúncio não encontrado" });
+      if (listing.userId !== req.session.userId) return res.status(403).json({ message: "Acesso negado" });
+
+      const bid = await storage.updateBidStatus(bidId, status);
+      // If accepted, reject all other pending bids and deactivate listing
+      if (status === "accepted") {
+        await storage.rejectOtherBids(listingId, bidId);
+        await storage.updateListing(listingId, { isActive: false });
+      }
+      res.json({ bid });
+    } catch (error) {
+      console.error("Update bid status error:", error);
+      res.status(500).json({ message: "Erro ao atualizar proposta" });
+    }
+  });
+
   return httpServer;
 }

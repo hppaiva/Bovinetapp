@@ -84,9 +84,12 @@ export interface IStorage {
   findNearbyTruckers(latitude: number, longitude: number, maxDistanceKm: number): Promise<Trucker[]>;
 
   // Bid methods
-  getBidsByListing(listingId: number): Promise<(Bid & { bidderInitial: string })[]>;
+  getBidsByListing(listingId: number): Promise<(Bid & { bidderInitial: string; bidderName: string; bidderPhone: string })[]>;
+  getSellerBids(sellerId: number): Promise<(Bid & { bidderInitial: string; bidderName: string; bidderPhone: string; listingTitle: string })[]>;
   createBid(bid: InsertBid & { userId: number }): Promise<Bid>;
   getHighestBid(listingId: number): Promise<Bid | undefined>;
+  updateBidStatus(bidId: number, status: string): Promise<Bid>;
+  rejectOtherBids(listingId: number, acceptedBidId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -406,17 +409,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Bid methods
-  async getBidsByListing(listingId: number): Promise<(Bid & { bidderInitial: string })[]> {
+  async getBidsByListing(listingId: number): Promise<(Bid & { bidderInitial: string; bidderName: string; bidderPhone: string })[]> {
     const result = await db
-      .select({ bid: bids, userName: users.name })
+      .select({ bid: bids, userName: users.name, userPhone: users.phone })
       .from(bids)
       .innerJoin(users, eq(bids.userId, users.id))
       .where(eq(bids.listingId, listingId))
       .orderBy(desc(bids.amount));
 
-    return result.map(({ bid, userName }) => ({
+    return result.map(({ bid, userName, userPhone }) => ({
       ...bid,
       bidderInitial: userName ? userName.charAt(0).toUpperCase() + "." : "?",
+      bidderName: userName || "Comprador",
+      bidderPhone: userPhone || "",
+    }));
+  }
+
+  async getSellerBids(sellerId: number): Promise<(Bid & { bidderInitial: string; bidderName: string; bidderPhone: string; listingTitle: string })[]> {
+    const result = await db
+      .select({ bid: bids, userName: users.name, userPhone: users.phone, listingTitle: listings.title })
+      .from(bids)
+      .innerJoin(users, eq(bids.userId, users.id))
+      .innerJoin(listings, eq(bids.listingId, listings.id))
+      .where(eq(listings.userId, sellerId))
+      .orderBy(desc(bids.createdAt));
+
+    return result.map(({ bid, userName, userPhone, listingTitle }) => ({
+      ...bid,
+      bidderInitial: userName ? userName.charAt(0).toUpperCase() + "." : "?",
+      bidderName: userName || "Comprador",
+      bidderPhone: userPhone || "",
+      listingTitle: listingTitle || `Lote ${bid.listingId}`,
     }));
   }
 
@@ -433,6 +456,17 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(bids.amount))
       .limit(1);
     return bid || undefined;
+  }
+
+  async updateBidStatus(bidId: number, status: string): Promise<Bid> {
+    const [bid] = await db.update(bids).set({ status }).where(eq(bids.id, bidId)).returning();
+    return bid;
+  }
+
+  async rejectOtherBids(listingId: number, acceptedBidId: number): Promise<void> {
+    await db.update(bids)
+      .set({ status: "rejected" })
+      .where(and(eq(bids.listingId, listingId), eq(bids.status, "pending")));
   }
 }
 

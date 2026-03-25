@@ -186,6 +186,44 @@ export default function Marketplace() {
     },
   });
 
+  const { data: sellerBidsData, refetch: refetchSellerBids } = useQuery({
+    queryKey: ["/api/seller/bids"],
+    enabled: !!(currentUser?.user?.id || isLocallyAuthenticated),
+    queryFn: async () => {
+      const token = getAuthToken();
+      const response = await fetch("/api/seller/bids", {
+        credentials: "include",
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      });
+      if (!response.ok) return { bids: [] };
+      return response.json();
+    },
+  });
+
+  const updateBidStatusMutation = useMutation({
+    mutationFn: async ({ listingId, bidId, status }: { listingId: number; bidId: number; status: string }) => {
+      const token = getAuthToken();
+      const response = await fetch(`/api/listings/${listingId}/bids/${bidId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Erro ao atualizar proposta");
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      const msg = variables.status === "accepted" ? "Proposta aceita! O anúncio foi desativado." : "Proposta recusada.";
+      toast({ title: variables.status === "accepted" ? "✅ Proposta aceita!" : "Proposta recusada", description: msg });
+      refetchSellerBids();
+      queryClient.invalidateQueries({ queryKey: ["/api/listings/user"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    },
+  });
+
   const form = useForm<ListingForm>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
@@ -1016,62 +1054,147 @@ export default function Marketplace() {
 
           {/* My Listings Tab */}
           <TabsContent value="my-listings">
-            <div className="space-y-4">
-              {userListings?.length > 0 ? (
-                userListings.map((listing: any) => (
-                  <Card key={listing.id} className="card-enhanced bg-container-bg border-gray-600">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-white">
-                            {listing.title ? listing.title : `Lote ${listing.id.toString().padStart(2, '0')} - ${listing.city}`}
-                          </h3>
-                          <p className="text-secondary">
-                            Publicado em {new Date(listing.createdAt).toLocaleDateString('pt-BR')}
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline">
-                            Editar
-                          </Button>
-                          <Button size="sm" variant="outline" className="text-accent-red border-accent-red">
-                            {listing.isActive ? "Pausar" : "Ativar"}
-                          </Button>
+            <div className="space-y-6">
+              {/* Bids / Proposals Section */}
+              {sellerBidsData?.bids?.length > 0 && (
+                <Card className="bg-container-bg border-amber-600/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <span className="text-amber-400">📨</span>
+                      Propostas Recebidas
+                      <Badge className="bg-amber-600 text-white ml-2">
+                        {sellerBidsData.bids.filter((b: any) => b.status === "pending").length} pendentes
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {sellerBidsData.bids.map((bid: any) => (
+                      <div
+                        key={bid.id}
+                        className={`p-4 rounded-lg border ${
+                          bid.status === "accepted"
+                            ? "bg-green-900/30 border-green-600"
+                            : bid.status === "rejected"
+                            ? "bg-gray-800/50 border-gray-600 opacity-60"
+                            : "bg-primary-bg border-amber-600/40"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-400 mb-1 truncate">{bid.listingTitle}</p>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <span className="text-white font-bold text-lg">
+                                R$ {Number(bid.amount).toLocaleString('pt-BR')}
+                                <span className="text-gray-400 text-sm font-normal">/cab</span>
+                              </span>
+                              <span className="text-gray-300 text-sm">
+                                {bid.bidderInitial}*** — {new Date(bid.createdAt).toLocaleDateString('pt-BR')}
+                              </span>
+                              {bid.status === "accepted" && (
+                                <Badge className="bg-green-600 text-white text-xs">✅ Aceita</Badge>
+                              )}
+                              {bid.status === "rejected" && (
+                                <Badge className="bg-gray-600 text-white text-xs">Recusada</Badge>
+                              )}
+                            </div>
+                          </div>
+                          {bid.status === "pending" && (
+                            <div className="flex gap-2 shrink-0">
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3"
+                                disabled={updateBidStatusMutation.isPending}
+                                onClick={() => updateBidStatusMutation.mutate({
+                                  listingId: bid.listingId,
+                                  bidId: bid.id,
+                                  status: "accepted",
+                                })}
+                              >
+                                Aceitar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-600 text-red-400 hover:bg-red-900/30 text-xs px-3"
+                                disabled={updateBidStatusMutation.isPending}
+                                onClick={() => updateBidStatusMutation.mutate({
+                                  listingId: bid.listingId,
+                                  bidId: bid.id,
+                                  status: "rejected",
+                                })}
+                              >
+                                Recusar
+                              </Button>
+                            </div>
+                          )}
+                          {bid.status === "accepted" && bid.bidderPhone && (
+                            <a
+                              href={`https://wa.me/55${bid.bidderPhone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Aceitei sua proposta de R$ ${Number(bid.amount).toLocaleString('pt-BR')}/cab para ${bid.listingTitle}. Vamos combinar os detalhes?`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0"
+                            >
+                              <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white text-xs px-3">
+                                📱 WhatsApp
+                              </Button>
+                            </a>
+                          )}
                         </div>
                       </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-secondary">Quantidade</p>
-                          <p className="font-semibold text-white">{listing.quantity} animais</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-secondary">Preço</p>
-                          <p className="font-semibold text-white">
-                            R$ {Number(listing.pricePerHead).toLocaleString('pt-BR')}/cabeça
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-secondary">Visualizações</p>
-                          <p className="font-semibold text-white">-</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-secondary">Interessados</p>
-                          <p className="font-semibold text-white">-</p>
-                        </div>
-                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-                      <div className="flex items-center justify-between">
-                        <Badge className={listing.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                          {listing.isActive ? "Ativo" : "Pausado"}
-                        </Badge>
-                        <Button variant="ghost" className="text-accent-green hover:text-green-400">
-                          Ver estatísticas →
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+              {/* Listings */}
+              {userListings?.listings?.length > 0 ? (
+                userListings.listings.map((listing: any) => {
+                  const listingBids = sellerBidsData?.bids?.filter((b: any) => b.listingId === listing.id) || [];
+                  const pendingCount = listingBids.filter((b: any) => b.status === "pending").length;
+                  return (
+                    <Card key={listing.id} className="card-enhanced bg-container-bg border-gray-600">
+                      <CardContent className="p-5">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="text-base font-semibold text-white">
+                              {listing.title || `Lote ${listing.id.toString().padStart(2, '0')}`}
+                            </h3>
+                            <p className="text-secondary text-sm">
+                              Publicado em {new Date(listing.createdAt).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {pendingCount > 0 && (
+                              <Badge className="bg-amber-600 text-white text-xs">
+                                {pendingCount} proposta{pendingCount > 1 ? "s" : ""}
+                              </Badge>
+                            )}
+                            <Badge className={listing.isActive ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"}>
+                              {listing.isActive ? "Ativo" : "Encerrado"}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div>
+                            <p className="text-secondary">Quantidade</p>
+                            <p className="font-semibold text-white">{listing.quantity} animais</p>
+                          </div>
+                          <div>
+                            <p className="text-secondary">Preço pedido</p>
+                            <p className="font-semibold text-white">
+                              R$ {Number(listing.pricePerHead).toLocaleString('pt-BR')}/cab
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-secondary">Propostas</p>
+                            <p className="font-semibold text-white">{listingBids.length} total</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
               ) : (
                 <div className="text-center py-12">
                   <List className="h-12 w-12 text-secondary mx-auto mb-4" />

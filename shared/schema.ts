@@ -248,6 +248,7 @@ export const bids = pgTable("bids", {
   listingId: integer("listing_id").references(() => listings.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  status: text("status").default("pending"), // 'pending' | 'accepted' | 'rejected'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
