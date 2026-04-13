@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log("Session after save:", req.session);
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "30d" });
       res.json({ user: { ...user, password: undefined }, token });
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log("Session after save:", req.session);
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "7d" });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "30d" });
       res.json({ user: { ...user, password: undefined }, token });
     } catch (error) {
       console.error("Login error:", error);

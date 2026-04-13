@@ -63,18 +63,30 @@ export default function Marketplace() {
 
   const queryClient = useQueryClient();
 
-  const { data: user, error: userError, isLoading: userLoading } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 0,
     refetchOnWindowFocus: true,
   });
 
-  // No polling - use localStorage auth as fallback
+  // Detect expired session: API returned null but localStorage has stale data → clear and redirect to login
+  useEffect(() => {
+    if (!userLoading && !user) {
+      const token = getAuthToken();
+      const localData = localStorage.getItem('user');
+      if (!token && localData) {
+        // Stale local data with no token — clear and redirect
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        window.location.href = '/';
+      }
+    }
+  }, [user, userLoading]);
 
   // Check localStorage auth as fallback (computed before hooks that depend on it)
   const localAuth = localStorage.getItem('user');
-  const isLocallyAuthenticated = !!localAuth;
+  const isLocallyAuthenticated = !!localAuth && !!getAuthToken();
   let currentUser: any = user;
   if (!currentUser?.user && isLocallyAuthenticated) {
     try {
@@ -141,14 +153,12 @@ export default function Marketplace() {
     queryKey: ["/api/listings/user"],
     enabled: !!(currentUser?.user?.id || isLocallyAuthenticated),
     queryFn: async () => {
+      const token = getAuthToken();
       const response = await fetch("/api/listings/user", {
         credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!response.ok) {
-        // Fallback to all listings if user-specific fails
-        console.log("Failed to fetch user listings, using all listings");
-        return { listings: [] };
-      }
+      if (!response.ok) return { listings: [] };
       return response.json();
     },
   });
