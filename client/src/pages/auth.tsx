@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { apiRequest, setAuthToken } from "@/lib/queryClient";
+import { setAuthToken } from "@/lib/queryClient";
+import { getSupabase } from "@/lib/supabase";
 import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -32,7 +33,15 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [supabaseReady, setSupabaseReady] = useState(false);
   const queryClient = useQueryClient();
+
+  // Pre-load Supabase client on mount
+  useEffect(() => {
+    getSupabase().then((client) => {
+      setSupabaseReady(!!client);
+    });
+  }, []);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -54,15 +63,89 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
-      const response = await apiRequest("POST", "/api/auth/login", data);
-      return response.json();
+      const supabase = await getSupabase();
+
+      if (supabase) {
+        // Supabase Auth login
+        const { data: authData, error } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (error) {
+          // Check if it might be a legacy user (exists in our DB but not in Supabase)
+          // Fall back to custom auth
+          const legacyRes = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include",
+          });
+          if (!legacyRes.ok) {
+            const errData = await legacyRes.json().catch(() => ({}));
+            throw new Error(errData.message || "E-mail ou senha incorretos");
+          }
+          return legacyRes.json();
+        }
+
+        // Supabase login succeeded — sync with our backend
+        const token = authData.session!.access_token;
+        let syncRes = await fetch("/api/auth/supabase-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: token }),
+          credentials: "include",
+        });
+
+        // If profile doesn't exist yet, try to create it with pending data
+        if (syncRes.status === 404) {
+          const pending = sessionStorage.getItem("pendingProfile");
+          if (pending) {
+            const profile = JSON.parse(pending);
+            const regRes = await fetch("/api/auth/supabase-register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ accessToken: token, ...profile }),
+              credentials: "include",
+            });
+            if (regRes.ok) {
+              sessionStorage.removeItem("pendingProfile");
+              const result = await regRes.json();
+              return { ...result, token };
+            }
+          }
+          throw new Error("Perfil não encontrado. Complete seu cadastro primeiro.");
+        }
+
+        if (!syncRes.ok) {
+          const errData = await syncRes.json().catch(() => ({}));
+          throw new Error(errData.message || "Erro ao sincronizar conta");
+        }
+
+        const result = await syncRes.json();
+        // Use Supabase token as our auth token
+        return { ...result, token };
+      } else {
+        // Supabase not available — use legacy custom auth
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || "E-mail ou senha incorretos");
+        }
+        return res.json();
+      }
     },
     onSuccess: (data) => {
       if (data.token) {
         setAuthToken(data.token);
       }
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
@@ -74,7 +157,7 @@ export default function AuthPage() {
     onError: (error: Error) => {
       toast({
         title: "Erro no login",
-        description: "E-mail ou senha incorretos",
+        description: error.message || "E-mail ou senha incorretos",
         variant: "destructive",
       });
     },
@@ -82,15 +165,82 @@ export default function AuthPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      const response = await apiRequest("POST", "/api/auth/register", data);
-      return response.json();
+      const supabase = await getSupabase();
+
+      if (supabase) {
+        // 1) Create user in Supabase Auth
+        const { data: authData, error } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (error) {
+          throw new Error(error.message || "Erro ao criar conta no Supabase");
+        }
+
+        const token = authData.session?.access_token;
+        if (!token) {
+          // Email confirmation required by Supabase
+          // Save profile data so we can complete registration after confirmation
+          sessionStorage.setItem(
+            "pendingProfile",
+            JSON.stringify({
+              name: data.name,
+              phone: data.phone,
+              cpf: data.cpf,
+              city: data.city,
+              state: data.state,
+              email: data.email,
+            })
+          );
+          throw new Error(
+            "📧 Confirmação de e-mail necessária! Verifique sua caixa de entrada e clique no link enviado pelo Supabase. Depois faça login normalmente."
+          );
+        }
+
+        // 2) Create user profile in our backend
+        const syncRes = await fetch("/api/auth/supabase-register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accessToken: token,
+            name: data.name,
+            phone: data.phone,
+            cpf: data.cpf,
+            city: data.city,
+            state: data.state,
+          }),
+          credentials: "include",
+        });
+
+        if (!syncRes.ok) {
+          const errData = await syncRes.json().catch(() => ({}));
+          throw new Error(errData.message || "Erro ao criar perfil");
+        }
+
+        const result = await syncRes.json();
+        return { ...result, token };
+      } else {
+        // Supabase not available — use legacy custom register
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || "Erro ao criar conta");
+        }
+        return res.json();
+      }
     },
     onSuccess: (data) => {
       if (data.token) {
         setAuthToken(data.token);
       }
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
       toast({
         title: "Conta criada",
@@ -113,9 +263,9 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
-            <img 
-              src="/logo.png" 
-              alt="Bovinet" 
+            <img
+              src="/logo.png"
+              alt="Bovinet"
               className="w-full h-full object-contain"
             />
           </div>
@@ -159,6 +309,7 @@ export default function AuthPage() {
                       <Input
                         {...loginForm.register("password")}
                         type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
                         placeholder="••••••••"
                         className="bg-primary-bg border-gray-600 text-white focus:border-accent-green pr-10"
                       />
@@ -277,6 +428,7 @@ export default function AuthPage() {
                       <Input
                         {...registerForm.register("password")}
                         type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
                         placeholder="••••••••"
                         className="bg-primary-bg border-gray-600 text-white focus:border-accent-green pr-10"
                       />

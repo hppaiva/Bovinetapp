@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name, email, phone, cpf, city, state,
         password: placeholderHash,
         supabaseId,
-      } as any);
+      });
 
       req.session.userId = newUser.id;
       await new Promise<void>((r) => req.session.save(() => r()));

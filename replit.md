@@ -27,7 +27,7 @@ The application follows a monorepo structure with separate client and server dir
 
 ### Backend Architecture
 - **API Structure**: RESTful endpoints organized by feature
-- **Authentication**: Session-based authentication with bcrypt password hashing
+- **Authentication**: Dual auth system — Supabase Auth (primary) + custom JWT (legacy fallback)
 - **File Uploads**: Multer for handling video and image uploads
 - **Database**: Drizzle ORM with PostgreSQL for type-safe queries
 - **Middleware**: Express middleware for logging, authentication, and error handling
