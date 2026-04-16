@@ -33,6 +33,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  updateUserSupabaseId(id: number, supabaseId: string): Promise<void>;
 
   // Listing methods
   getListings(filters?: {
@@ -112,6 +113,10 @@ export class DatabaseStorage implements IStorage {
   async updateUser(id: number, updateData: Partial<InsertUser>): Promise<User> {
     const [user] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
     return user;
+  }
+
+  async updateUserSupabaseId(id: number, supabaseId: string): Promise<void> {
+    await db.update(users).set({ supabaseId }).where(eq(users.id, id));
   }
 
   // Listing methods

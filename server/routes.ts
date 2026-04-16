@@ -9,6 +9,7 @@ import connectPgSimple from "connect-pg-simple";
 import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { pool } from "./db";
+import { supabasePublicConfig, verifySupabaseToken } from "./supabase";
 import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema, insertFreightAlertSchema } from "@shared/schema";
 import { WebSocketServer } from "ws";
 
@@ -39,18 +40,35 @@ const upload = multer({
   },
 });
 
-// Middleware to check if user is authenticated (session OR JWT token)
-const requireAuth = (req: any, res: any, next: any) => {
-  // Check JWT token first (Authorization: Bearer <token>)
+// Middleware to check if user is authenticated (session OR custom JWT OR Supabase JWT)
+const requireAuth = async (req: any, res: any, next: any) => {
+  // Check Authorization header first
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
+
+    // 1) Try custom JWT
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
       req.session.userId = decoded.userId;
       return next();
-    } catch (e) {
-      // Invalid token, fall through to session check
+    } catch (_e) {
+      // Not a custom JWT — try Supabase
+    }
+
+    // 2) Try Supabase JWT
+    try {
+      const supabaseUser = await verifySupabaseToken(token);
+      if (supabaseUser) {
+        // Find our user by email or supabaseId
+        const dbUser = await storage.getUserByEmail(supabaseUser.email!);
+        if (dbUser) {
+          req.session.userId = dbUser.id;
+          return next();
+        }
+      }
+    } catch (_e) {
+      // Supabase verification failed
     }
   }
 
@@ -63,6 +81,14 @@ const requireAuth = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Public Supabase config for frontend initialization
+  app.get("/api/config", (_req, res) => {
+    res.json({
+      supabaseUrl: supabasePublicConfig.url,
+      supabaseAnonKey: supabasePublicConfig.anonKey,
+    });
+  });
+
   // Session configuration was moved to server/index.ts to avoid duplication
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
@@ -169,6 +195,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     req.session.destroy(() => {
       res.json({ message: "Logged out successfully" });
     });
+  });
+
+  // Supabase Auth: called after supabase.auth.signUp() to create user profile
+  app.post("/api/auth/supabase-register", async (req, res) => {
+    try {
+      const { accessToken, name, phone, cpf, city, state } = req.body;
+      if (!accessToken) return res.status(400).json({ message: "Access token obrigatório" });
+
+      const supabaseUser = await verifySupabaseToken(accessToken);
+      if (!supabaseUser) return res.status(401).json({ message: "Token Supabase inválido" });
+
+      const email = supabaseUser.email!;
+      const supabaseId = supabaseUser.id;
+
+      // Check if user already exists (by email or supabaseId)
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        // Link supabaseId to existing user
+        if (!existing.supabaseId) {
+          await storage.updateUserSupabaseId(existing.id, supabaseId);
+        }
+        req.session.userId = existing.id;
+        await new Promise<void>((r) => req.session.save(() => r()));
+        return res.json({ user: { ...existing, password: undefined, supabaseId } });
+      }
+
+      // Validate required fields
+      if (!name || !phone || !cpf || !city || !state) {
+        return res.status(400).json({ message: "Dados incompletos: nome, telefone, CPF, cidade e estado são obrigatórios" });
+      }
+
+      // Create placeholder bcrypt password (Supabase handles auth)
+      const placeholderHash = await bcrypt.hash(supabaseId + process.env.SESSION_SECRET, 10);
+
+      const newUser = await storage.createUser({
+        name, email, phone, cpf, city, state,
+        password: placeholderHash,
+        supabaseId,
+      } as any);
+
+      req.session.userId = newUser.id;
+      await new Promise<void>((r) => req.session.save(() => r()));
+      res.status(201).json({ user: { ...newUser, password: undefined } });
+    } catch (error: any) {
+      console.error("Supabase register error:", error);
+      if (error.message?.includes("unique")) {
+        return res.status(409).json({ message: "CPF ou e-mail já cadastrado" });
+      }
+      res.status(500).json({ message: "Erro ao criar conta" });
+    }
+  });
+
+  // Supabase Auth: called after supabase.auth.signInWithPassword() to get user profile
+  app.post("/api/auth/supabase-login", async (req, res) => {
+    try {
+      const { accessToken } = req.body;
+      if (!accessToken) return res.status(400).json({ message: "Access token obrigatório" });
+
+      const supabaseUser = await verifySupabaseToken(accessToken);
+      if (!supabaseUser) return res.status(401).json({ message: "Token Supabase inválido" });
+
+      const dbUser = await storage.getUserByEmail(supabaseUser.email!);
+      if (!dbUser) {
+        return res.status(404).json({ message: "Usuário não encontrado. Faça o cadastro primeiro." });
+      }
+
+      // Link supabaseId if not already set
+      if (!dbUser.supabaseId) {
+        await storage.updateUserSupabaseId(dbUser.id, supabaseUser.id);
+      }
+
+      req.session.userId = dbUser.id;
+      await new Promise<void>((r) => req.session.save(() => r()));
+
+      // Return Supabase token as our auth token (accepted by requireAuth)
+      res.json({ user: { ...dbUser, password: undefined }, token: accessToken });
+    } catch (error) {
+      console.error("Supabase login error:", error);
+      res.status(500).json({ message: "Erro ao fazer login" });
+    }
   });
 
   app.get("/api/auth/me", requireAuth, async (req, res) => {

@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   state: text("state").notNull(),
   isVerified: boolean("is_verified").default(false),
   isTrucker: boolean("is_trucker").default(false),
+  supabaseId: text("supabase_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
