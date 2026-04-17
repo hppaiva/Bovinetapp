@@ -16,7 +16,7 @@ export default function SimpleDashboard() {
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
-    <div className="min-h-screen bg-[#1E2A38] text-white pb-20">
+    <div className="min-h-screen bg-[#1E2A38] text-white pb-8">
       {/* Header */}
       <header className="bg-[#2A3A4A] p-4 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">

@@ -258,8 +258,8 @@ export default function AuthPage() {
   });
 
   return (
-    <div className="min-h-screen bg-primary-bg flex items-center justify-center p-6">
-      <div className="w-full max-w-md animate-fade-in">
+    <div className="bg-primary-bg min-h-screen">
+      <div className="max-w-md mx-auto px-6 py-10">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
