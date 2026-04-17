@@ -20,7 +20,6 @@ const loginSchema = z.object({
 
 const registerSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("E-mail inválido"),
   phone: z.string().min(10, "Telefone inválido"),
   cpf: z.string().min(11, "CPF inválido"),
   city: z.string().min(2, "Cidade é obrigatória"),
@@ -52,7 +51,6 @@ export default function AuthPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
-      email: "",
       phone: "",
       cpf: "",
       city: "",
@@ -165,23 +163,26 @@ export default function AuthPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm) => {
+      // Generate synthetic email from phone number (digits only)
+      const phoneDigits = data.phone.replace(/\D/g, "");
+      const syntheticEmail = `${phoneDigits}@bovinet.app`;
+
       const supabase = await getSupabase();
 
       if (supabase) {
-        // 1) Create user in Supabase Auth
+        // 1) Create user in Supabase Auth using synthetic email
         const { data: authData, error } = await supabase.auth.signUp({
-          email: data.email,
+          email: syntheticEmail,
           password: data.password,
         });
 
         if (error) {
-          throw new Error(error.message || "Erro ao criar conta no Supabase");
+          throw new Error(error.message || "Erro ao criar conta");
         }
 
         const token = authData.session?.access_token;
         if (!token) {
-          // Email confirmation required by Supabase
-          // Save profile data so we can complete registration after confirmation
+          // Email confirmation required by Supabase (should be disabled for synthetic emails)
           sessionStorage.setItem(
             "pendingProfile",
             JSON.stringify({
@@ -190,11 +191,10 @@ export default function AuthPage() {
               cpf: data.cpf,
               city: data.city,
               state: data.state,
-              email: data.email,
             })
           );
           throw new Error(
-            "📧 Confirmação de e-mail necessária! Verifique sua caixa de entrada e clique no link enviado pelo Supabase. Depois faça login normalmente."
+            "Confirme seu número de telefone para concluir o cadastro."
           );
         }
 
@@ -225,7 +225,7 @@ export default function AuthPage() {
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, email: syntheticEmail }),
           credentials: "include",
         });
         if (!res.ok) {
@@ -354,19 +354,6 @@ export default function AuthPage() {
                     />
                     {registerForm.formState.errors.name && (
                       <p className="text-accent-red text-sm mt-1">{registerForm.formState.errors.name.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email" className="text-white">E-mail</Label>
-                    <Input
-                      {...registerForm.register("email")}
-                      type="email"
-                      placeholder="seu@email.com"
-                      className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
-                    />
-                    {registerForm.formState.errors.email && (
-                      <p className="text-accent-red text-sm mt-1">{registerForm.formState.errors.email.message}</p>
                     )}
                   </div>
 
