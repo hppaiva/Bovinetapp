@@ -14,7 +14,7 @@ import { getSupabase } from "@/lib/supabase";
 import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email("E-mail inválido"),
+  phone: z.string().min(10, "Telefone inválido"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
@@ -44,7 +44,7 @@ export default function AuthPage() {
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { phone: "", password: "" },
   });
 
   const registerForm = useForm<RegisterForm>({
@@ -61,32 +61,33 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
+      // Convert phone to synthetic email used at registration
+      const phoneDigits = data.phone.replace(/\D/g, "");
+      const syntheticEmail = `${phoneDigits}@bovinet.app`;
+
       const supabase = await getSupabase();
 
       if (supabase) {
-        // Supabase Auth login
         const { data: authData, error } = await supabase.auth.signInWithPassword({
-          email: data.email,
+          email: syntheticEmail,
           password: data.password,
         });
 
         if (error) {
-          // Check if it might be a legacy user (exists in our DB but not in Supabase)
-          // Fall back to custom auth
+          // Fallback to custom auth using synthetic email
           const legacyRes = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ email: syntheticEmail, password: data.password }),
             credentials: "include",
           });
           if (!legacyRes.ok) {
             const errData = await legacyRes.json().catch(() => ({}));
-            throw new Error(errData.message || "E-mail ou senha incorretos");
+            throw new Error(errData.message || "Telefone ou senha incorretos");
           }
           return legacyRes.json();
         }
 
-        // Supabase login succeeded — sync with our backend
         const token = authData.session!.access_token;
         let syncRes = await fetch("/api/auth/supabase-login", {
           method: "POST",
@@ -95,23 +96,7 @@ export default function AuthPage() {
           credentials: "include",
         });
 
-        // If profile doesn't exist yet, try to create it with pending data
         if (syncRes.status === 404) {
-          const pending = sessionStorage.getItem("pendingProfile");
-          if (pending) {
-            const profile = JSON.parse(pending);
-            const regRes = await fetch("/api/auth/supabase-register", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ accessToken: token, ...profile }),
-              credentials: "include",
-            });
-            if (regRes.ok) {
-              sessionStorage.removeItem("pendingProfile");
-              const result = await regRes.json();
-              return { ...result, token };
-            }
-          }
           throw new Error("Perfil não encontrado. Complete seu cadastro primeiro.");
         }
 
@@ -121,19 +106,18 @@ export default function AuthPage() {
         }
 
         const result = await syncRes.json();
-        // Use Supabase token as our auth token
         return { ...result, token };
       } else {
         // Supabase not available — use legacy custom auth
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ email: syntheticEmail, password: data.password }),
           credentials: "include",
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.message || "E-mail ou senha incorretos");
+          throw new Error(errData.message || "Telefone ou senha incorretos");
         }
         return res.json();
       }
@@ -155,7 +139,7 @@ export default function AuthPage() {
     onError: (error: Error) => {
       toast({
         title: "Erro no login",
-        description: error.message || "E-mail ou senha incorretos",
+        description: error.message || "Telefone ou senha incorretos",
         variant: "destructive",
       });
     },
@@ -291,15 +275,16 @@ export default function AuthPage() {
               <CardContent>
                 <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
                   <div>
-                    <Label htmlFor="email" className="text-white">E-mail</Label>
+                    <Label htmlFor="phone" className="text-white">Telefone</Label>
                     <Input
-                      {...loginForm.register("email")}
-                      type="email"
-                      placeholder="seu@email.com"
+                      {...loginForm.register("phone")}
+                      type="tel"
+                      autoComplete="tel"
+                      placeholder="(11) 99999-9999"
                       className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
                     />
-                    {loginForm.formState.errors.email && (
-                      <p className="text-accent-red text-sm mt-1">{loginForm.formState.errors.email.message}</p>
+                    {loginForm.formState.errors.phone && (
+                      <p className="text-accent-red text-sm mt-1">{loginForm.formState.errors.phone.message}</p>
                     )}
                   </div>
 
