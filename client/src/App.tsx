@@ -10,6 +10,7 @@ import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
 import AuthPage from "@/pages/auth";
+import ResetPasswordPage from "@/pages/reset-password";
 import { getAuthToken } from "@/lib/queryClient";
 
 // ─── Contexto de autenticação ───────────────────────────────────────────────
@@ -81,6 +82,7 @@ function Router() {
     <Switch>
       {/* Rotas públicas */}
       <Route path="/auth" component={AuthPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
 
       {/* FIX #4: NotFound só aparece para usuários logados nas rotas protegidas */}
       {!isLoggedIn ? (

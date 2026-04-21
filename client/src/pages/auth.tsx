@@ -8,6 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { setAuthToken } from "@/lib/queryClient";
 import { getSupabase } from "@/lib/supabase";
@@ -34,7 +42,44 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [supabaseReady, setSupabaseReady] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSending, setForgotSending] = useState(false);
   const queryClient = useQueryClient();
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(forgotEmail)) {
+      toast({
+        title: "E-mail inválido",
+        description: "Informe um e-mail válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setForgotSending(true);
+    try {
+      const supabase = await getSupabase();
+      if (!supabase) throw new Error("Serviço indisponível");
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw new Error(error.message);
+      toast({
+        title: "E-mail enviado",
+        description: `Enviamos um link de redefinição para ${forgotEmail}. Verifique sua caixa de entrada.`,
+      });
+      setForgotOpen(false);
+      setForgotEmail("");
+    } catch (err: any) {
+      toast({
+        title: "Erro ao enviar",
+        description: err.message || "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    } finally {
+      setForgotSending(false);
+    }
+  };
 
   // Pre-load Supabase client on mount
   useEffect(() => {
@@ -353,6 +398,20 @@ export default function AuthPage() {
                   >
                     {loginMutation.isPending ? "Entrando..." : "Entrar"}
                   </Button>
+
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForgotEmail(loginForm.getValues("email") || "");
+                        setForgotOpen(true);
+                      }}
+                      className="text-sm text-accent-green hover:underline"
+                      data-testid="link-forgot-password"
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
                 </form>
               </CardContent>
             </Card>
@@ -484,6 +543,49 @@ export default function AuthPage() {
           <p>Termos de Uso e Política de Privacidade</p>
         </div>
       </div>
+
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent className="bg-container-bg border-gray-600 text-white">
+          <DialogHeader>
+            <DialogTitle>Redefinir senha</DialogTitle>
+            <DialogDescription className="text-secondary">
+              Informe o e-mail cadastrado e enviaremos um link para você criar uma nova senha.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="forgot-email" className="text-white">E-mail</Label>
+            <Input
+              id="forgot-email"
+              type="email"
+              autoComplete="email"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+              placeholder="seu@email.com"
+              className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+              data-testid="input-forgot-email"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setForgotOpen(false)}
+              className="border-gray-600 text-white hover:bg-gray-700"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleForgotPassword}
+              disabled={forgotSending}
+              className="bg-accent-green hover:bg-green-600 text-white"
+              data-testid="button-send-reset"
+            >
+              {forgotSending ? "Enviando..." : "Enviar link"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
