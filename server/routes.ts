@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { pool } from "./db";
 import { supabasePublicConfig, verifySupabaseToken } from "./supabase";
-import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema, insertFreightAlertSchema } from "@shared/schema";
+import { insertUserSchema, insertListingSchema, insertTruckerSchema, insertFreightRequestSchema, insertGtaRequestSchema, insertIdentityVerificationSchema, insertFreightAlertSchema, insertAdvertisementSchema } from "@shared/schema";
 import { WebSocketServer } from "ws";
 
 
@@ -78,6 +78,23 @@ const requireAuth = async (req: any, res: any, next: any) => {
   }
 
   return res.status(401).json({ message: "Authentication required" });
+};
+
+// Middleware to require admin privileges
+const requireAdmin = async (req: any, res: any, next: any) => {
+  if (!req.session?.userId) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+  const user = await storage.getUser(req.session.userId);
+  if (!user?.isAdmin) {
+    return res.status(403).json({ message: "Acesso restrito ao administrador" });
+  }
+  next();
+};
+
+// Combined middleware: requireAuth then requireAdmin
+const adminOnly = async (req: any, res: any, next: any) => {
+  return requireAuth(req, res, async () => requireAdmin(req, res, next));
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -586,6 +603,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Create GTA request error:", error);
       res.status(400).json({ message: "Invalid GTA request data" });
+    }
+  });
+
+  // ===== Advertisement routes =====
+  // Public: get active ads (optionally filter by position)
+  app.get("/api/ads", async (req, res) => {
+    try {
+      const position = req.query.position as string | undefined;
+      const ads = await storage.getActiveAds(position);
+      res.json({ ads });
+    } catch (error) {
+      console.error("Get ads error:", error);
+      res.status(500).json({ message: "Failed to get ads" });
+    }
+  });
+
+  // Public: track impression
+  app.post("/api/ads/:id/impression", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+      await storage.incrementAdImpression(id);
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  // Public: track click
+  app.post("/api/ads/:id/click", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+      await storage.incrementAdClick(id);
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed" });
+    }
+  });
+
+  // Admin: list all ads (active + inactive)
+  app.get("/api/admin/ads", adminOnly, async (_req, res) => {
+    try {
+      const ads = await storage.getAllAds();
+      res.json({ ads });
+    } catch (error) {
+      console.error("Admin get ads error:", error);
+      res.status(500).json({ message: "Failed to get ads" });
+    }
+  });
+
+  // Admin: create ad (with optional image upload)
+  app.post("/api/admin/ads", adminOnly, upload.single("image"), async (req, res) => {
+    try {
+      const file = req.file;
+      const imageUrl = file ? `/uploads/${file.filename}` : req.body.imageUrl;
+      if (!imageUrl) return res.status(400).json({ message: "Imagem obrigatória" });
+
+      const payload = {
+        title: req.body.title,
+        imageUrl,
+        linkUrl: req.body.linkUrl || null,
+        position: req.body.position,
+        isActive: req.body.isActive === undefined ? true : req.body.isActive === "true" || req.body.isActive === true,
+        startDate: req.body.startDate ? new Date(req.body.startDate) : null,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : null,
+      };
+
+      const data = insertAdvertisementSchema.parse(payload);
+      const ad = await storage.createAd(data);
+      res.json({ ad });
+    } catch (error: any) {
+      console.error("Create ad error:", error);
+      res.status(400).json({ message: error.message || "Dados inválidos" });
+    }
+  });
+
+  // Admin: update ad
+  app.put("/api/admin/ads/:id", adminOnly, upload.single("image"), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+
+      const file = req.file;
+      const updateData: any = {};
+      if (req.body.title !== undefined) updateData.title = req.body.title;
+      if (file) updateData.imageUrl = `/uploads/${file.filename}`;
+      else if (req.body.imageUrl) updateData.imageUrl = req.body.imageUrl;
+      if (req.body.linkUrl !== undefined) updateData.linkUrl = req.body.linkUrl || null;
+      if (req.body.position !== undefined) updateData.position = req.body.position;
+      if (req.body.isActive !== undefined) {
+        updateData.isActive = req.body.isActive === "true" || req.body.isActive === true;
+      }
+      if (req.body.startDate !== undefined) updateData.startDate = req.body.startDate ? new Date(req.body.startDate) : null;
+      if (req.body.endDate !== undefined) updateData.endDate = req.body.endDate ? new Date(req.body.endDate) : null;
+
+      const ad = await storage.updateAd(id, updateData);
+      res.json({ ad });
+    } catch (error: any) {
+      console.error("Update ad error:", error);
+      res.status(400).json({ message: error.message || "Falha ao atualizar" });
+    }
+  });
+
+  // Admin: delete ad
+  app.delete("/api/admin/ads/:id", adminOnly, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid id" });
+      await storage.deleteAd(id);
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("Delete ad error:", error);
+      res.status(500).json({ message: "Failed to delete ad" });
     }
   });
 

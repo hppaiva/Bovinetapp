@@ -18,6 +18,7 @@ import { toast } from "@/hooks/use-toast";
 import { apiRequest, getAuthToken } from "@/lib/queryClient";
 import { generateWhatsAppLink } from "@/lib/whatsapp";
 import { calculateArrobaPrice, getCityDistanceKm } from "@/lib/utils";
+import AdBanner from "@/components/ad-banner";
 import { brazilianStates, getCitiesByState } from "../data/brazilian-locations";
 import Header from "@/components/header";
 import BottomNav from "@/components/bottom-nav";
@@ -450,6 +451,9 @@ export default function Marketplace() {
 
           {/* Buy Tab */}
           <TabsContent value="buy" className="space-y-6">
+            {/* Top sponsored banner */}
+            <AdBanner position="top_banner" />
+
             {/* Filters */}
             <Card className="bg-container-bg border-gray-600">
               <CardHeader>

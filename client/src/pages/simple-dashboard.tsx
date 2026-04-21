@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
-import { Plus, Search, LogOut, Menu, X, User } from "lucide-react";
+import { Plus, Search, LogOut, Menu, X, User, Megaphone } from "lucide-react";
 import bovinetLogo from "@assets/logo_1750855451070.png";
+import AdBanner from "@/components/ad-banner";
 
 export default function SimpleDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
+  const { data: meData } = useQuery<{ user: any }>({ queryKey: ["/api/auth/me"] });
+  const isAdmin = meData?.user?.isAdmin === true;
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('authToken');
@@ -42,6 +47,12 @@ export default function SimpleDashboard() {
               <User size={20} />
               <span>Perfil</span>
             </Link>
+            {isAdmin && (
+              <Link href="/admin/ads" className="flex items-center space-x-2 hover:text-[#4CAF50] transition-colors" data-testid="link-admin-ads">
+                <Megaphone size={20} />
+                <span>Anúncios</span>
+              </Link>
+            )}
             <button 
               onClick={handleLogout}
               className="flex items-center space-x-2 hover:text-red-400 transition-colors"
@@ -69,6 +80,11 @@ export default function SimpleDashboard() {
             <Link href="/profile" className="block px-4 py-2 hover:bg-[#1E2A38] rounded">
               👤 Perfil
             </Link>
+            {isAdmin && (
+              <Link href="/admin/ads" className="block px-4 py-2 hover:bg-[#1E2A38] rounded">
+                📣 Anúncios (Admin)
+              </Link>
+            )}
             <button 
               onClick={handleLogout}
               className="block w-full text-left px-4 py-2 hover:bg-[#1E2A38] rounded text-red-400"

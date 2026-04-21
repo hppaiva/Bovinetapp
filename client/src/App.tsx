@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 import OfflineIndicator from "@/components/offline-indicator";
 import AuthPage from "@/pages/auth";
 import ResetPasswordPage from "@/pages/reset-password";
+import AdminAdsPage from "@/pages/admin-ads";
 import { getAuthToken } from "@/lib/queryClient";
 
 // ─── Contexto de autenticação ───────────────────────────────────────────────
@@ -93,6 +94,7 @@ function Router() {
           <ProtectedRoute path="/dashboard" component={SimpleDashboard} isLoggedIn={isLoggedIn} />
           <ProtectedRoute path="/marketplace" component={Marketplace} isLoggedIn={isLoggedIn} />
           <ProtectedRoute path="/profile" component={Profile} isLoggedIn={isLoggedIn} />
+          <ProtectedRoute path="/admin/ads" component={AdminAdsPage} isLoggedIn={isLoggedIn} />
           <Route component={NotFound} />
         </>
       )}

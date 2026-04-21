@@ -14,9 +14,34 @@ export const users = pgTable("users", {
   state: text("state").notNull(),
   isVerified: boolean("is_verified").default(false),
   isTrucker: boolean("is_trucker").default(false),
+  isAdmin: boolean("is_admin").default(false),
   supabaseId: text("supabase_id").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const advertisements = pgTable("advertisements", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  imageUrl: text("image_url").notNull(),
+  linkUrl: text("link_url"),
+  position: text("position").notNull(), // 'top_banner' | 'inline_card' | 'sidebar'
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAdvertisementSchema = createInsertSchema(advertisements).omit({
+  id: true,
+  createdAt: true,
+  impressions: true,
+  clicks: true,
+});
+
+export type Advertisement = typeof advertisements.$inferSelect;
+export type InsertAdvertisement = z.infer<typeof insertAdvertisementSchema>;
 
 export const listings = pgTable("listings", {
   id: serial("id").primaryKey(),

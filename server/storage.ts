@@ -7,6 +7,7 @@ import {
   identityVerifications,
   freightAlerts,
   bids,
+  advertisements,
   type User,
   type InsertUser,
   type Listing,
@@ -23,9 +24,11 @@ import {
   type InsertFreightAlert,
   type Bid,
   type InsertBid,
+  type Advertisement,
+  type InsertAdvertisement,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql, or, isNull, lte, gte } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -91,6 +94,16 @@ export interface IStorage {
   getHighestBid(listingId: number): Promise<Bid | undefined>;
   updateBidStatus(bidId: number, status: string): Promise<Bid>;
   rejectOtherBids(listingId: number, acceptedBidId: number): Promise<void>;
+
+  // Advertisement methods
+  getActiveAds(position?: string): Promise<Advertisement[]>;
+  getAllAds(): Promise<Advertisement[]>;
+  getAd(id: number): Promise<Advertisement | undefined>;
+  createAd(ad: InsertAdvertisement): Promise<Advertisement>;
+  updateAd(id: number, ad: Partial<InsertAdvertisement>): Promise<Advertisement>;
+  deleteAd(id: number): Promise<void>;
+  incrementAdImpression(id: number): Promise<void>;
+  incrementAdClick(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -472,6 +485,55 @@ export class DatabaseStorage implements IStorage {
     await db.update(bids)
       .set({ status: "rejected" })
       .where(and(eq(bids.listingId, listingId), eq(bids.status, "pending")));
+  }
+
+  // Advertisement methods
+  async getActiveAds(position?: string): Promise<Advertisement[]> {
+    const now = new Date();
+    const conditions = [
+      eq(advertisements.isActive, true),
+      or(isNull(advertisements.startDate), lte(advertisements.startDate, now))!,
+      or(isNull(advertisements.endDate), gte(advertisements.endDate, now))!,
+    ];
+    if (position) conditions.push(eq(advertisements.position, position));
+    return await db.select().from(advertisements)
+      .where(and(...conditions))
+      .orderBy(desc(advertisements.createdAt));
+  }
+
+  async getAllAds(): Promise<Advertisement[]> {
+    return await db.select().from(advertisements).orderBy(desc(advertisements.createdAt));
+  }
+
+  async getAd(id: number): Promise<Advertisement | undefined> {
+    const [ad] = await db.select().from(advertisements).where(eq(advertisements.id, id));
+    return ad || undefined;
+  }
+
+  async createAd(ad: InsertAdvertisement): Promise<Advertisement> {
+    const [created] = await db.insert(advertisements).values(ad).returning();
+    return created;
+  }
+
+  async updateAd(id: number, ad: Partial<InsertAdvertisement>): Promise<Advertisement> {
+    const [updated] = await db.update(advertisements).set(ad).where(eq(advertisements.id, id)).returning();
+    return updated;
+  }
+
+  async deleteAd(id: number): Promise<void> {
+    await db.delete(advertisements).where(eq(advertisements.id, id));
+  }
+
+  async incrementAdImpression(id: number): Promise<void> {
+    await db.update(advertisements)
+      .set({ impressions: sql`${advertisements.impressions} + 1` })
+      .where(eq(advertisements.id, id));
+  }
+
+  async incrementAdClick(id: number): Promise<void> {
+    await db.update(advertisements)
+      .set({ clicks: sql`${advertisements.clicks} + 1` })
+      .where(eq(advertisements.id, id));
   }
 }
 
