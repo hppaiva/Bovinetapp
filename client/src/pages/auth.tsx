@@ -14,12 +14,13 @@ import { getSupabase } from "@/lib/supabase";
 import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
-  phone: z.string().min(10, "Telefone inválido"),
+  email: z.string().email("E-mail inválido"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
 const registerSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("E-mail inválido"),
   phone: z.string().min(10, "Telefone inválido"),
   cpf: z.string().min(11, "CPF inválido"),
   city: z.string().min(2, "Cidade é obrigatória"),
@@ -44,13 +45,14 @@ export default function AuthPage() {
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { phone: "", password: "" },
+    defaultValues: { email: "", password: "" },
   });
 
   const registerForm = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
+      email: "",
       phone: "",
       cpf: "",
       city: "",
@@ -61,43 +63,67 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
-      // Convert phone to synthetic email used at registration
-      const phoneDigits = data.phone.replace(/\D/g, "");
-      const syntheticEmail = `${phoneDigits}@bovinet.app`;
-
       const supabase = await getSupabase();
 
       if (supabase) {
         const { data: authData, error } = await supabase.auth.signInWithPassword({
-          email: syntheticEmail,
+          email: data.email,
           password: data.password,
         });
 
         if (error) {
-          // Fallback to custom auth using synthetic email
+          if (error.message.toLowerCase().includes("email not confirmed")) {
+            throw new Error("Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.");
+          }
+          // Fallback to legacy custom auth
           const legacyRes = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: syntheticEmail, password: data.password }),
+            body: JSON.stringify(data),
             credentials: "include",
           });
           if (!legacyRes.ok) {
             const errData = await legacyRes.json().catch(() => ({}));
-            throw new Error(errData.message || "Telefone ou senha incorretos");
+            throw new Error(errData.message || "E-mail ou senha incorretos");
           }
           return legacyRes.json();
         }
 
         const token = authData.session!.access_token;
-        let syncRes = await fetch("/api/auth/supabase-login", {
+        const syncRes = await fetch("/api/auth/supabase-login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ accessToken: token }),
           credentials: "include",
         });
 
+        // If profile doesn't exist yet, create it now using pendingProfile data
         if (syncRes.status === 404) {
-          throw new Error("Perfil não encontrado. Complete seu cadastro primeiro.");
+          const pending = sessionStorage.getItem("pendingProfile");
+          if (!pending) {
+            throw new Error("Perfil não encontrado. Faça o cadastro primeiro.");
+          }
+          const profile = JSON.parse(pending);
+          const regRes = await fetch("/api/auth/supabase-register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accessToken: token,
+              name: profile.name,
+              phone: profile.phone,
+              cpf: profile.cpf,
+              city: profile.city,
+              state: profile.state,
+            }),
+            credentials: "include",
+          });
+          if (!regRes.ok) {
+            const errData = await regRes.json().catch(() => ({}));
+            throw new Error(errData.message || "Erro ao criar perfil");
+          }
+          sessionStorage.removeItem("pendingProfile");
+          const result = await regRes.json();
+          return { ...result, token };
         }
 
         if (!syncRes.ok) {
@@ -108,16 +134,15 @@ export default function AuthPage() {
         const result = await syncRes.json();
         return { ...result, token };
       } else {
-        // Supabase not available — use legacy custom auth
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: syntheticEmail, password: data.password }),
+          body: JSON.stringify(data),
           credentials: "include",
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.message || "Telefone ou senha incorretos");
+          throw new Error(errData.message || "E-mail ou senha incorretos");
         }
         return res.json();
       }
@@ -139,7 +164,7 @@ export default function AuthPage() {
     onError: (error: Error) => {
       toast({
         title: "Erro no login",
-        description: error.message || "Telefone ou senha incorretos",
+        description: error.message || "E-mail ou senha incorretos",
         variant: "destructive",
       });
     },
@@ -147,42 +172,43 @@ export default function AuthPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      // Generate synthetic email from phone number (digits only)
-      const phoneDigits = data.phone.replace(/\D/g, "");
-      const syntheticEmail = `${phoneDigits}@bovinet.app`;
-
       const supabase = await getSupabase();
 
       if (supabase) {
-        // 1) Create user in Supabase Auth using synthetic email
+        // 1) Create user in Supabase Auth — sends confirmation e-mail automatically
         const { data: authData, error } = await supabase.auth.signUp({
-          email: syntheticEmail,
+          email: data.email,
           password: data.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth`,
+          },
         });
 
         if (error) {
           throw new Error(error.message || "Erro ao criar conta");
         }
 
+        // Store profile data so we can create it after the user confirms the e-mail and logs in
+        sessionStorage.setItem(
+          "pendingProfile",
+          JSON.stringify({
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            cpf: data.cpf,
+            city: data.city,
+            state: data.state,
+            password: data.password,
+          })
+        );
+
         const token = authData.session?.access_token;
         if (!token) {
-          // Email confirmation required by Supabase (should be disabled for synthetic emails)
-          sessionStorage.setItem(
-            "pendingProfile",
-            JSON.stringify({
-              name: data.name,
-              phone: data.phone,
-              cpf: data.cpf,
-              city: data.city,
-              state: data.state,
-            })
-          );
-          throw new Error(
-            "Confirme seu número de telefone para concluir o cadastro."
-          );
+          // Email confirmation pending
+          return { needsConfirmation: true, email: data.email };
         }
 
-        // 2) Create user profile in our backend
+        // 2) Already authenticated (confirmation disabled in Supabase) — create profile now
         const syncRes = await fetch("/api/auth/supabase-register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -203,13 +229,14 @@ export default function AuthPage() {
         }
 
         const result = await syncRes.json();
+        sessionStorage.removeItem("pendingProfile");
         return { ...result, token };
       } else {
         // Supabase not available — use legacy custom register
         const res = await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, email: syntheticEmail }),
+          body: JSON.stringify(data),
           credentials: "include",
         });
         if (!res.ok) {
@@ -220,6 +247,14 @@ export default function AuthPage() {
       }
     },
     onSuccess: (data) => {
+      if (data?.needsConfirmation) {
+        toast({
+          title: "Confirme seu e-mail",
+          description: `Enviamos um link de confirmação para ${data.email}. Clique no link para ativar sua conta e depois faça login.`,
+        });
+        registerForm.reset();
+        return;
+      }
       if (data.token) {
         setAuthToken(data.token);
       }
@@ -275,16 +310,16 @@ export default function AuthPage() {
               <CardContent>
                 <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
                   <div>
-                    <Label htmlFor="phone" className="text-white">Telefone</Label>
+                    <Label htmlFor="email" className="text-white">E-mail</Label>
                     <Input
-                      {...loginForm.register("phone")}
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder="(11) 99999-9999"
+                      {...loginForm.register("email")}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="seu@email.com"
                       className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
                     />
-                    {loginForm.formState.errors.phone && (
-                      <p className="text-accent-red text-sm mt-1">{loginForm.formState.errors.phone.message}</p>
+                    {loginForm.formState.errors.email && (
+                      <p className="text-accent-red text-sm mt-1">{loginForm.formState.errors.email.message}</p>
                     )}
                   </div>
 
@@ -339,6 +374,20 @@ export default function AuthPage() {
                     />
                     {registerForm.formState.errors.name && (
                       <p className="text-accent-red text-sm mt-1">{registerForm.formState.errors.name.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="register-email" className="text-white">E-mail</Label>
+                    <Input
+                      {...registerForm.register("email")}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="seu@email.com"
+                      className="bg-primary-bg border-gray-600 text-white focus:border-accent-green"
+                    />
+                    {registerForm.formState.errors.email && (
+                      <p className="text-accent-red text-sm mt-1">{registerForm.formState.errors.email.message}</p>
                     )}
                   </div>
 
