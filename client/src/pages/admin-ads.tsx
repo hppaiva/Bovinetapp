@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { getAuthToken } from "@/lib/queryClient";
-import { Pencil, Trash2, Plus, ArrowLeft, BarChart3 } from "lucide-react";
+import { Pencil, Trash2, Plus, ArrowLeft, BarChart3, Beef } from "lucide-react";
 import type { Advertisement } from "@shared/schema";
 
 const POSITIONS = [
@@ -204,13 +204,23 @@ export default function AdminAdsPage() {
             </Button>
             <h1 className="text-white text-2xl font-bold">Anúncios patrocinados</h1>
           </div>
-          <Button
-            onClick={openCreate}
-            className="bg-accent-green hover:bg-green-600 text-white"
-            data-testid="button-new-ad"
-          >
-            <Plus className="w-4 h-4 mr-2" /> Novo anúncio
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/admin/listings")}
+              className="border-gray-600 text-white hover:bg-gray-700"
+              data-testid="button-go-listings"
+            >
+              <Beef className="w-4 h-4 mr-2" /> Anúncios de Gado
+            </Button>
+            <Button
+              onClick={openCreate}
+              className="bg-accent-green hover:bg-green-600 text-white"
+              data-testid="button-new-ad"
+            >
+              <Plus className="w-4 h-4 mr-2" /> Novo anúncio
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (

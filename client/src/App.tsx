@@ -10,6 +10,7 @@ import OfflineIndicator from "@/components/offline-indicator";
 import AuthPage from "@/pages/auth";
 import ResetPasswordPage from "@/pages/reset-password";
 import AdminAdsPage from "@/pages/admin-ads";
+import AdminListingsPage from "@/pages/admin-listings";
 import { getAuthToken } from "@/lib/queryClient";
 
 interface AuthState {
@@ -69,6 +70,9 @@ function Router() {
       <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/admin/ads">
         <ProtectedRoute component={AdminAdsPage} isLoggedIn={isLoggedIn} />
+      </Route>
+      <Route path="/admin/listings">
+        <ProtectedRoute component={AdminListingsPage} isLoggedIn={isLoggedIn} />
       </Route>
       <Route component={NotFound} />
     </Switch>

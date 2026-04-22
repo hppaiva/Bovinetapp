@@ -356,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/listings", requireAuth, upload.single("video"), async (req, res) => {
+  app.post("/api/listings", adminOnly, upload.single("video"), async (req, res) => {
     try {
       console.log("=== LISTING CREATION SERVER DEBUG ===");
       console.log("Session userId:", req.session.userId);
@@ -452,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/listings/:id", requireAuth, async (req, res) => {
+  app.put("/api/listings/:id", adminOnly, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updateData = req.body;
@@ -465,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/listings/:id", requireAuth, async (req, res) => {
+  app.delete("/api/listings/:id", adminOnly, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteListing(id);

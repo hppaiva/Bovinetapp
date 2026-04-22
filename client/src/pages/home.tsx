@@ -3,9 +3,62 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogIn, Megaphone } from "lucide-react";
+import { LogIn, Megaphone, MapPin, Beef } from "lucide-react";
 import bovinetLogo from "@assets/logo_1750855451070.png";
-import type { Advertisement } from "@shared/schema";
+import type { Advertisement, Listing } from "@shared/schema";
+
+const SEX_LABEL: Record<string, string> = { macho: "Macho", femea: "Fêmea" };
+const AGE_LABEL: Record<string, string> = {
+  ate12: "Até 12 meses",
+  "12a24": "12 a 24 meses",
+  "24a36": "24 a 36 meses",
+  "36a48": "36 a 48 meses",
+  mais48: "Mais de 48 meses",
+};
+const APT_LABEL: Record<string, string> = { corte: "Corte", leite: "Leite" };
+
+function ListingCard({ l }: { l: Listing }) {
+  return (
+    <Card
+      className="bg-[#2A3A4A] border-gray-600 overflow-hidden hover:border-[#4CAF50] transition-all"
+      data-testid={`home-listing-${l.id}`}
+    >
+      {l.videoUrl ? (
+        <video
+          className="w-full h-56 object-cover bg-black"
+          src={l.videoUrl}
+          controls
+          preload="metadata"
+        />
+      ) : (
+        <div className="w-full h-56 bg-[#1E2A38] flex items-center justify-center text-gray-500">
+          <Beef className="w-16 h-16" />
+        </div>
+      )}
+      <CardContent className="p-4 space-y-2">
+        <h3 className="text-white font-semibold text-lg">{l.title}</h3>
+        <div className="text-sm text-gray-300 space-y-1">
+          <p>
+            <span className="font-semibold text-[#4CAF50]">{l.quantity}</span> cab. ·{" "}
+            {SEX_LABEL[l.sex] || l.sex} · {AGE_LABEL[l.age] || l.age}
+          </p>
+          <p>
+            {l.weight} kg · {APT_LABEL[l.aptitude] || l.aptitude}
+          </p>
+          <p className="text-xl font-bold text-white">
+            R$ {Number(l.pricePerHead).toLocaleString("pt-BR")}{" "}
+            <span className="text-sm font-normal text-gray-400">/ cabeça</span>
+          </p>
+          {l.city && (
+            <p className="text-gray-400 flex items-center gap-1 text-xs">
+              <MapPin className="w-3 h-3" /> {l.city}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function AdCard({ ad }: { ad: Advertisement }) {
   const tracked = useRef(false);
@@ -71,6 +124,18 @@ export default function Home() {
 
   const ads = data?.ads || [];
 
+  const { data: listingsData, isLoading: loadingListings } = useQuery<{
+    listings: Listing[];
+  }>({
+    queryKey: ["/api/listings"],
+    queryFn: async () => {
+      const res = await fetch("/api/listings");
+      if (!res.ok) return { listings: [] };
+      return res.json();
+    },
+  });
+  const listings = listingsData?.listings || [];
+
   return (
     <div className="min-h-screen bg-[#1E2A38] text-white pb-12">
       <header className="bg-[#2A3A4A] p-4 shadow-lg">
@@ -106,28 +171,54 @@ export default function Home() {
           </p>
         </section>
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4CAF50] mx-auto"></div>
-            <p className="text-gray-400 mt-4">Carregando anúncios...</p>
-          </div>
-        ) : ads.length === 0 ? (
-          <Card className="bg-[#2A3A4A] border-gray-600">
-            <CardContent className="p-10 text-center text-gray-300 space-y-3">
-              <Megaphone className="w-10 h-10 mx-auto text-[#4CAF50]" />
-              <p className="text-lg font-medium">Nenhum anúncio disponível no momento.</p>
-              <p className="text-sm text-gray-400">
-                Volte em breve para ver as próximas ofertas!
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2">
-            {ads.map((ad) => (
-              <AdCard key={ad.id} ad={ad} />
-            ))}
-          </div>
+        {/* Promoções patrocinadas */}
+        {ads.length > 0 && (
+          <section>
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Megaphone className="w-5 h-5 text-[#4CAF50]" /> Promoções
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {ads.map((ad) => (
+                <AdCard key={ad.id} ad={ad} />
+              ))}
+            </div>
+          </section>
         )}
+
+        {/* Lotes de gado */}
+        <section>
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Beef className="w-5 h-5 text-[#4CAF50]" /> Lotes disponíveis
+          </h3>
+          {loadingListings || isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4CAF50] mx-auto"></div>
+              <p className="text-gray-400 mt-4">Carregando anúncios...</p>
+            </div>
+          ) : listings.length === 0 && ads.length === 0 ? (
+            <Card className="bg-[#2A3A4A] border-gray-600">
+              <CardContent className="p-10 text-center text-gray-300 space-y-3">
+                <Megaphone className="w-10 h-10 mx-auto text-[#4CAF50]" />
+                <p className="text-lg font-medium">
+                  Nenhum anúncio disponível no momento.
+                </p>
+                <p className="text-sm text-gray-400">
+                  Volte em breve para ver as próximas ofertas!
+                </p>
+              </CardContent>
+            </Card>
+          ) : listings.length === 0 ? (
+            <p className="text-gray-400 text-center py-6">
+              Nenhum lote cadastrado ainda.
+            </p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {listings.map((l) => (
+                <ListingCard key={l.id} l={l} />
+              ))}
+            </div>
+          )}
+        </section>
       </main>
 
       <footer className="text-center text-xs text-gray-500 mt-10 px-4">
