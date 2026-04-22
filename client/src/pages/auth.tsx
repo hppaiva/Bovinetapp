@@ -204,7 +204,7 @@ export default function AuthPage() {
         title: "Login realizado",
         description: "Bem-vindo ao Bovinet!",
       });
-      window.location.href = "/dashboard";
+      window.location.href = "/admin/ads";
     },
     onError: (error: Error) => {
       toast({
@@ -310,7 +310,7 @@ export default function AuthPage() {
         title: "Conta criada",
         description: "Sua conta foi criada com sucesso!",
       });
-      window.location.href = "/dashboard";
+      window.location.href = "/admin/ads";
     },
     onError: (error: Error) => {
       toast({
